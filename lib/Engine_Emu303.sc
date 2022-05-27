@@ -13,7 +13,7 @@ Engine_Emu303 : CroneEngine {
 			arg in, tape_wet=0.9,tape_bias=0.9,saturation=0.9,drive=0.5,
 			tape_oversample=2,mode=0,
 			dist_wet=0.5,drivegain=0.5,dist_bias=0,lowgain=0.1,highgain=0.1,
-			shelvingfreq=600,dist_oversample=1,
+			shelvingfreq=600,dist_oversample=2,
 			wowflu=1.0,
 			wobble_rpm=33, wobble_amp=0.05, flutter_amp=0.03, flutter_fixedfreq=6, flutter_variationfreq=2,
 			hpf=60,hpfqr=0.6,
@@ -48,7 +48,7 @@ Engine_Emu303 : CroneEngine {
             filterEnv =  EnvGen.ar( Env.new([10e-9, 1, 10e-9], [0.01, decay],  'exp'), t_trig);
             filter = RLPFD.ar(SelectX.ar(wave, waves), cutoff +(filterEnv*envAdjust), res,gain);
             snd=(filter*amp).tanh;
-            snd=snd+SinOsc.ar([noteVal-12-detune,noteVal-12+detune].midicps,mul:sub*env);
+            snd=snd+SinOsc.ar([noteVal-12-detune,noteVal-12+detune].midicps,mul:sub*env/10.0);
             Out.ar(out, snd);
         }).add;
 

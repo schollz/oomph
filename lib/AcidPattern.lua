@@ -17,6 +17,52 @@ function AP:new(o)
 end
 
 function AP:init()
+  local prams={
+    {name="volume",eng="amp",min=0,max=1,default=0.5,div=0.01},
+    {name="sub volume",eng="sub",min=0,max=2,default=0.0,div=0.01},
+    {name="cutoff",eng="cutoff",min=10,max=10000,default=200.0,div=10,exp=true,unit="Hz"},
+    {name="cutoff env",eng="envAdjust",min=10,max=10000,default=500.0,div=10,exp=true,unit="Hz"},
+    {name="env accent",eng="envAccent",min=0.0,max=10,default=0,div=0.01},
+    {name="res",eng="resAdjust",min=0.01,max=0.99,default=0.303,div=0.01},
+    {name="res accent",eng="resAccent",min=0.01,max=0.99,default=0.303,div=0.01},
+    {name="portamento",eng="portamento",min=0,max=2,default=0.1,div=0.01,unit="s"},
+    {name="sustain",eng="sustain",min=0,max=2,default=0.0,div=0.01,unit="s"},
+    {name="decay",eng="decay",min=0.01,max=30,default=clock.get_beat_sec()*4,div=0.01,unit="s",exp=true},
+    {name="saw/square",eng="wave",min=0.0,max=1,default=0.0,div=0.01},
+    {name="detune",eng="detune",min=0.0,max=1,default=0.0,div=0.04,'notes'},
+  }
+
+  for _, p in ipairs(prams) do
+    params:add_control(self.id..p.eng,p.name,controlspec.new(p.min,p.max,p.exp and 'exp' or 'lin',p.div,p.default,p.unit or "",p.div/(p.max-p.min)))
+    params:set_action(self.id..p.eng,function(x)
+      engine[p.eng](x)
+    end)
+  end
+
+
+
+  local tape_prams={
+    {name="tape",eng="tape_wet",min=0,max=1,default=0.5,div=0.01,unit="wet/dry"},
+    {name="bias",eng="tape_bias",min=0,max=1,default=0.8,div=0.01},
+    {name="saturate",eng="saturation",min=0,max=1,default=0.8,div=0.01},
+    {name="drive",eng="drive",min=0,max=1,default=0.8,div=0.01},
+    {name="distortion",eng="dist_wet",min=0,max=1,default=0.1,div=0.01,unit="wet/dry"},
+    {name="gain",eng="drivegain",min=0,max=1,default=0.1,div=0.01},
+    {name="low gain",eng="lowgain",min=0,max=1,default=0.1,div=0.01},
+    {name="high gain",eng="highgain",min=0,max=1,default=0.1,div=0.01},
+    {name="shelf",eng="shelvingfreq",min=10,max=1000,default=600,div=10,exp=true},
+  }
+  params:add_group("tape fx",#tape_prams)
+  for _, p in ipairs(tape_prams) do
+    params:add_control(self.id..p.eng,p.name,controlspec.new(p.min,p.max,p.exp and 'exp' or 'lin',p.div,p.default,p.unit or "",p.div/(p.max-p.min)))
+    params:set_action(self.id..p.eng,function(x)
+      engine[p.eng](x)
+    end)
+  end
+
+  params:bang()
+
+
   -- https://acidpattern.bandcamp.com/album/july-acid-pattern-2014
   self.current=1
   self.note_scale={33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50}
