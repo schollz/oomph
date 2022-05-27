@@ -9,6 +9,7 @@
 --
 -- ?
 
+engine.name="Emu303"
 local lattice_=require("lattice")
 s=require("sequins")
 ap_=include("lib/AcidPattern")
@@ -27,9 +28,9 @@ function init()
   lattice=lattice_:new()
   lattice:new_pattern{
     action=function(t)
-      ap.process()
+      ap:process()
     end,
-    division=1/8,
+    division=1/16,
   }
   lattice:start()
 end

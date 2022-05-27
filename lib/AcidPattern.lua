@@ -1,7 +1,7 @@
 local AP={}
 
-local DURATION_NOTE=1
-local DURATION_REST=2
+local PUNCUATION_NOTE=1
+local PUNCTUATION_REST=2
 local DURATION_HOLD=3
 
 function AP:new(o)
@@ -17,37 +17,34 @@ function AP:new(o)
 end
 
 function AP:init()
+  -- https://acidpattern.bandcamp.com/album/july-acid-pattern-2014
   self.note_scale={33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50}
-  self.key_notes={"C","D","E"}
+  self.key_notes={"C","D","E"} --TODO fix this
   self.key_octave={"D","","U"}
-  self.key_accent={"","S","A"}
+  self.key_accent={"","A","S"}
   self.key_duration={"*","o","-"}
   -- do initialize here
-  self.note={}
-  self.octave={}
-  self.accent={}
-  self.duration={}
-  self.step={}
-  for i=1,16 do
-    table.insert(self.steps,i)
-    table.insert(self.note,1)
-    table.insert(self.octave,2)
-    table.insert(self.accent,1)
-    table.insert(self.duration,1)
-  end
+  self.note=    {1,1,7,4,4,1,1,7,4,4,1,1,7,4,4,1}
+  self.octave=  {2,1,2,2,2,2,1,2,2,2,2,1,2,2,2,2}
+  self.accent=  {2,2,1,3,1,2,2,1,3,1,2,2,1,3,1,2}
+  self.duration={1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}
+  self.punct   ={1,1,1,1,2,1,1,1,1,2,1,1,1,1,2,1}
+  self.step={1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16}
   -- create sequins
   self.step_s=s(self.step)
 end
 
 function AP:process()
   local i=self.step_s()
-  if self.duration[i]~=DURATION_NOTE then
+  if self.punct[i]==PUNCTUATION_REST then
     do return end
   end
-  local accent=self.key_accent[self.accent[i]]
-  local note=self.key_notes[self.note[i]]+self.key_octave[self.octave[i]]
+  local note=self.note_scale[self.note[i]]+(self.octave[i]-2)*12 + 12
   -- do something with the note
-  -- engine.play(id,note,accent,portament)
+  local accent=self.accent[i]==2 and 1 or 0
+  local slide=self.accent[i]==3 and 1 or 0
+  print(note,accent,slide)
+  engine.trig(note,self.duration[i]*0.1,slide,accent)
 end
 
 return AP
