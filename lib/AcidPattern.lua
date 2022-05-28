@@ -29,7 +29,7 @@ function AP:init()
     {name="sustain",eng="sustain",min=0,max=2,default=0.0,div=0.01,unit="s"},
     {name="decay",eng="decay",min=0.01,max=30,default=clock.get_beat_sec()*4,div=0.01,unit="s",exp=true},
     {name="saw/square",eng="wave",min=0.0,max=1,default=0.0,div=0.01},
-    {name="detune",eng="detune",min=0.0,max=1,default=0.0,div=0.04,'notes'},
+    {name="detune",eng="detune",min=0.0,max=1,default=0.02,div=0.01,'notes'},
   }
 
   for _, p in ipairs(prams) do
@@ -72,10 +72,12 @@ function AP:init()
   self.key_punctuation={"@","o","-"}
   -- do initialize here
   self.note=    {1,1,7,4,4,1,1,7,4,4,1,1,7,4,4,1}
-  self.octave=  {2,1,2,2,2,2,1,2,2,2,2,1,2,2,2,2}
+  self.note=    {1,1,4,1,1,1,4,1,1,4,1,1,9,8,8,8}
+  self.octave=  {2,1,2,2,2,2,1,2,2,2,2,1,2,2,1,2}
   self.accent=  {2,2,1,3,1,2,2,1,3,1,2,2,1,3,1,2}
   self.duration={1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}
   self.punct   ={1,1,1,1,2,1,1,1,1,2,1,1,1,1,2,1}
+  self.punct=    {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}
   self.step={1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16}
   -- create sequins
   self.step_s=s(self.step)

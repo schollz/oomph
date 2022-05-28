@@ -17,7 +17,28 @@ local shift=false
 local pos={1,3}
 
 function init()
+  -- setup parameters
+  params:add_control("drumlatency","drum latency",controlspec.new(-1,1,'lin',0.01,0,"beats",0.01/2))
+  params:set_action("drumlatency",function(x)
+    x=x*clock.get_beat_sec()
+    if x>0.2 then 
+      x=0.2
+    elseif x<-0.2 then 
+      x=-0.2
+    end
+    print(x)
+    engine.amenlatency(x>0 and x or 0)
+    engine.latency(x<0 and math.abs(x) or 0)
+  end)
+
   ap=ap_:new()
+
+
+  -- engine.amenload("/home/we/dust/code/acid-pattern/lib/amenbreak_bpm136.wav",136)
+  engine.amenload("/home/we/dust/code/acid-pattern/lib/beats16_bpm150_Ultimate_Jack_Loops_014__BPM_150_.wav",150)
+  engine.amenbpm(clock.get_tempo())
+  engine.amenamp(0.4)
+  engine.amenjump(0.0,0.0,1.0)
 
   -- initialize metro for updating screen
   timer=metro.init()
@@ -26,9 +47,21 @@ function init()
   timer.event=update_screen
   timer:start()
 
+  local beat_num=16*4
+  local beat_count=beat_num
+  local known_tempo=clock.get_tempo()
   lattice=lattice_:new()
   lattice:new_pattern{
     action=function(t)
+      if known_tempo~=clock.get_tempo() then
+        known_tempo=clock.get_tempo()
+        engine.amenbpm(known_tempo)
+      end
+      beat_count=beat_count+1
+      if beat_count>beat_num then 
+        beat_count=1
+        engine.amenjump(0,0.0,1.0)
+      end
       ap:process()
     end,
     division=1/16,
