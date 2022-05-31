@@ -32,16 +32,16 @@ function AP:init()
     {name="detune",eng="detune",min=0.0,max=1,default=0.02,div=0.01,'notes'},
   }
 
-  for _, p in ipairs(prams) do
+  params:add_group("303",#prams)
+  for _,p in ipairs(prams) do
     params:add_control(self.id..p.eng,p.name,controlspec.new(p.min,p.max,p.exp and 'exp' or 'lin',p.div,p.default,p.unit or "",p.div/(p.max-p.min)))
     params:set_action(self.id..p.eng,function(x)
       engine[p.eng](x)
     end)
   end
 
-
-
   local tape_prams={
+    {name="aux",eng="auxin",min=0,max=1,default=0.5,div=0.01,unit="wet/dry"},
     {name="tape",eng="tape_wet",min=0,max=1,default=0.5,div=0.01,unit="wet/dry"},
     {name="bias",eng="tape_bias",min=0,max=1,default=0.8,div=0.01},
     {name="saturate",eng="saturation",min=0,max=1,default=0.8,div=0.01},
@@ -52,8 +52,8 @@ function AP:init()
     {name="high gain",eng="highgain",min=0,max=1,default=0.1,div=0.01},
     {name="shelf",eng="shelvingfreq",min=10,max=1000,default=600,div=10,exp=true},
   }
-  params:add_group("tape fx",#tape_prams)
-  for _, p in ipairs(tape_prams) do
+  params:add_group("TAPE FX",#tape_prams)
+  for _,p in ipairs(tape_prams) do
     params:add_control(self.id..p.eng,p.name,controlspec.new(p.min,p.max,p.exp and 'exp' or 'lin',p.div,p.default,p.unit or "",p.div/(p.max-p.min)))
     params:set_action(self.id..p.eng,function(x)
       engine[p.eng](x)
@@ -61,7 +61,6 @@ function AP:init()
   end
 
   params:bang()
-
 
   -- https://acidpattern.bandcamp.com/album/july-acid-pattern-2014
   self.current=1
@@ -71,41 +70,37 @@ function AP:init()
   self.key_accent={"","A","S"}
   self.key_punctuation={"@","o","-"}
   -- do initialize here
-  self.note=    {1,1,7,4,4,1,1,7,4,4,1,1,7,4,4,1}
-  self.note=    {1,1,4,1,1,1,4,1,1,4,1,1,9,8,8,8}
-  self.octave=  {2,1,2,2,2,2,1,2,2,2,2,1,2,2,1,2}
-  self.accent=  {2,2,1,3,1,2,2,1,3,1,2,2,1,3,1,2}
+  self.note={1,1,7,4,4,1,1,7,4,4,1,1,7,4,4,1}
+  self.note={1,1,4,1,1,1,4,1,1,4,1,1,9,8,8,8}
+  self.octave={2,1,2,2,2,2,1,2,2,2,2,1,2,2,1,2}
+  self.accent={2,2,1,3,1,2,2,1,3,1,2,2,1,3,1,2}
   self.duration={1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}
-  self.punct   ={1,1,1,1,2,1,1,1,1,2,1,1,1,1,2,1}
-  self.punct=    {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}
+  self.punct={1,1,1,1,2,1,1,1,1,2,1,1,1,1,2,1}
+  self.punct={1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}
   self.step={1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16}
-  -- create sequins
-  self.step_s=s(self.step)
 end
 
 function AP:set(ind,pos,d)
   local setters={"note","octave","accent","punct"}
   local maxes={12,3,3,3}
-  print(setters[ind],pos)
-  self[setters[ind]][pos] = self[setters[ind]][pos] + d
-  if self[setters[ind]][pos]<1 then 
-    self[setters[ind]][pos] = self[setters[ind]][pos] + maxes[ind]
-  elseif self[setters[ind]][pos]>maxes[ind] then 
-    self[setters[ind]][pos] = self[setters[ind]][pos] - maxes[ind]
+  self[setters[ind]][pos]=self[setters[ind]][pos]+d
+  if self[setters[ind]][pos]<1 then
+    self[setters[ind]][pos]=self[setters[ind]][pos]+maxes[ind]
+  elseif self[setters[ind]][pos]>maxes[ind] then
+    self[setters[ind]][pos]=self[setters[ind]][pos]-maxes[ind]
   end
 end
 
-function AP:process()
-  local i=self.step_s()
-  self.current=i
+function AP:process(beat)
+  self.current=self.step[beat]
+  local i=self.current
   if self.punct[i]==PUNCTUATION_REST then
     do return end
   end
-  local note=self.note_scale[self.note[i]]+(self.octave[i]-2)*12 + 12
+  local note=self.note_scale[self.note[i]]+(self.octave[i]-2)*12+12
   -- do something with the note
   local accent=self.accent[i]==2 and 1 or 0
   local slide=self.accent[i]==3 and 1 or 0
-  print(note,accent,slide)
   engine.trig(note,self.duration[i]*0.1,slide,accent)
 end
 

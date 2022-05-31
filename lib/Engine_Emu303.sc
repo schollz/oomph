@@ -15,6 +15,7 @@ Engine_Emu303 : CroneEngine {
     var playerVinyl; 
     var sampleVinyl;
     var playerSwap;
+    var amenparams;
     // </Amen>
 
 	alloc { 
@@ -46,7 +47,7 @@ Engine_Emu303 : CroneEngine {
         }).add;
 
         SynthDef("playerAmen",{ 
-            arg out=0, bufnum, amp=0, t_trig=0,t_trigtime=0, amp_crossfade=0,
+            arg out=0, bufnum, amp=0, t_trig=0,t_trigtime=0,t_quiet=0,quiet_time=1,amp_crossfade=0,loop=1,
             sampleStart=0,sampleEnd=1,samplePos=0, latency=0,
             rate=1,rateSlew=0,bpm_sample=1,bpm_target=1,
             bitcrush=0,bitcrush_bits=24,bitcrush_rate=44100,
@@ -55,7 +56,7 @@ Engine_Emu303 : CroneEngine {
             pan=0,lpf=20000,lpflag=0,hpf=10,hpflag=0;
 
             // vars
-            var snd,pos,timestretchPos,timestretchWindow;
+            var snd,pos,timestretchPos,timestretchWindow,quiet;
             rate = Lag.kr(rate,rateSlew);
             rate = rate * bpm_target / bpm_sample;
             // scratch effect
@@ -84,13 +85,13 @@ Engine_Emu303 : CroneEngine {
             );
 
             snd=BufRd.ar(2,bufnum,pos,
-                loop:1,
+                loop:loop,
                 interpolation:1
             );
             timestretch=Lag.kr(timestretch,2);
             snd=((1-timestretch)*snd)+(timestretch*BufRd.ar(2,bufnum,
                 timestretchWindow,
-                loop:1,
+                loop:loop,
                 interpolation:1
             ));
 
@@ -107,10 +108,12 @@ Engine_Emu303 : CroneEngine {
             snd=(vinyl<1*snd)+(vinyl>0* Limiter.ar(Compander.ar(snd,snd,0.5,1.0,0.1,0.1,1,2),dur:0.0008));
             snd =(vinyl<1*snd)+(vinyl>0* DelayC.ar(snd,0.01,VarLag.kr(LFNoise0.kr(1),1,warp:\sine).range(0,0.01)));                
             
+            quiet=1-EnvGen.ar(Env.new([0,1,1,0],[0.025,quiet_time-0.05,0.025]),t_quiet);
+
             // manual panning
             snd = Balance2.ar(snd[0],snd[1],
                 pan+SinOsc.kr(60/bpm_target*16,mul:strobe*0.5),
-                level:Lag.kr(amp,0.2)*Lag.kr(amp_crossfade,0.2)
+                level:Lag.kr(amp,0.2)*Lag.kr(amp_crossfade,0.2)*quiet
             );
 
             Out.ar(out,DelayN.ar(snd,delaytime:latency));
@@ -118,7 +121,7 @@ Engine_Emu303 : CroneEngine {
         // </Amen>
 
         SynthDef("TapeFX",{
-			arg in, tape_wet=0.9,tape_bias=0.9,saturation=0.9,drive=0.5,
+			arg in, auxin=0.0,tape_wet=0.9,tape_bias=0.9,saturation=0.9,drive=0.5,
 			tape_oversample=2,mode=0,
 			dist_wet=0.5,drivegain=0.5,dist_bias=0,lowgain=0.1,highgain=0.1,
 			shelvingfreq=600,dist_oversample=2,
@@ -128,6 +131,7 @@ Engine_Emu303 : CroneEngine {
 			lpf=18000,lpfqr=0.6,
 			buf;
 			var snd=In.ar(in,2);
+            snd=snd+(auxin*SoundIn.ar([0,1]));
 			snd=SelectX.ar(Lag.kr(tape_wet,1),[snd,AnalogTape.ar(snd,tape_bias,saturation,drive,tape_oversample,mode)]);
 			snd=SelectX.ar(Lag.kr(dist_wet/10,1),[snd,AnalogVintageDistortion.ar(snd,drivegain,dist_bias,lowgain,highgain,shelvingfreq,dist_oversample)]);			
 			snd=RHPF.ar(snd,hpf,hpfqr);
@@ -208,7 +212,7 @@ Engine_Emu303 : CroneEngine {
             });
 		});
 
-		[\hpf,\hpfqr,\lpf,\lpfqr,\wowflu,\wobble_rpm,\wobble_amp,\flutter_amp,\flutter_fixedfreq,\flutter_variationfreq,\amp,\tape_wet,\tape_bias,\saturation,\drive,\tape_oversample,\mode,\dist_wet,\drivegain,\dist_bias,\lowgain,\highgain,\shelvingfreq,\dist_oversample].do({ arg key;
+		[\auxin,\hpf,\hpfqr,\lpf,\lpfqr,\wowflu,\wobble_rpm,\wobble_amp,\flutter_amp,\flutter_fixedfreq,\flutter_variationfreq,\amp,\tape_wet,\tape_bias,\saturation,\drive,\tape_oversample,\mode,\dist_wet,\drivegain,\dist_bias,\lowgain,\highgain,\shelvingfreq,\dist_oversample].do({ arg key;
 			this.addCommand(key, "f", { arg msg;
 				synTape.set(key,msg[1]);
 			});
@@ -216,6 +220,14 @@ Engine_Emu303 : CroneEngine {
 
 
         // <Amen>
+
+        amenparams = Dictionary.newFrom([
+            \bpm_target, 0,
+            \bpm_sample, 0,
+            \lpf,18000,
+        ]);
+
+
         this.addCommand("amenrelease","", { arg msg;
             playerAmen.do({ arg item,i;
                 item.set(\amp,0);
@@ -231,28 +243,55 @@ Engine_Emu303 : CroneEngine {
                 arg buf;
                 postln("loaded "++msg[1]++"into buf "++buf.bufnum);
                 sampleBuffAmen=buf;
+                amenparams[\bpm_sample] = msg[2];
                 playerAmen.do({ arg item,i;
                     item.set(\bufnum,buf,\bpm_sample,msg[2]);
                 });
             });
         });
 
-        this.addCommand("amenbpm","f",{ arg msg;
-            playerAmen.do({ arg item,i;
-                item.set(\bpm_target,msg[1]);
-            });            
+        [\bpm_target,\latency,\amp].do({ arg key;
+            this.addCommand("amen"++key, "f", { arg msg;
+                amenparams[key] = msg[1];
+                playerAmen.do({ arg item,i;
+                    item.set(key,msg[1]);
+                });  
+            });
         });
 
-        this.addCommand("amenlatency","f",{ arg msg;
-            playerAmen.do({ arg item,i;
-                item.set(\latency,msg[1]);
-            });            
-        });
 
-        this.addCommand("amenamp","f", { arg msg;
-            // lua is sending 1-index
-            playerAmen.do({ arg item,i;
-                item.set(\amp,msg[1]);
+        // engine.amenswap("/home/we/dust/audio/acid-pattern/stutter_beats16_bpm150_Ultimate_Jack_Loops_014__BPM_150_.wav_4.wav",1)
+        this.addCommand("amenswap","sf",{ arg msg;
+            Buffer.read(context.server,msg[1],action:{
+                arg buf;
+                var syn=Synth.head(context.server,"playerAmen",[
+                    \out,busTape,
+                    \t_trig,1,
+                    \amp_crossfade,1,
+                    \bufnum,buf,
+                    \amp,amenparams[\amp],
+                    \bpm_target,amenparams[\bpm_target],
+                    \bpm_sample,amenparams[\bpm_sample],
+                    \latency,amenparams[\latency],
+                    \lpf,10,
+                    \lpflag,msg[2]*4,
+                    \loop,0,
+                ]);
+                // quiet for certain time
+                playerAmen.do({ arg item,i;
+                    item.set(
+                        \t_quiet,1,
+                        \quiet_time,msg[2],
+                    )
+                });  
+                Routine{
+                    0.1.wait;
+                    syn.set(\lpf,amenparams[\lpf],\rateSlew,msg[2]);
+                    (msg[2].asFloat-0.1).wait;
+                    "freeing player".postln;
+                    syn.free;
+                    buf.free;
+                }.play;
             });
         });
 
@@ -269,6 +308,7 @@ Engine_Emu303 : CroneEngine {
                 )
             });
         });
+
 
         // </Amen>
 
