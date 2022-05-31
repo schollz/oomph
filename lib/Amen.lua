@@ -14,7 +14,7 @@ end
 
 function Amen:init()
   local prams={
-    {name="volume",eng="amenamp",min=0,max=1,default=0.5,div=0.01},
+    {name="volume",eng="amen_amp",min=0,max=1,default=0.5,div=0.01},
   }
   params:add_group("AMEN",#prams)
   for _,p in ipairs(prams) do
@@ -96,10 +96,10 @@ function Amen:load(fname)
   self.beat=self.beats_eigth_notes
 
   -- engine.amenload("/home/we/dust/code/acid-pattern/lib/amenbreak_bpm136.wav",136)
-  engine.amenload(fname,self.bpm)
-  engine.amenbpm_target(clock.get_tempo())
-  engine.amenamp(params:get("amenamp"))
-  engine.amenjump(0.0,0.0,1.0)
+  engine.amen_load(fname,self.bpm)
+  engine.amen_bpm_target(clock.get_tempo())
+  engine.amen_amp(params:get("amen_amp"))
+  engine.amen_jump(0.0,0.0,1.0)
 end
 
 function Amen:stutter()
@@ -108,19 +108,14 @@ function Amen:stutter()
     do return end
   end
   self.stutter_ready=nil
-  fname=string.format("/home/we/dust/audio/acid-pattern/stutter_%s_%d.wav",self.filename,math.random(1,16))
-  local ch,samples,samplerate=audio.file_info(fname)
-  local duration=samples/samplerate
-  duration=duration*self.tempo_known/self.bpm
-  print(fname,duration)
-  engine.amenswap(fname,duration)
+
 end
 
 function Amen:process(beat)
   -- modify the known tempo if it changes
   if clock.get_tempo()~=self.tempo_known then
     self.tempo_known=clock.get_tempo()
-    engine.amenbpm_target(self.tempo_known)
+    engine.amen_bpm_target(self.tempo_known)
   end
 
   -- if incoming beat is anew and beats reset, then reset the internal beat
@@ -137,7 +132,7 @@ function Amen:process(beat)
 
   -- if the internal beat hits 1, reset the drums
   if self.beat==1 then
-    engine.amenjump(0.0,0.0,1.0)
+    engine.amen_jump(0.0,0.0,1.0)
   end
 
   -- if a stutter is activated then play it

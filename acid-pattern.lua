@@ -33,7 +33,7 @@ function init()
       x=-0.2
     end
     print(x)
-    engine.amenlatency(x>0 and x or 0)
+    engine.amen_latency(x>0 and x or 0)
     engine.latency(x<0 and math.abs(x) or 0)
   end)
 
