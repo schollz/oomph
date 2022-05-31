@@ -12,7 +12,7 @@
 engine.name="Emu303"
 local lattice_=require("lattice")
 local ap_=include("lib/AcidPattern")
-local amen_=include("lib/Amen")
+--local amen_=include("lib/Amen")
 local shift=false
 local pos={1,3}
 
@@ -21,7 +21,7 @@ function init()
   util.os_capture("mkdir -p /home/we/dust/audio/acid-pattern")
 
   ap=ap_:new()
-  amen=amen_:new()
+  -- amen=amen_:new()
 
   -- setup global parameters
   params:add_control("drumlatency","drum latency",controlspec.new(-1,1,'lin',0.01,0,"beats",0.01/2))
@@ -33,8 +33,8 @@ function init()
       x=-0.2
     end
     print(x)
-    engine.amen_latency(x>0 and x or 0)
-    engine.latency(x<0 and math.abs(x) or 0)
+    -- engine.amen_latency(x>0 and x or 0)
+    -- engine.latency(x<0 and math.abs(x) or 0)
   end)
 
   -- load in the default parameters
@@ -59,14 +59,14 @@ function init()
         beat_count=1
       end
       -- process
-      amen:process(beat_count)
+      --amen:process(beat_count)
       ap:process(beat_count)
     end,
     division=1/16,
   }
 
   -- dev stuff
-  amen:load("/home/we/dust/code/acid-pattern/lib/beats16_bpm150_Ultimate_Jack_Loops_014__BPM_150_.wav")
+  -- amen:load("/home/we/dust/code/acid-pattern/lib/beats16_bpm150_Ultimate_Jack_Loops_014__BPM_150_.wav")
   -- amen:stutter_build()
 
   -- start the lattice

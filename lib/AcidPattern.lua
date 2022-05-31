@@ -21,10 +21,10 @@ function AP:init()
     {name="volume",eng="amp",min=0,max=1,default=0.5,div=0.01},
     {name="sub volume",eng="sub",min=0,max=2,default=0.0,div=0.01},
     {name="cutoff",eng="cutoff",min=10,max=10000,default=200.0,div=10,exp=true,unit="Hz"},
-    {name="cutoff env",eng="envAdjust",min=10,max=10000,default=500.0,div=10,exp=true,unit="Hz"},
-    {name="env accent",eng="envAccent",min=0.0,max=10,default=0,div=0.01},
-    {name="res",eng="resAdjust",min=0.01,max=0.99,default=0.303,div=0.01},
-    {name="res accent",eng="resAccent",min=0.01,max=0.99,default=0.303,div=0.01},
+    {name="cutoff env",eng="env_adjust",min=10,max=10000,default=500.0,div=10,exp=true,unit="Hz"},
+    {name="env accent",eng="env_accent",min=0.0,max=10,default=0,div=0.01},
+    {name="res",eng="res_adjust",min=0.01,max=0.99,default=0.303,div=0.01},
+    {name="res accent",eng="res_accent",min=0.01,max=0.99,default=0.303,div=0.01},
     {name="portamento",eng="portamento",min=0,max=2,default=0.1,div=0.01,unit="s"},
     {name="sustain",eng="sustain",min=0,max=2,default=0.0,div=0.01,unit="s"},
     {name="decay",eng="decay",min=0.01,max=30,default=clock.get_beat_sec()*4,div=0.01,unit="s",exp=true},
@@ -36,7 +36,7 @@ function AP:init()
   for _,p in ipairs(prams) do
     params:add_control(self.id..p.eng,p.name,controlspec.new(p.min,p.max,p.exp and 'exp' or 'lin',p.div,p.default,p.unit or "",p.div/(p.max-p.min)))
     params:set_action(self.id..p.eng,function(x)
-      engine[p.eng](x)
+      engine["threeohthree_"..p.eng]("dc",0,x,0.2)
     end)
   end
 
@@ -56,7 +56,7 @@ function AP:init()
   for _,p in ipairs(tape_prams) do
     params:add_control(self.id..p.eng,p.name,controlspec.new(p.min,p.max,p.exp and 'exp' or 'lin',p.div,p.default,p.unit or "",p.div/(p.max-p.min)))
     params:set_action(self.id..p.eng,function(x)
-      engine[p.eng](x)
+      --engine[p.eng](x)
     end)
   end
 
@@ -101,7 +101,7 @@ function AP:process(beat)
   -- do something with the note
   local accent=self.accent[i]==2 and 1 or 0
   local slide=self.accent[i]==3 and 1 or 0
-  engine.trig(note,self.duration[i]*0.1,slide,accent)
+  engine.threeohthree_trig(note,self.duration[i]*0.1,slide,accent)
 end
 
 return AP
