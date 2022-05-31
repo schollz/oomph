@@ -14,13 +14,28 @@ end
 
 function Amen:init()
   local prams={
-    {name="volume",eng="amen_amp",min=0,max=1,default=0.5,div=0.01},
+    {name="volume",eng="amp",min=0,max=1,default=0.5,div=0.01},
+    {name="rate",eng="rate",min=-1,max=2,default=1,div=0.01},
+    {name="vinyl",eng="vinyl",min=0,max=1,default=0,div=0.01},
+    {name="bitcrush",eng="bitcrush",min=0,max=1,default=0,div=0.01},
+    {name="bitcrush bits",eng="bitcrush_bits",min=4,max=32,default=32,div=0.1,unit='bits'},
+    {name="bitcrush rate",eng="bitcrush_rate",min=100,max=44100,default=44100,div=100,exp=true,unit='Hz'},
+    {name="scratch",eng="scratch",min=0,max=1,default=0,div=0.01},
+    {name="scratch rate",eng="scratchrate",min=0.1,max=20,default=6,div=0.1,unit='Hz'},
+    {name="strobe",eng="strobe",min=0,max=1,default=0,div=0.01},
+    {name="strobe rate",eng="stroberate",min=0.1,max=20,default=6,div=0.1,unit='Hz'},
+    {name="timestretch",eng="timestretch",min=0,max=1,default=0,div=0.01},
+    {name="timestretch slow",eng="timestretch_slow",min=1,max=20,default=6,div=0.1},
+    {name="timestretch beats",eng="timestretch_beats",min=1,max=20,default=6,div=0.1},
+    {name="pan",eng="pan",min=-1,max=1,default=0,div=0.01},
+    {name="lpf",eng="lpf",min=50,max=20000,default=20000,div=100,exp=true,unit='Hz'},
+    {name="hpf",eng="hpf",min=20,max=500,default=20,div=10,exp=true,unit='Hz'},
   }
   params:add_group("AMEN",#prams)
   for _,p in ipairs(prams) do
-    params:add_control(p.eng,p.name,controlspec.new(p.min,p.max,p.exp and 'exp' or 'lin',p.div,p.default,p.unit or "",p.div/(p.max-p.min)))
-    params:set_action(p.eng,function(x)
-      engine[p.eng](x)
+    params:add_control("amen_"..p.eng,p.name,controlspec.new(p.min,p.max,p.exp and 'exp' or 'lin',p.div,p.default,p.unit or "",p.div/(p.max-p.min)))
+    params:set_action("amen_"..p.eng,function(x)
+      engine["amen_"..p.eng]("dc",0,x,0)
     end)
   end
 
@@ -98,7 +113,7 @@ function Amen:load(fname)
   -- engine.amenload("/home/we/dust/code/acid-pattern/lib/amenbreak_bpm136.wav",136)
   engine.amen_load(fname,self.bpm)
   engine.amen_bpm_target(clock.get_tempo())
-  engine.amen_amp(params:get("amen_amp"))
+  engine.amen_amp("dc",0,params:get("amen_amp"),0)
   engine.amen_jump(0.0,0.0,1.0)
 end
 

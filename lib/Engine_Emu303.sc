@@ -16,7 +16,7 @@ Engine_Emu303 : CroneEngine {
 
     // <Amen>
     var sampleBuffAmen;
-    var amenSynthDef;
+    var synAmen;
     var playerVinyl; 
     var sampleVinyl;
     var playerSwap;
@@ -54,22 +54,37 @@ Engine_Emu303 : CroneEngine {
         }).add;
 
         SynthDef("defAmen",{ 
-            arg out=0, bufnum, amp=0, t_trig=0,t_trigtime=0,t_quiet=0,quiet_time=1,amp_crossfade=0,loop=1,
+            arg out=0, bufnum, ampBus, t_trig=0,t_trigtime=0,amp_crossfade=0,loop=1,
             sampleStart=0,sampleEnd=1,samplePos=0, latency=0,
-            rate=1,rateslew=0,bpm_sample=1,bpm_target=1,
-            bitcrush=0,bitcrush_bits=24,bitcrush_rate=44100,
-            scratch=0,scratchrate=2,strobe=0,stroberate=16,vinyl=0,
-            timestretch=0,timestretch_slow=1,timestretch_beats=1,
-            pan=0,lpf=20000,lpflag=0,hpf=10,hpflag=0,
-            fxbus_amp=0,fxbus_lpf=0;
+            rateBus,bpm_sample=1,bpm_target=1,
+            bitcrushBus,bitcrush_bitsBus,bitcrush_rateBus,
+            scratchBus,scratchrateBus,strobeBus,stroberateBus,vinylBus,
+            timestretchBus,timestretch_slowBus,timestretch_beatsBus,
+            panBus,lpfBus,hpfBus;
 
             // vars
-            var snd,pos,timestretchPos,timestretchWindow,quiet;
-            rate = Lag.kr(rate,rateslew);
+            var snd,pos,timestretchPos,timestretchWindow;
+            var amp=In.kr(ampBus);//bus2
+            var rate=In.kr(rateBus);//bus2
+            var bitcrush=In.kr(bitcrushBus);//bus2
+            var bitcrush_bits=In.kr(bitcrush_bitsBus);//bus2
+            var bitcrush_rate=In.kr(bitcrush_rateBus);//bus2
+            var scratch=In.kr(scratchBus);//bus2
+            var scratchrate=In.kr(scratchrateBus);//bus2
+            var strobe=In.kr(strobeBus);//bus2
+            var stroberate=In.kr(stroberateBus);//bus2
+            var vinyl=In.kr(vinylBus);//bus2
+            var timestretch=In.kr(timestretchBus);//bus2
+            var timestretch_slow=In.kr(timestretch_slowBus);//bus2
+            var timestretch_beats=In.kr(timestretch_beatsBus);//bus2
+            var pan=In.kr(panBus);//bus2
+            var lpf=In.kr(lpfBus);//bus2
+            var hpf=In.kr(hpfBus);//bus2
+
             rate = rate * bpm_target / bpm_sample;
             // scratch effect
-            rate = (scratch<1*rate) + (scratch>0*LFTri.kr(bpm_target/60*scratchrate));
-
+            rate = SelectX.kr(scratch,[rate,LFTri.kr(bpm_target/60*scratchrate)]);
+            rate.poll;
             pos = Phasor.ar(
                 trig:t_trig,
                 rate:BufRateScale.kr(bufnum)*rate,
@@ -93,18 +108,18 @@ Engine_Emu303 : CroneEngine {
             );
 
             snd=BufRd.ar(2,bufnum,pos,
-                loop:loop,
+                loop:1,
                 interpolation:1
             );
             timestretch=Lag.kr(timestretch,2);
             snd=((1-timestretch)*snd)+(timestretch*BufRd.ar(2,bufnum,
                 timestretchWindow,
-                loop:loop,
+                loop:1,
                 interpolation:1
             ));
 
-            snd = RLPF.ar(snd,Clip.kr(In.kr(fxbus_lpf),10,20000),0.707);
-            snd = HPF.ar(snd,Lag.kr(hpf,hpflag));
+            snd = RLPF.ar(snd,lpf,0.707);
+            snd = HPF.ar(snd,hpf);
 
             // strobe
             snd = ((strobe<1)*snd)+((strobe>0)*snd*LFPulse.ar(60/bpm_target*stroberate));
@@ -116,13 +131,11 @@ Engine_Emu303 : CroneEngine {
             // vinyl wow + compressor
             snd=(vinyl<1*snd)+(vinyl>0* Limiter.ar(Compander.ar(snd,snd,0.5,1.0,0.1,0.1,1,2),dur:0.0008));
             snd =(vinyl<1*snd)+(vinyl>0* DelayC.ar(snd,0.01,VarLag.kr(LFNoise0.kr(1),1,warp:\sine).range(0,0.01)));                
-            
-            quiet=1-EnvGen.ar(Env.new([0,1,1,0],[0.025,quiet_time-0.05,0.025]),t_quiet);
 
             // manual panning
             snd = Balance2.ar(snd[0],snd[1],
-                pan+SinOsc.kr(60/bpm_target*16,mul:strobe*0.5),
-                level:Lag.kr(amp,0.2)*Lag.kr(amp_crossfade,0.2)*quiet*In.kr(fxbus_amp)
+                pan+SinOsc.kr(60/bpm_target*stroberate,mul:strobe*0.5),
+                level:amp*Lag.kr(amp_crossfade,0.2)
             );
 
             Out.ar(out,DelayN.ar(snd,delaytime:latency));
@@ -130,9 +143,11 @@ Engine_Emu303 : CroneEngine {
         // </Amen>
 
 
+
+
         SynthDef("defThreeOhThree", {
             arg out, busAccent, 
-            t_trig=1, note=33, pwBus, detuneBus, waveBus, ampBus, subBus,
+            t_trig=1, note=33, latency=0.0,pwBus, detuneBus, waveBus, ampBus, subBus,
             cutoffBus, gainBus, portamentoBus, slideBus,
             durationBus, sustainBus, decayBus,
             res_adjustBus, res_accentBus,
@@ -154,7 +169,6 @@ Engine_Emu303 : CroneEngine {
             var res_accent=In.kr(res_accentBus);
             var env_adjust=In.kr(env_adjustBus);
             var env_accent=In.kr(env_accentBus);
-            var latency=In.kr(latencyBus);
             noteVal=Lag.kr(note,portamento*slide);
             accentVal=In.kr(busAccent);
             res = res_adjust+(res_accent*accentVal);
@@ -174,7 +188,7 @@ Engine_Emu303 : CroneEngine {
 
         SynthDef("defTape",{
             arg in, auxinBus,tape_wetBus,tape_biasBus,tape_satBus,tape_driveBus,
-            tape_oversample=2,mode=0,
+            tape_oversample=1,mode=0,
             dist_wetBus,dist_driveBus,dist_biasBus,dist_lowBus,dist_highBus,
             dist_shelfBus,dist_oversample=2,
             wowflu=1.0,
@@ -184,7 +198,7 @@ Engine_Emu303 : CroneEngine {
             buf;
             var snd=In.ar(in,2);
             var auxin=In.kr(auxinBus);//bus
-            var tape_wet=In.kr(tape_wetBus).poll;//bus
+            var tape_wet=In.kr(tape_wetBus);//bus
             var tape_bias=In.kr(tape_biasBus);//bus
             var tape_sat=In.kr(tape_satBus);//bus
             var tape_drive=In.kr(tape_driveBus);//bus
@@ -196,7 +210,7 @@ Engine_Emu303 : CroneEngine {
             var dist_shelf=In.kr(dist_shelfBus);//bus
             snd=snd+(auxin*SoundIn.ar([0,1]));
             snd=SelectX.ar(Lag.kr(tape_wet,1),[snd,AnalogTape.ar(snd,tape_bias,tape_sat,tape_drive,tape_oversample,mode)]);
-            snd=SelectX.ar(Lag.kr(dist_wet/10,1),[snd,AnalogVintageDistortion.ar(snd,dist_drive,dist_bias,dist_low,dist_high,dist_shelf,dist_oversample)]);          
+            snd=SelectX.ar(Lag.kr(dist_wet,1),[snd,AnalogVintageDistortion.ar(snd,dist_drive,dist_bias,dist_low,dist_high,dist_shelf,dist_oversample)]);          
             snd=RHPF.ar(snd,hpf,hpfqr);
             snd=RLPF.ar(snd,lpf,lpfqr);
             Out.ar(0,snd);
@@ -242,15 +256,15 @@ Engine_Emu303 : CroneEngine {
         context.server.sync;        
         // define always-on synths
         synThreeOhThree=Synth("defThreeOhThree",[\busAccent,busAccent,\out,busTape]); // TODO: switch back to busTape
-        playerVinyl = Synth("defVinyl",[\bufnum,sampleVinyl,\amp,0],target:context.xg);
-        amenSynthDef = Array.fill(2,{arg i;
-            Synth.head(context.server,"defAmen",[\out,busTape])
+        //TODO add back playerVinyl = Synth("defVinyl",[\bufnum,sampleVinyl,\amp,0],target:context.xg);
+        synAmen = Array.fill(2,{arg i;
+            Synth("defAmen",[\out,busTape])
         });
         synTape=Synth.tail(context.server,"defTape",[\in,busTape]);
         context.server.sync;
 
         // <303>
-        [\amp,\pw,\detune,\wave,\sub,\cutoff,\gain,\duration,\sustain,\decay,\res_adjust,\res_accent,\env_adjust,\env_accent,\portamento,\latency].do({ arg fx;
+        [\amp,\pw,\detune,\wave,\sub,\cutoff,\gain,\duration,\sustain,\decay,\res_adjust,\res_accent,\env_adjust,\env_accent,\portamento].do({ arg fx;
             var domain="threeohthree";
             var key=domain++"_"++fx;
             fxbus.put(key,Bus.control(context.server,1));
@@ -269,6 +283,11 @@ Engine_Emu303 : CroneEngine {
                     });
                     fxsyn.put(key,Synth.new("defMod_"++msg[1].asString,[\out,fxbus.at(key),\msg1,msg[2],\msg2,msg[3],\msg3,msg[4]]));
                 })
+            });
+        });
+        [\latency].do({ arg key;
+            this.addCommand("threeohthree_"++key, "f", { arg msg;
+                synThreeOhThree.set(key,msg[1]);
             });
         });
 
@@ -312,76 +331,74 @@ Engine_Emu303 : CroneEngine {
 
 
 
-        // // <Amen>
+        // <Amen>
 
-        // amenparams = Dictionary.newFrom([
-        //     \bpm_target, 0,
-        //     \bpm_sample, 0,
-        //     \lpf,18000,
-        // ]);
-
-
-        // this.addCommand("amen_release","", { arg msg;
-        //     amenSynthDef.do({ arg item,i;
-        //         item.set(\amp,0);
-        //     });
-        //     sampleBuffAmen.free;
-        // });
-
-        // this.addCommand("amen_load","sf", { arg msg;
-        //     // lua is sending 1-index
-        //     sampleBuffAmen.free;
-        //     postln("loading "++msg[1]);
-        //     Buffer.read(context.server,msg[1],action:{
-        //         arg buf;
-        //         postln("loaded "++msg[1]++"into buf "++buf.bufnum);
-        //         sampleBuffAmen=buf;
-        //         amenparams[\bpm_sample] = msg[2];
-        //         amenSynthDef.do({ arg item,i;
-        //             item.set(\bufnum,buf,\bpm_sample,msg[2]);
-        //         });
-        //     });
-        // });
-
-        // [\fxbus_amp,\fxbus_lpf].do({ arg key;
-        //     fxbus.put(key,Bus.control(context.server,1));
-        //     fxbus.at(key).value=1.0;
-        //     amenSynthDef.do({ arg item,i;
-        //         item.set(key,fxbus.at(key).index);
-        //     });
-        //     this.addCommand("amen_"++key, "sfff", { arg msg;
-        //         if (fxsyn.at(key).notNil,{
-        //             fxsyn.at(key).free;
-        //         });
-        //         fxsyn.put(key,Synth.new(msg[1].asString,[\out,fxbus.at(key),\msg1,msg[2],\msg2,msg[3],\msg3,msg[4]]));
-        //     });
-        // });
+        [\amp,\rate,\bitcrush,\bitcrush_bits,\bitcrush_rate,\scratch,\scratchrate,\strobe,\stroberate,\vinyl,\timestretch,\timestretch_slow,\timestretch_beats,\pan,\lpf,\hpf].do({ arg fx;
+            var domain="amen";
+            var key=domain++"_"++fx;
+            fxbus.put(key,Bus.control(context.server,1));
+            fxbus.at(key).value=1.0;
+            // MAKE SURE TO CHANGE THE SYNTH
+            synAmen.do({ arg item,i;
+                item.set(fx++"Bus",fxbus.at(key).index);
+            });  
+            this.addCommand(key, "sfff", { arg msg;
+                if (key=="lag",{
+                    if (fxsyn.at(key).isNil,{
+                        fxsyn.put(key,Synth.new("defMod_"++msg[1].asString,[\out,fxbus.at(key),\msg1,msg[2],\msg2,msg[3],\msg3,msg[4]]));
+                    },{
+                        fxsyn.at(key).set(\msg1,msg[2],\msg2,msg[3],\msg3,msg[4]);
+                    });
+                },{
+                    if (fxsyn.at(key).notNil,{
+                        fxsyn.at(key).free;
+                    });
+                    fxsyn.put(key,Synth.new("defMod_"++msg[1].asString,[\out,fxbus.at(key),\msg1,msg[2],\msg2,msg[3],\msg3,msg[4]]));
+                })
+            });
+        });
 
 
-        // [\stroberate,\scratchrate,\bpm_target,\latency,\amp,\rate,\rateslew,\scratch,\lpf,\lpflag,\hpf,\hpflag,\strobe,\vinyl,\bitcrush,\bitcrush_bits,\bitcrush_rate,\timestretch,\timestretch_slow,\timestretch_beats].do({ arg key;
-        //     this.addCommand("amen_"++key, "f", { arg msg;
-        //         amenparams[key] = msg[1];
-        //         amenSynthDef.do({ arg item,i;
-        //             item.set(key,msg[1]);
-        //         });  
-        //     });
-        // });
+        this.addCommand("amen_load","sf", { arg msg;
+            // lua is sending 1-index
+            sampleBuffAmen.free;
+            postln("loading "++msg[1]);
+            Buffer.read(context.server,msg[1],action:{
+                arg buf;
+                postln("loaded "++msg[1]++"into buf "++buf.bufnum);
+                sampleBuffAmen=buf;
+                synAmen.do({ arg item,i;
+                    item.set(\bufnum,buf,\bpm_sample,msg[2],
+                        \amp_crossfade,playerSwap==i,
+                        \samplePos,0,
+                        \sampleStart,0,
+                        \sampleEnd,1.0
+                    );
+                });
+            });
+        });
 
+        this.addCommand("amen_jump","fff", { arg msg;
+            // lua is sending 1-index
+            playerSwap=1-playerSwap;
+            synAmen.do({ arg item,i;
+                item.set(
+                    \t_trig,playerSwap==i,
+                    \amp_crossfade,playerSwap==i,
+                    \samplePos,msg[1],
+                    \sampleStart,msg[2],
+                    \sampleEnd,msg[3],
+                )
+            });
+        });
 
-        // this.addCommand("amen_jump","fff", { arg msg;
-        //     // lua is sending 1-index
-        //     playerSwap=1-playerSwap;
-        //     amenSynthDef.do({ arg item,i;
-        //         item.set(
-        //             \t_trig,playerSwap==i,
-        //             \amp_crossfade,playerSwap==i,
-        //             \samplePos,msg[1],
-        //             \sampleStart,msg[2],
-        //             \sampleEnd,msg[3],
-        //         )
-        //     });
-        // });
-
+        [\bpm_target,\latency].do({ arg key;
+            this.addCommand("amen_"++key, "f", { arg msg;
+                synAmen.do({ arg item,i;
+                    item.set(key,msg[1]);
+                });  
+            });
+        });
 
         // </Amen>
 
@@ -390,15 +407,15 @@ Engine_Emu303 : CroneEngine {
 
     free {
         // <Amen>
-        amenSynthDef.do({ arg item,i; item.free; i.postln; });
+        synAmen.do({ arg item,i; item.free; i.postln; });
         fxbus.keysValuesDo{ |key,value| value.free };
         fxsyn.keysValuesDo{ |key,value| value.free };
-        amenSynthDef.free;
+        synAmen.free;
         sampleBuffAmen.free;
         playerVinyl.free;
         sampleVinyl.free;
         // </Amen>
-
+        synThreeOhThree.free;
         busAccent.free;
         synTape.free;
         busTape.free;
