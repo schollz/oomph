@@ -31,12 +31,29 @@ function AP:init()
     {name="saw/square",eng="wave",min=0.0,max=1,default=0.0,div=0.01},
     {name="detune",eng="detune",min=0.0,max=1,default=0.02,div=0.01,'notes'},
   }
-
   params:add_group("303",#prams)
   for _,p in ipairs(prams) do
     params:add_control(self.id..p.eng,p.name,controlspec.new(p.min,p.max,p.exp and 'exp' or 'lin',p.div,p.default,p.unit or "",p.div/(p.max-p.min)))
     params:set_action(self.id..p.eng,function(x)
       engine["threeohthree_"..p.eng]("dc",0,x,0.2)
+    end)
+  end
+  params:add_group("303 MOD",#prams*5)
+  local mod_ops_ids={"sine","xline","line"}
+  local mod_ops_nom={"sine","exp ramp","linear ramp"}
+  for _,p in ipairs(prams) do
+    params:add_option(self.id..p.eng.."modoption",p.name.." form",mod_ops_nom,1)
+    params:add_control(self.id..p.eng.."modperiod",p.name.." period",controlspec.new(0.1,120,'exp',0.1,2,"s",0.1/119.9))
+    params:add_control(self.id..p.eng.."modmin",p.name.." min",controlspec.new(p.min,p.max,p.exp and 'exp' or 'lin',p.div,p.min,p.unit or "",p.div/(p.max-p.min)))
+    params:add_control(self.id..p.eng.."modmax",p.name.." max",controlspec.new(p.min,p.max,p.exp and 'exp' or 'lin',p.div,p.max,p.unit or "",p.div/(p.max-p.min)))
+    params:add_trigger(self.id..p.eng.."modtrig",p.name.." trig")
+    params:set_action(self.id..p.eng.."modtrig",function(x)
+      print(mod_ops_ids[params:get(self.id..p.eng.."modoption")],params:get(self.id..p.eng.."modmin"),
+          params:get(self.id..p.eng.."modmax"),
+          params:get(self.id..p.eng.."modperiod"))
+      engine["threeohthree_"..p.eng](mod_ops_ids[params:get(self.id..p.eng.."modoption")],params:get(self.id..p.eng.."modmin"),
+          params:get(self.id..p.eng.."modmax"),
+          params:get(self.id..p.eng.."modperiod"))
     end)
   end
 

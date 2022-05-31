@@ -29,34 +29,38 @@ function init()
     {name="aux",eng="auxin",min=0,max=1,default=0.5,div=0.01,unit="wet/dry"},
     {name="tape",eng="tape_wet",min=0,max=1,default=0.5,div=0.01,unit="wet/dry"},
     {name="bias",eng="tape_bias",min=0,max=1,default=0.8,div=0.01},
-    {name="saturate",eng="saturation",min=0,max=1,default=0.8,div=0.01},
-    {name="drive",eng="drive",min=0,max=1,default=0.8,div=0.01},
+    {name="saturate",eng="tape_sat",min=0,max=1,default=0.8,div=0.01},
+    {name="drive",eng="tape_drive",min=0,max=1,default=0.8,div=0.01},
     {name="distortion",eng="dist_wet",min=0,max=1,default=0.1,div=0.01,unit="wet/dry"},
-    {name="gain",eng="drivegain",min=0,max=1,default=0.1,div=0.01},
-    {name="low gain",eng="lowgain",min=0,max=1,default=0.1,div=0.01},
-    {name="high gain",eng="highgain",min=0,max=1,default=0.1,div=0.01},
-    {name="shelf",eng="shelvingfreq",min=10,max=1000,default=600,div=10,exp=true},
+    {name="gain",eng="dist_drive",min=0,max=1,default=0.1,div=0.01},
+    {name="low gain",eng="dist_low",min=0,max=1,default=0.1,div=0.01},
+    {name="high gain",eng="dist_high",min=0,max=1,default=0.1,div=0.01},
+    {name="shelf",eng="dist_shelf",min=10,max=1000,default=600,div=10,exp=true},
   }
   params:add_group("TAPE FX",#tape_prams)
   for _,p in ipairs(tape_prams) do
-    params:add_control(self.id..p.eng,p.name,controlspec.new(p.min,p.max,p.exp and 'exp' or 'lin',p.div,p.default,p.unit or "",p.div/(p.max-p.min)))
-    params:set_action(self.id..p.eng,function(x)
-      engine["tape_"..p.eng]("dc",x,0,x,0)
+    params:add_control("tape"..p.eng,p.name,controlspec.new(p.min,p.max,p.exp and 'exp' or 'lin',p.div,p.default,p.unit or "",p.div/(p.max-p.min)))
+    params:set_action("tape"..p.eng,function(x)
+      print("tape_"..p.eng,x)
+      engine["tape_"..p.eng]("lag",0,x,0)
     end)
   end
-  params:add_group("TAPE FX MOD",#tape_prams)
-  local mod_ops_ids={"lag","sine","xline","line"}
-  local mod_ops_nom={"default","sine","exp ramp","linear ramp"}
+  params:add_group("TAPE FX MOD",#tape_prams*5)
+  local mod_ops_ids={"sine","xline","line"}
+  local mod_ops_nom={"sine","exp ramp","linear ramp"}
   for _,p in ipairs(tape_prams) do
-    params:add_option(self.id..p.eng.."modoption",p.name.." form",mod_ops_nom,1)
-    params:add_control(self.id..p.eng.."modperiod",p.name.." period",controlspec.new(0.1,120,'exp',0.1,2,"s",0.1/119.9))
-    params:add_control(self.id..p.eng.."modmin",p.name.." min",controlspec.new(p.min,p.max,p.exp and 'exp' or 'lin',p.div,p.min,p.unit or "",p.div/(p.max-p.min)))
-    params:add_control(self.id..p.eng.."modmax",p.name.." max",controlspec.new(p.min,p.max,p.exp and 'exp' or 'lin',p.div,p.max,p.unit or "",p.div/(p.max-p.min)))
-    params:add_triger(self.id..p.eng.."modtrig",p.name.." trig")
-    params:set_action(self.id..p.eng.."modtrig",function(x)
-      engine["tape_"..p.eng](mod_ops_ids[x],params:get(self.id..p.eng.."modmin"),
-          params:get(self.id..p.eng.."modmax"),
-          params:get(self.id..p.eng.."modperiod"))
+    params:add_option("tape"..p.eng.."modoption",p.name.." form",mod_ops_nom,1)
+    params:add_control("tape"..p.eng.."modperiod",p.name.." period",controlspec.new(0.1,120,'exp',0.1,2,"s",0.1/119.9))
+    params:add_control("tape"..p.eng.."modmin",p.name.." min",controlspec.new(p.min,p.max,p.exp and 'exp' or 'lin',p.div,p.min,p.unit or "",p.div/(p.max-p.min)))
+    params:add_control("tape"..p.eng.."modmax",p.name.." max",controlspec.new(p.min,p.max,p.exp and 'exp' or 'lin',p.div,p.max,p.unit or "",p.div/(p.max-p.min)))
+    params:add_trigger("tape"..p.eng.."modtrig",p.name.." trig")
+    params:set_action("tape"..p.eng.."modtrig",function(x)
+      print(mod_ops_ids[params:get("tape"..p.eng.."modoption")],params:get("tape"..p.eng.."modmin"),
+          params:get("tape"..p.eng.."modmax"),
+          params:get("tape"..p.eng.."modperiod"))
+      engine["tape_"..p.eng](mod_ops_ids[params:get("tape"..p.eng.."modoption")],params:get("tape"..p.eng.."modmin"),
+          params:get("tape"..p.eng.."modmax"),
+          params:get("tape"..p.eng.."modperiod"))
     end)
   end
 

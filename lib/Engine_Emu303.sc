@@ -184,7 +184,7 @@ Engine_Emu303 : CroneEngine {
             buf;
             var snd=In.ar(in,2);
             var auxin=In.kr(auxinBus);//bus
-            var tape_wet=In.kr(tape_wetBus);//bus
+            var tape_wet=In.kr(tape_wetBus).poll;//bus
             var tape_bias=In.kr(tape_biasBus);//bus
             var tape_sat=In.kr(tape_satBus);//bus
             var tape_drive=In.kr(tape_driveBus);//bus
@@ -241,7 +241,7 @@ Engine_Emu303 : CroneEngine {
         busAccent=Bus.control(context.server,1);
         context.server.sync;        
         // define always-on synths
-        synThreeOhThree=Synth("defThreeOhThree",[\busAccent,busAccent,\out,0]); // TODO: switch back to busTape
+        synThreeOhThree=Synth("defThreeOhThree",[\busAccent,busAccent,\out,busTape]); // TODO: switch back to busTape
         playerVinyl = Synth("defVinyl",[\bufnum,sampleVinyl,\amp,0],target:context.xg);
         amenSynthDef = Array.fill(2,{arg i;
             Synth.head(context.server,"defAmen",[\out,busTape])
@@ -290,7 +290,8 @@ Engine_Emu303 : CroneEngine {
             var key=domain++"_"++fx;
             fxbus.put(key,Bus.control(context.server,1));
             fxbus.at(key).value=1.0;
-            synThreeOhThree.set(fx++"Bus",fxbus.at(key).index);
+            // MAKE SURE TO CHANGE THE SYNTH
+            synTape.set(fx++"Bus",fxbus.at(key).index);
             this.addCommand(key, "sfff", { arg msg;
                 if (key=="lag",{
                     if (fxsyn.at(key).isNil,{
