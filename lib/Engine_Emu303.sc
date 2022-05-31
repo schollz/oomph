@@ -172,30 +172,38 @@ Engine_Emu303 : CroneEngine {
             Out.kr(out,EnvGen.ar( Env.new([10e-9, 1, 10e-9], [0.01, decay],  'exp'),doneAction:2));
         }).add;
 
-
-
         SynthDef("defTape",{
-            arg in, auxin=0.0,tape_wet=0.9,tape_bias=0.9,saturation=0.9,drive=0.5,
+            arg in, auxinBus,tape_wetBus,tape_biasBus,tape_satBus,tape_driveBus,
             tape_oversample=2,mode=0,
-            dist_wet=0.5,drivegain=0.5,dist_bias=0,lowgain=0.1,highgain=0.1,
-            shelvingfreq=600,dist_oversample=2,
+            dist_wetBus,dist_driveBus,dist_biasBus,dist_lowBus,dist_highBus,
+            dist_shelfBus,dist_oversample=2,
             wowflu=1.0,
             wobble_rpm=33, wobble_amp=0.05, flutter_amp=0.03, flutter_fixedfreq=6, flutter_variationfreq=2,
             hpf=60,hpfqr=0.6,
             lpf=18000,lpfqr=0.6,
             buf;
             var snd=In.ar(in,2);
+            var auxin=In.kr(auxinBus);//bus
+            var tape_wet=In.kr(tape_wetBus);//bus
+            var tape_bias=In.kr(tape_biasBus);//bus
+            var tape_sat=In.kr(tape_satBus);//bus
+            var tape_drive=In.kr(tape_driveBus);//bus
+            var dist_wet=In.kr(dist_wetBus);//bus
+            var dist_drive=In.kr(dist_driveBus);//bus
+            var dist_bias=In.kr(dist_biasBus);//bus
+            var dist_low=In.kr(dist_lowBus);//bus
+            var dist_high=In.kr(dist_highBus);//bus
+            var dist_shelf=In.kr(dist_shelfBus);//bus
             snd=snd+(auxin*SoundIn.ar([0,1]));
-            snd=SelectX.ar(Lag.kr(tape_wet,1),[snd,AnalogTape.ar(snd,tape_bias,saturation,drive,tape_oversample,mode)]);
-            snd=SelectX.ar(Lag.kr(dist_wet/10,1),[snd,AnalogVintageDistortion.ar(snd,drivegain,dist_bias,lowgain,highgain,shelvingfreq,dist_oversample)]);          
+            snd=SelectX.ar(Lag.kr(tape_wet,1),[snd,AnalogTape.ar(snd,tape_bias,tape_sat,tape_drive,tape_oversample,mode)]);
+            snd=SelectX.ar(Lag.kr(dist_wet/10,1),[snd,AnalogVintageDistortion.ar(snd,dist_drive,dist_bias,dist_low,dist_high,dist_shelf,dist_oversample)]);          
             snd=RHPF.ar(snd,hpf,hpfqr);
             snd=RLPF.ar(snd,lpf,lpfqr);
             Out.ar(0,snd);
         }).add;
 
-        
 
-        // mods
+        // <mods>
         // msg1 = start value
         // msg2 = final value 
         // msg3 = period
@@ -226,12 +234,12 @@ Engine_Emu303 : CroneEngine {
             Out.kr(out,XLine.kr(start:msg1+0.00001,end:msg2,dur:msg3,doneAction:2));
         }).add;
 
+        // </mods>
 
         context.server.sync;
         busTape=Bus.audio(context.server,2);
         busAccent=Bus.control(context.server,1);
-        context.server.sync;
-        
+        context.server.sync;        
         // define always-on synths
         synThreeOhThree=Synth("defThreeOhThree",[\busAccent,busAccent,\out,0]); // TODO: switch back to busTape
         playerVinyl = Synth("defVinyl",[\bufnum,sampleVinyl,\amp,0],target:context.xg);
@@ -239,7 +247,6 @@ Engine_Emu303 : CroneEngine {
             Synth.head(context.server,"defAmen",[\out,busTape])
         });
         synTape=Synth.tail(context.server,"defTape",[\in,busTape]);
-
         context.server.sync;
 
         // <303>
@@ -277,23 +284,29 @@ Engine_Emu303 : CroneEngine {
         // </303>
 
 
-        // // <Tape>
-        // [\auxin,\hpf,\hpfqr,\lpf,\lpfqr,\wowflu,\wobble_rpm,\wobble_amp,\flutter_amp,\flutter_fixedfreq,\flutter_variationfreq,\amp,\tape_wet,\tape_bias,\saturation,\drive,\tape_oversample,\mode,\dist_wet,\drivegain,\dist_bias,\lowgain,\highgain,\shelvingfreq,\dist_oversample].do({ arg fx;
-        //     var domain="tape";
-        //     var key=domain++"_"++fx;
-        //     fxbus.put(key,Bus.control(context.server,1));
-        //     fxbus.at(key).value=1.0;
-        //     synTape.set(key,fxbus.at(key).index);
-        //     this.addCommand(key, "sfff", { arg msg;
-        //         if (fxsyn.at(key).notNil,{
-        //             fxsyn.at(key).free;
-        //         });
-        //         fxsyn.put(key,Synth.new(msg[1].asString,[\out,fxbus.at(key),\msg1,msg[2],\msg2,msg[3],\msg3,msg[4]]));
-        //     });
-        // });
-
-
-        // // </Tape>
+        // <Tape>
+        [\auxin,\tape_wet,\tape_bias,\tape_sat,\tape_drive,\dist_wet,\dist_drive,\dist_bias,\dist_low,\dist_high,\dist_shelf].do({ arg fx;
+            var domain="tape";
+            var key=domain++"_"++fx;
+            fxbus.put(key,Bus.control(context.server,1));
+            fxbus.at(key).value=1.0;
+            synThreeOhThree.set(fx++"Bus",fxbus.at(key).index);
+            this.addCommand(key, "sfff", { arg msg;
+                if (key=="lag",{
+                    if (fxsyn.at(key).isNil,{
+                        fxsyn.put(key,Synth.new("defMod_"++msg[1].asString,[\out,fxbus.at(key),\msg1,msg[2],\msg2,msg[3],\msg3,msg[4]]));
+                    },{
+                        fxsyn.at(key).set(\msg1,msg[2],\msg2,msg[3],\msg3,msg[4]);
+                    });
+                },{
+                    if (fxsyn.at(key).notNil,{
+                        fxsyn.at(key).free;
+                    });
+                    fxsyn.put(key,Synth.new("defMod_"++msg[1].asString,[\out,fxbus.at(key),\msg1,msg[2],\msg2,msg[3],\msg3,msg[4]]));
+                })
+            });
+        });
+        // </Tape>
 
 
 

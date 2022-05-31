@@ -40,27 +40,6 @@ function AP:init()
     end)
   end
 
-  local tape_prams={
-    {name="aux",eng="auxin",min=0,max=1,default=0.5,div=0.01,unit="wet/dry"},
-    {name="tape",eng="tape_wet",min=0,max=1,default=0.5,div=0.01,unit="wet/dry"},
-    {name="bias",eng="tape_bias",min=0,max=1,default=0.8,div=0.01},
-    {name="saturate",eng="saturation",min=0,max=1,default=0.8,div=0.01},
-    {name="drive",eng="drive",min=0,max=1,default=0.8,div=0.01},
-    {name="distortion",eng="dist_wet",min=0,max=1,default=0.1,div=0.01,unit="wet/dry"},
-    {name="gain",eng="drivegain",min=0,max=1,default=0.1,div=0.01},
-    {name="low gain",eng="lowgain",min=0,max=1,default=0.1,div=0.01},
-    {name="high gain",eng="highgain",min=0,max=1,default=0.1,div=0.01},
-    {name="shelf",eng="shelvingfreq",min=10,max=1000,default=600,div=10,exp=true},
-  }
-  params:add_group("TAPE FX",#tape_prams)
-  for _,p in ipairs(tape_prams) do
-    params:add_control(self.id..p.eng,p.name,controlspec.new(p.min,p.max,p.exp and 'exp' or 'lin',p.div,p.default,p.unit or "",p.div/(p.max-p.min)))
-    params:set_action(self.id..p.eng,function(x)
-      --engine[p.eng](x)
-    end)
-  end
-
-  params:bang()
 
   -- https://acidpattern.bandcamp.com/album/july-acid-pattern-2014
   self.current=1
