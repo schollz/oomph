@@ -13,6 +13,7 @@ engine.name="Emu303"
 local lattice_=require("lattice")
 local ap_=include("lib/AcidPattern")
 local amen_=include("lib/Amen")
+local ggrid_=include("lib/ggrid")
 local shift=false
 local pos={1,3}
 
@@ -22,6 +23,7 @@ function init()
 
   ap=ap_:new()
   amen=amen_:new()
+  ggrid=ggrid_:new{ap=ap}
 
   -- setup tape fx
 
