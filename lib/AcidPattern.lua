@@ -60,14 +60,15 @@ function AP:init()
 
   -- https://acidpattern.bandcamp.com/album/july-acid-pattern-2014
   self.current=1
-  self.note_scale={33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50}
-  self.key_notes={"A","Bb","B","C","Db","D","Eb","E","F","Gb","G","Ab"}
+  self.note_scale={33,35,36,38,40,41,43}
+  self.key_notes={"A","B","C","D","E","F","G"}
+  self.key_accid={"b","","#"}
   self.key_octave={"D","","U"}
   self.key_accent={"","A","S"}
   self.key_punctuation={"@","o","-"}
   -- do initialize here
-  self.note={1,1,7,4,4,1,1,7,4,4,1,1,7,4,4,1}
-  self.note={1,1,4,1,1,1,4,1,1,4,1,1,9,8,8,8}
+  self.note=  {1,1,3,1,1,1,2,1,1,3,1,1,6,7,1,1}
+  self.accid= {2,2,2,2,2,2,2,3,1,2,2,2,2,2,2,2}
   self.octave={2,1,2,2,2,2,1,2,2,2,2,1,2,2,1,2}
   self.accent={2,2,1,3,1,2,2,1,3,1,2,2,1,3,1,2}
   self.duration={1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}
@@ -77,14 +78,35 @@ function AP:init()
 end
 
 function AP:set(ind,pos,d)
-  local setters={"note","octave","accent","punct"}
-  local maxes={12,3,3,3}
+  local setters={"note","accid","octave","accent","punct"}
+  local maxes={7,3,3,3,3}
   self[setters[ind]][pos]=self[setters[ind]][pos]+d
   if self[setters[ind]][pos]<1 then
     self[setters[ind]][pos]=self[setters[ind]][pos]+maxes[ind]
   elseif self[setters[ind]][pos]>maxes[ind] then
     self[setters[ind]][pos]=self[setters[ind]][pos]-maxes[ind]
   end
+  -- TODO: figure out the durations of all the notes
+end
+
+function AP:rotate_step(step,d)
+  local pos=0
+  for i,s in ipairs(self.step) do 
+    if s==step then 
+      pos=i
+      break
+    end
+  end
+  local pos_new=pos+d
+  if pos_new>#self.steps then 
+    pos_new=pos_new-#self.steps 
+  end
+  if pos_new<1 then 
+    pos_new=pos_new+#self.steps 
+  end
+  local step_move=self.steps[pos_new]
+  self.steps[pos_new]=step 
+  self.steps[step]=step_move
 end
 
 function AP:process(beat)
@@ -93,7 +115,7 @@ function AP:process(beat)
   if self.punct[i]==PUNCTUATION_REST then
     do return end
   end
-  local note=self.note_scale[self.note[i]]+(self.octave[i]-2)*12+12
+  local note=self.note_scale[self.note[i]]+(self.accid[i]-2)+(self.octave[i]-2)*12+12
   -- do something with the note
   local accent=self.accent[i]==2 and 1 or 0
   local slide=self.accent[i]==3 and 1 or 0
