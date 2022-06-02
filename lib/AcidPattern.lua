@@ -49,11 +49,11 @@ function AP:init()
     params:add_trigger(self.id..p.eng.."modtrig",p.name.." trig")
     params:set_action(self.id..p.eng.."modtrig",function(x)
       print(mod_ops_ids[params:get(self.id..p.eng.."modoption")],params:get(self.id..p.eng.."modmin"),
-          params:get(self.id..p.eng.."modmax"),
-          params:get(self.id..p.eng.."modperiod"))
+        params:get(self.id..p.eng.."modmax"),
+      params:get(self.id..p.eng.."modperiod"))
       engine["threeohthree_"..p.eng](mod_ops_ids[params:get(self.id..p.eng.."modoption")],params:get(self.id..p.eng.."modmin"),
-          params:get(self.id..p.eng.."modmax"),
-          params:get(self.id..p.eng.."modperiod"))
+        params:get(self.id..p.eng.."modmax"),
+      params:get(self.id..p.eng.."modperiod"))
     end)
   end
 
@@ -67,8 +67,8 @@ function AP:init()
   self.key_accent={"","A","S"}
   self.key_punctuation={"@","o","-"}
   -- do initialize here
-  self.note=  {1,1,3,1,1,1,2,1,1,3,1,1,6,7,1,1}
-  self.accid= {2,2,2,2,2,2,2,3,1,2,2,2,2,2,2,2}
+  self.note={1,1,3,1,1,1,2,1,1,3,1,1,6,7,1,1}
+  self.accid={2,2,2,2,2,2,2,3,1,2,2,2,2,2,2,2}
   self.octave={2,1,2,2,2,2,1,2,2,2,2,1,2,2,1,2}
   self.accent={2,2,1,3,1,2,2,1,3,1,2,2,1,3,1,2}
   self.duration={1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}
@@ -91,21 +91,21 @@ end
 
 function AP:rotate_step(step,d)
   local pos=0
-  for i,s in ipairs(self.step) do 
-    if s==step then 
+  for i,s in ipairs(self.step) do
+    if s==step then
       pos=i
       break
     end
   end
   local pos_new=pos+d
-  if pos_new>#self.steps then 
-    pos_new=pos_new-#self.steps 
+  if pos_new>#self.steps then
+    pos_new=pos_new-#self.steps
   end
-  if pos_new<1 then 
-    pos_new=pos_new+#self.steps 
+  if pos_new<1 then
+    pos_new=pos_new+#self.steps
   end
   local step_move=self.steps[pos_new]
-  self.steps[pos_new]=step 
+  self.steps[pos_new]=step
   self.steps[step]=step_move
 end
 

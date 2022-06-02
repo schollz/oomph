@@ -2,12 +2,12 @@
 local GGrid={}
 
 
-local ROW_STEP=1
-local ROW_ACCI=2
-local ROW_NOTE=3
-local ROW_OCTAVE=4
-local ROW_ACCE=5
-local ROW_PUNC=6
+local ROW_NOTE=1
+local ROW_ACCID=2
+local ROW_OCTAVE=3
+local ROW_ACCENT=4
+local ROW_PUNCT=5
+local ROW_STEP=7
 
 function GGrid:new(args)
   local m=setmetatable({},{__index=GGrid})
@@ -65,18 +65,11 @@ function GGrid:key_press(row,col,on)
   else
     self.pressed_buttons[row..","..col]=nil
   end
+  if on and row<6 then
+    self.ap:set(row,col,1)
+  end
 end
 
-
-function GGrid:toggle_key(row,col)
-	for i=row-1,row+1 do
-	  for j=col-1,col+1 do
-	    if i>=1 and i<=8 and j>=1 and j<=self.grid_width then
-	      self.lightsout[i][j]=1-self.lightsout[i][j]
-	    end
-	  end
-	end
-end
 
 function GGrid:get_visual()
   -- clear visual
@@ -90,12 +83,15 @@ function GGrid:get_visual()
   end
 
   -- draw steps
-  for i=1,16 do 
-	self.visual[ROW_STEP][i]=self.ap.steps[i]-1
-	self.visual[ROW_ACCE][i]=self.ap.accid[i]*4
-	self.visual[ROW_NOTE][i]=self.ap.note[i]*2
-	self.visual[ROW_OCTAVE][i]=self.ap.octave[i]*4
+  for i=1,16 do
+    self.visual[ROW_STEP][i]=self.ap.steps[i]-1
+    self.visual[ROW_NOTE][i]=self.ap.note[i]*2
+    self.visual[ROW_ACCID][i]=self.ap.accid[i]*4
+    self.visual[ROW_OCTAVE][i]=self.ap.octave[i]*4
+    self.visual[ROW_ACCENT][i]=self.ap.accent[i]*4
+    self.visual[ROW_PUNCT][i]=self.ap.punct[i]*4
   end
+  self.visual[8][self.ap.current]=10
 
   -- illuminate currently pressed button
   for k,_ in pairs(self.pressed_buttons) do
