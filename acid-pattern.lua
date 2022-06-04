@@ -57,11 +57,11 @@ function init()
     params:add_trigger("tape"..p.eng.."modtrig",p.name.." trig")
     params:set_action("tape"..p.eng.."modtrig",function(x)
       print(mod_ops_ids[params:get("tape"..p.eng.."modoption")],params:get("tape"..p.eng.."modmin"),
-          params:get("tape"..p.eng.."modmax"),
-          params:get("tape"..p.eng.."modperiod"))
+        params:get("tape"..p.eng.."modmax"),
+      params:get("tape"..p.eng.."modperiod"))
       engine["tape_"..p.eng](mod_ops_ids[params:get("tape"..p.eng.."modoption")],params:get("tape"..p.eng.."modmin"),
-          params:get("tape"..p.eng.."modmax"),
-          params:get("tape"..p.eng.."modperiod"))
+        params:get("tape"..p.eng.."modmax"),
+      params:get("tape"..p.eng.."modperiod"))
     end)
   end
 

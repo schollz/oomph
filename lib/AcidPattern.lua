@@ -87,26 +87,26 @@ function AP:set(ind,pos,d)
   elseif self[setters[ind]][pos]>maxes[ind] then
     self[setters[ind]][pos]=self[setters[ind]][pos]-maxes[ind]
   end
-  if setters[ind]=="punct" then 
+  if setters[ind]=="punct" then
     -- TODO: figure out the durations of all the notes
     local punct={}
     local durations={}
-    for i=1,2 do 
-      for _, p in ipairs(self.punct) do 
+    for i=1,2 do
+      for _,p in ipairs(self.punct) do
         table.insert(durations,1)
         table.insert(punct,p)
       end
     end
     local duration=1
-    for i=#punct,1,-1 do 
-      if punct[i]<=2 then 
+    for i=#punct,1,-1 do
+      if punct[i]<=2 then
         durations[i]=duration
         duration=1
       else
         duration=duration+1
       end
     end
-    for i=1,#self.duration do 
+    for i=1,#self.duration do
       self.duration[i]=durations[i]
     end
     tab.print(self.duration)

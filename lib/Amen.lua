@@ -49,11 +49,11 @@ function Amen:init()
     params:add_trigger("amen_"..p.eng.."modtrig",p.name.." trig")
     params:set_action("amen_"..p.eng.."modtrig",function(x)
       print(mod_ops_ids[params:get("amen_"..p.eng.."modoption")],params:get("amen_"..p.eng.."modmin"),
-          params:get("amen_"..p.eng.."modmax"),
-          params:get("amen_"..p.eng.."modperiod"))
+        params:get("amen_"..p.eng.."modmax"),
+      params:get("amen_"..p.eng.."modperiod"))
       engine["amen_"..p.eng](mod_ops_ids[params:get("amen_"..p.eng.."modoption")],params:get("amen_"..p.eng.."modmin"),
-          params:get("amen_"..p.eng.."modmax"),
-          params:get("amen_"..p.eng.."modperiod"))
+        params:get("amen_"..p.eng.."modmax"),
+      params:get("amen_"..p.eng.."modperiod"))
     end)
   end
 
