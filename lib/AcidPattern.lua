@@ -69,7 +69,7 @@ function AP:init()
   self.key_notes={"C","D","E","F","G","A","B"}
   self.key_accid={"b","","#"}
   self.key_octave={"D","","U"}
-  self.key_accent={"","A","S"}
+  self.key_accent={"","O","F"}
   self.key_punctuation={"@","o","-"}
   -- do initialize here
   self.note={1,1,3,1,1,1,2,1,1,3,1,1,6,7,1,1}
@@ -80,6 +80,28 @@ function AP:init()
   self.punct={1,1,1,1,2,1,1,1,1,2,1,1,1,1,2,1}
   self.punct={3,1,1,1,1,1,1,1,1,1,1,1,1,3,3,3}
   self.step={1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16}
+end
+
+function AP:save(filename)
+	local to_save={"note","accid","octave","accent","duration","punct","step"}
+	local data={}
+	for _, key in ipairs(to_save) do 
+		data[key]=self[key]
+	end
+	local file=io.open(filename,"w+")
+	io.output(file)
+	io.write(json.encode(data))
+	io.close(file)
+end
+
+function AP:open(filename)
+	local f=io.open(filename,"rb")
+	local content=f:read("*all")
+	f:close()
+	local data=json.decode(content)
+	for k,v in pairs(data) do 
+		self[k]=v
+	end
 end
 
 function AP:set(ind,pos,d)
@@ -148,6 +170,27 @@ function AP:process(beat)
   local accent=self.accent[i]==2 and 1 or 0
   local slide=self.accent[i]==3 and 1 or 0
   engine.threeohthree_trig(note,self.duration[i],slide,accent)
+end
+
+function AP:redraw(x,y,sh,sw)
+  screen.level(15)
+  screen.blend_mode(0)
+  for i=1,16 do
+    screen.move(x+sw*(i-1),y)
+    screen.text_center(self.key_step[self.step[i]])
+    screen.move(x+sw*(i-1),y+sh*1)
+    screen.text_center(self.key_notes[self.note[i]])
+    screen.move(x+sw*(i-1),y+sh*2)
+    screen.text_center(self.key_accid[self.accid[i]])
+    screen.move(x+sw*(i-1),y+sh*3)
+    screen.text_center(self.key_octave[self.octave[i]])
+    screen.move(x+sw*(i-1),y+sh*4)
+    screen.text_center(self.key_accent[self.accent[i]])
+    screen.move(x+sw*(i-1),y+sh*5)
+    screen.text_center(self.key_punctuation[self.punct[i]])
+  end
+  screen.move(x+sw*(self.current-1),y-5)
+  screen.text_center("^")
 end
 
 return AP

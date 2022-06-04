@@ -50,7 +50,7 @@ Engine_Emu303 : CroneEngine {
             );
             snd = HPF.ar(snd,hpf);
             snd = LPF.ar(snd,lpf);
-            Out.ar(0,snd*amp);
+            Out.ar(0,snd*amp*EnvGen.ar(Env.new([0,1],[4])));
         }).add;
 
         SynthDef("defAmen",{ 
@@ -124,8 +124,8 @@ Engine_Emu303 : CroneEngine {
             snd = ((strobe<1)*snd)+((strobe>0)*snd*LFPulse.ar(60/bpm_target*stroberate));
 
             // bitcrush
-            bitcrush = VarLag.kr(bitcrush,1,warp:\cubed);
-            snd = (snd*(1-bitcrush))+(bitcrush*Decimator.ar(snd,VarLag.kr(bitcrush_rate,1,warp:\cubed),VarLag.kr(bitcrush_bits,1,warp:\cubed)));
+            bitcrush = VarLag.kr(bitcrush,0.2,warp:\cubed);
+            snd = (snd*(1-bitcrush))+(bitcrush*Decimator.ar(snd,VarLag.kr(bitcrush_rate,0.2,warp:\cubed),VarLag.kr(bitcrush_bits,0.2,warp:\cubed)));
 
             // vinyl wow + compressor
             snd=(vinyl<1*snd)+(vinyl>0* Limiter.ar(Compander.ar(snd,snd,0.5,1.0,0.1,0.1,1,2),dur:0.0008));
@@ -137,7 +137,7 @@ Engine_Emu303 : CroneEngine {
                 level:amp*Lag.kr(amp_crossfade,0.2)
             );
 
-            Out.ar(out,DelayN.ar(snd,delaytime:latency));
+            Out.ar(out,DelayN.ar(snd,delaytime:latency)*EnvGen.ar(Env.new([0,1],[4])));
         }).add; 
         // </Amen>
 
@@ -177,7 +177,7 @@ Engine_Emu303 : CroneEngine {
             filter = RLPFD.ar(SelectX.ar(wave, waves), cutoff +(filterEnv*env_adjust), res,gain);
             snd=(filter*amp).tanh;
             snd=snd+SinOsc.ar([noteVal-12-detune,noteVal-12+detune].midicps,mul:sub*env/10.0);
-            Out.ar(out, DelayN.ar(snd,delaytime:latency));
+            Out.ar(out, DelayN.ar(snd,delaytime:latency)*EnvGen.ar(Env.new([0,1],[4])));
         }).add;
         
         SynthDef("defThreeOhThreeAccent",{
@@ -212,7 +212,7 @@ Engine_Emu303 : CroneEngine {
             snd=SelectX.ar(Lag.kr(dist_wet,1),[snd,AnalogVintageDistortion.ar(snd,dist_drive,dist_bias,dist_low,dist_high,dist_shelf,dist_oversample)]);          
             snd=RHPF.ar(snd,hpf,hpfqr);
             snd=RLPF.ar(snd,lpf,lpfqr);
-            Out.ar(0,snd);
+            Out.ar(0,snd*EnvGen.ar(Env.new([0,1],[4])));
         }).add;
 
 

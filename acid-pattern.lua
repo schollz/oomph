@@ -14,6 +14,10 @@ local lattice_=require("lattice")
 local ap_=include("lib/AcidPattern")
 local amen_=include("lib/Amen")
 local ggrid_=include("lib/ggrid")
+if not string.find(package.cpath,"/home/we/dust/code/acid-pattern/lib/") then
+  package.cpath=package.cpath..";/home/we/dust/code/acid-pattern/lib/?.so"
+end
+json=require("cjson")
 local shift=false
 local pos={1,3}
 
@@ -80,11 +84,6 @@ function init()
     engine.threeohthree_latency(x<0 and math.abs(x) or 0)
   end)
 
-
-  -- load in the default parameters
-  -- params:default()
-  params:bang()
-
   -- initialize metro for updating screen
   timer=metro.init()
   timer.time=1/15
@@ -112,6 +111,21 @@ function init()
   -- dev stuff
   amen:load("/home/we/dust/code/acid-pattern/lib/beats16_bpm150_Ultimate_Jack_Loops_014__BPM_150_.wav")
   -- amen:stutter_build()
+
+
+  params.action_write=function(filename,name)
+	  print("write",filename,name)
+	  ap:save(filename..".ap.json")
+  end
+  params.action_read=function(filename,silent)
+	  print("read",filename,silent)
+	  ap:open(filename..".ap.json")
+  end
+
+  -- load in the default parameters
+  params:default()
+  params:bang()
+
 
   -- start the lattice
   lattice:start()
@@ -168,28 +182,11 @@ end
 
 function redraw()
   screen.clear()
-  screen.level(15)
-  screen.blend_mode(0)
   local x=2.5
-  local y=13
+  local y=10
   local sh=9
   local sw=8
-  for i=1,16 do
-    screen.move(x+sw*(i-1),y)
-    screen.text_center(ap.key_step[ap.step[i]])
-    screen.move(x+sw*(i-1),y+sh*1)
-    screen.text_center(ap.key_notes[ap.note[i]])
-    screen.move(x+sw*(i-1),y+sh*2)
-    screen.text_center(ap.key_accid[ap.accid[i]])
-    screen.move(x+sw*(i-1),y+sh*3)
-    screen.text_center(ap.key_octave[ap.octave[i]])
-    screen.move(x+sw*(i-1),y+sh*4)
-    screen.text_center(ap.key_accent[ap.accent[i]])
-    screen.move(x+sw*(i-1),y+sh*5)
-    screen.text_center(ap.key_punctuation[ap.punct[i]])
-  end
-  screen.move(x+sw*(ap.current-1),y-5)
-  screen.text_center("^")
+  ap:redraw(x,y,sh,sw)
   screen.blend_mode(1)
   screen.rect(x+sw*(pos[2]-1)-4,y+sh*(pos[1]-1)+2,10,9)
   screen.fill()
