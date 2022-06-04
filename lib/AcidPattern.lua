@@ -26,7 +26,7 @@ function AP:init()
     {name="res",eng="res_adjust",min=0.01,max=0.99,default=0.303,div=0.01},
     {name="res accent",eng="res_accent",min=0.01,max=0.99,default=0.303,div=0.01},
     {name="portamento",eng="portamento",min=0,max=2,default=0.1,div=0.01,unit="s"},
-    {name="sustain",eng="sustain",min=0,max=2,default=0.0,div=0.01,unit="s"},
+    {name="sustain",eng="sustain",min=0,max=2,default=clock.get_beat_sec(),div=0.01,unit="s"},
     {name="decay",eng="decay",min=0.01,max=30,default=clock.get_beat_sec()*4,div=0.01,unit="s",exp=true},
     {name="saw/square",eng="wave",min=0.0,max=1,default=0.0,div=0.01},
     {name="detune",eng="detune",min=0.0,max=1,default=0.02,div=0.01,'notes'},
@@ -73,7 +73,7 @@ function AP:init()
   self.accent={2,2,1,3,1,2,2,1,3,1,2,2,1,3,1,2}
   self.duration={1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}
   self.punct={1,1,1,1,2,1,1,1,1,2,1,1,1,1,2,1}
-  self.punct={1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}
+  self.punct={3,1,1,1,1,1,1,1,1,1,1,1,1,3,3,3}
   self.step={1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16}
 end
 
@@ -86,7 +86,30 @@ function AP:set(ind,pos,d)
   elseif self[setters[ind]][pos]>maxes[ind] then
     self[setters[ind]][pos]=self[setters[ind]][pos]-maxes[ind]
   end
-  -- TODO: figure out the durations of all the notes
+  if setters[ind]=="punct" then 
+    -- TODO: figure out the durations of all the notes
+    local punct={}
+    local durations={}
+    for i=1,2 do 
+      for _, p in ipairs(self.punct) do 
+        table.insert(durations,1)
+        table.insert(punct,p)
+      end
+    end
+    local duration=1
+    for i=#punct,1,-1 do 
+      if punct[i]<=2 then 
+        durations[i]=duration
+        duration=1
+      else
+        duration=duration+1
+      end
+    end
+    for i=1,#self.duration do 
+      self.duration[i]=durations[i]
+    end
+    tab.print(self.duration)
+  end
 end
 
 function AP:rotate_step(step,d)
@@ -112,14 +135,14 @@ end
 function AP:process(beat)
   self.current=self.step[beat]
   local i=self.current
-  if self.punct[i]==PUNCTUATION_REST then
+  if self.punct[i]~=PUNCUATION_NOTE then
     do return end
   end
   local note=self.note_scale[self.note[i]]+(self.accid[i]-2)+(self.octave[i]-2)*12+12
   -- do something with the note
   local accent=self.accent[i]==2 and 1 or 0
   local slide=self.accent[i]==3 and 1 or 0
-  engine.threeohthree_trig(note,self.duration[i]*0.1,slide,accent)
+  engine.threeohthree_trig(note,self.duration[i],slide,accent)
 end
 
 return AP
