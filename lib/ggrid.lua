@@ -29,7 +29,6 @@ function GGrid:new(args)
   m.visual={}
   m.grid_width=16
   for i=1,8 do
-    m.playing[i]={}
     m.visual[i]={}
     for j=1,m.grid_width do
       m.visual[i][j]=0
@@ -84,7 +83,7 @@ function GGrid:get_visual()
 
   -- draw steps
   for i=1,16 do
-    self.visual[ROW_STEP][i]=self.ap.steps[i]-1
+    self.visual[ROW_STEP][i]=self.ap.step[i]-1
     self.visual[ROW_NOTE][i]=self.ap.note[i]*2
     self.visual[ROW_ACCID][i]=self.ap.accid[i]*4
     self.visual[ROW_OCTAVE][i]=self.ap.octave[i]*4

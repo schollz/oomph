@@ -84,7 +84,6 @@ Engine_Emu303 : CroneEngine {
             rate = rate * bpm_target / bpm_sample;
             // scratch effect
             rate = SelectX.kr(scratch,[rate,LFTri.kr(bpm_target/60*scratchrate)]);
-            rate.poll;
             pos = Phasor.ar(
                 trig:t_trig,
                 rate:BufRateScale.kr(bufnum)*rate,
