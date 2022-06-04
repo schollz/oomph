@@ -65,7 +65,7 @@ function GGrid:key_press(row,col,on)
     self.pressed_buttons[row..","..col]=nil
   end
   if on and row<6 then
-    self.ap:set(row,col,1)
+    self.apm:set(row,col,1)
   end
 end
 
@@ -83,14 +83,15 @@ function GGrid:get_visual()
 
   -- draw steps
   for i=1,16 do
-    self.visual[ROW_STEP][i]=self.ap.step[i]-1
-    self.visual[ROW_NOTE][i]=self.ap.note[i]*2
-    self.visual[ROW_ACCID][i]=self.ap.accid[i]*4
-    self.visual[ROW_OCTAVE][i]=self.ap.octave[i]*4
-    self.visual[ROW_ACCENT][i]=self.ap.accent[i]*4
-    self.visual[ROW_PUNCT][i]=self.ap.punct[i]*4
+    -- TODO: implement these gets
+    self.visual[ROW_STEP][i]=self.apm:get("step",i)-1
+    self.visual[ROW_NOTE][i]=self.apm:get("note",i)*2
+    self.visual[ROW_ACCID][i]=self.apm:get("accid",i)*4
+    self.visual[ROW_OCTAVE][i]=self.apm:get("octave",i)*4
+    self.visual[ROW_ACCENT][i]=self.apm:get("accent",i)*4
+    self.visual[ROW_PUNCT][i]=self.apm:get("punct",i)*4
   end
-  self.visual[8][self.ap.current]=10
+  self.visual[8][self.ap:get("current")]=10
 
   -- illuminate currently pressed button
   for k,_ in pairs(self.pressed_buttons) do

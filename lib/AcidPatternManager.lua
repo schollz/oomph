@@ -1,9 +1,5 @@
-local AP={}
-local MusicUtil=require("musicutil")
-
-local PUNCUATION_NOTE=1
-local PUNCTUATION_REST=2
-local PUNCTUATION_TIE=3
+local APM={}
+local ap_=include("lib/AcidPattern")
 
 function APM:new(o)
   -- https://www.lua.org/pil/16.1.html
@@ -12,7 +8,7 @@ function APM:new(o)
   self.__index=self
 
   -- define defaults if they are not defined
-  o.id=o.id or 1
+  o.pattern_num=o.pattern_num or 4
   o:init()
   return o
 end
@@ -37,8 +33,8 @@ function APM:init()
     min = 0, max = 127, default = 36, formatter = function(param) return MusicUtil.note_num_to_name(param:get(), true) end}
 
   for _,p in ipairs(prams) do
-    params:add_control(self.id..p.eng,p.name,controlspec.new(p.min,p.max,p.exp and 'exp' or 'lin',p.div,p.default,p.unit or "",p.div/(p.max-p.min)))
-    params:set_action(self.id..p.eng,function(x)
+    params:add_control("threeohthree_"..p.eng,p.name,controlspec.new(p.min,p.max,p.exp and 'exp' or 'lin',p.div,p.default,p.unit or "",p.div/(p.max-p.min)))
+    params:set_action("threeohthree_"..p.eng,function(x)
       engine["threeohthree_"..p.eng]("dc",0,x,0.2)
     end)
   end
@@ -46,37 +42,64 @@ function APM:init()
   local mod_ops_ids={"sine","xline","line"}
   local mod_ops_nom={"sine","exp ramp","linear ramp"}
   for _,p in ipairs(prams) do
-    params:add_option(self.id..p.eng.."modoption",p.name.." form",mod_ops_nom,1)
-    params:add_control(self.id..p.eng.."modperiod",p.name.." period",controlspec.new(0.1,120,'exp',0.1,2,"s",0.1/119.9))
-    params:add_control(self.id..p.eng.."modmin",p.name.." min",controlspec.new(p.min,p.max,p.exp and 'exp' or 'lin',p.div,p.min,p.unit or "",p.div/(p.max-p.min)))
-    params:add_control(self.id..p.eng.."modmax",p.name.." max",controlspec.new(p.min,p.max,p.exp and 'exp' or 'lin',p.div,p.max,p.unit or "",p.div/(p.max-p.min)))
-    params:add_trigger(self.id..p.eng.."modtrig",p.name.." trig")
-    params:set_action(self.id..p.eng.."modtrig",function(x)
-      print(mod_ops_ids[params:get(self.id..p.eng.."modoption")],params:get(self.id..p.eng.."modmin"),
-        params:get(self.id..p.eng.."modmax"),
-      params:get(self.id..p.eng.."modperiod"))
-      engine["threeohthree_"..p.eng](mod_ops_ids[params:get(self.id..p.eng.."modoption")],params:get(self.id..p.eng.."modmin"),
-        params:get(self.id..p.eng.."modmax"),
-      params:get(self.id..p.eng.."modperiod"))
+    params:add_option("threeohthree_"..p.eng.."modoption",p.name.." form",mod_ops_nom,1)
+    params:add_control("threeohthree_"..p.eng.."modperiod",p.name.." period",controlspec.new(0.1,120,'exp',0.1,2,"s",0.1/119.9))
+    params:add_control("threeohthree_"..p.eng.."modmin",p.name.." min",controlspec.new(p.min,p.max,p.exp and 'exp' or 'lin',p.div,p.min,p.unit or "",p.div/(p.max-p.min)))
+    params:add_control("threeohthree_"..p.eng.."modmax",p.name.." max",controlspec.new(p.min,p.max,p.exp and 'exp' or 'lin',p.div,p.max,p.unit or "",p.div/(p.max-p.min)))
+    params:add_trigger("threeohthree_"..p.eng.."modtrig",p.name.." trig")
+    params:set_action("threeohthree_"..p.eng.."modtrig",function(x)
+      print(mod_ops_ids[params:get("threeohthree_"..p.eng.."modoption")],params:get("threeohthree_"..p.eng.."modmin"),
+        params:get("threeohthree_"..p.eng.."modmax"),
+      params:get("threeohthree_"..p.eng.."modperiod"))
+      engine["threeohthree_"..p.eng](mod_ops_ids[params:get("threeohthree_"..p.eng.."modoption")],params:get("threeohthree_"..p.eng.."modmin"),
+        params:get("threeohthree_"..p.eng.."modmax"),
+      params:get("threeohthree_"..p.eng.."modperiod"))
     end)
+  end
+
+  self.ap={}
+  self.current=1
+  for i=1,self.pattern_num do 
+    table.insert(self.ap,ap_:new{id=i})
   end
 end
 
 function APM:save(filename)
+  for i=1,self.pattern_num do 
+    self.ap[i]:save(filename)
+  end
 end
 
 function APM:open(filename)
+  for i=1,self.pattern_num do 
+    self.ap[i]:open(filename)
+  end
 end
 
 function APM:set(ind,pos,d)
-
+  self.ap[self.current]:set(ind,pos,d)
 end
 
 
 function APM:process(beat)
+  -- TODO: allow chaining?
+  self.ap[self.current]:process(beat)
 end
 
 function APM:redraw(x,y,sh,sw)
+  self.ap[self.current]:redraw(x,y,sh,sw)
+  -- TODO draw a thing showing which pattern we are on
+  screen.move(10+10*self.current,60)
+  screen.text_center(".")
+end
+
+function APM:change_pattern(d)
+  self.current=self.current+d
+  if self.current>self.pattern_num then 
+    self.current = self.current-self.pattern_num
+  elseif self.current<1 then
+    self.current=self.current+self.pattern_num
+  end
 end
 
 return APM

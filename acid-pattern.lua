@@ -11,7 +11,7 @@
 
 engine.name="Emu303"
 local lattice_=require("lattice")
-local ap_=include("lib/AcidPattern")
+local apm_=include("lib/AcidPatternManager")
 local amen_=include("lib/Amen")
 local ggrid_=include("lib/ggrid")
 if not string.find(package.cpath,"/home/we/dust/code/acid-pattern/lib/") then
@@ -25,9 +25,9 @@ function init()
   -- setup audio folders
   util.os_capture("mkdir -p /home/we/dust/audio/acid-pattern")
 
-  ap=ap_:new()
+  apm=apm_:new()
   amen=amen_:new()
-  ggrid=ggrid_:new{ap=ap}
+  ggrid=ggrid_:new{apm=apm}
 
   -- setup tape fx
 
@@ -103,7 +103,7 @@ function init()
       end
       -- process
       amen:process(beat_count)
-      ap:process(beat_count)
+      apm:process(beat_count)
     end,
     division=1/16,
   }
@@ -115,11 +115,11 @@ function init()
 
   params.action_write=function(filename,name)
 	  print("write",filename,name)
-	  ap:save(filename..".ap.json")
+	  apm:save(filename)
   end
   params.action_read=function(filename,silent)
 	  print("read",filename,silent)
-	  ap:open(filename..".ap.json")
+	  apm:open(filename)
   end
 
   -- load in the default parameters
@@ -148,7 +148,7 @@ function key(k,z)
     if k==1 then
     elseif k>1 and z==1 then
       local d=k*2-5
-      ap:set(pos[1],pos[2],d)
+      apm:set(pos[1],pos[2],d)
     end
   end
 end
@@ -186,7 +186,7 @@ function redraw()
   local y=10
   local sh=9
   local sw=8
-  ap:redraw(x,y,sh,sw)
+  apm:redraw(x,y,sh,sw)
   screen.blend_mode(1)
   screen.rect(x+sw*(pos[2]-1)-4,y+sh*(pos[1]-1)+2,10,9)
   screen.fill()
