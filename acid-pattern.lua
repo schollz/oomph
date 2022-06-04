@@ -156,11 +156,11 @@ function enc(k,d)
       if pos[k_]<1 and k_==2 then
         pos[k_]=pos[k_]+16
       end
-      if pos[k_]>4 and k_==1 then
-        pos[k_]=pos[k_]-4
+      if pos[k_]>5 and k_==1 then
+        pos[k_]=pos[k_]-5
       end
       if pos[k_]<1 and k_==1 then
-        pos[k_]=pos[k_]+4
+        pos[k_]=pos[k_]+5
       end
     end
   end
