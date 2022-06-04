@@ -61,6 +61,7 @@ function AP:init()
   -- https://acidpattern.bandcamp.com/album/july-acid-pattern-2014
   self.current=1
   self.note_scale={36,38,40,41,43,45,47}
+  self.key_step={"0","1","2","3","4","5","6","7","8","9","A","B","C","D","E","F"}
   self.key_notes={"C","D","E","F","G","A","B"}
   self.key_accid={"b","","#"}
   self.key_octave={"D","","U"}

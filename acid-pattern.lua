@@ -176,7 +176,7 @@ function redraw()
   local sw=8
   for i=1,16 do
     screen.move(x+sw*(i-1),y)
-    screen.text_center(ap.step[i])
+    screen.text_center(ap.key_step[ap.step[i]])
     screen.move(x+sw*(i-1),y+sh*1)
     screen.text_center(ap.key_notes[ap.note[i]])
     screen.move(x+sw*(i-1),y+sh*2)
