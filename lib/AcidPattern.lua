@@ -1,4 +1,5 @@
 local AP={}
+local MusicUtil=require("musicutil")
 
 local PUNCUATION_NOTE=1
 local PUNCTUATION_REST=2
@@ -31,7 +32,10 @@ function AP:init()
     {name="saw/square",eng="wave",min=0.0,max=1,default=0.0,div=0.01},
     {name="detune",eng="detune",min=0.0,max=1,default=0.02,div=0.01,'notes'},
   }
-  params:add_group("303",#prams)
+  params:add_group("303",#prams+1)
+  params:add{type = "number", id = "root_note", name = "root note",
+    min = 0, max = 127, default = 36, formatter = function(param) return MusicUtil.note_num_to_name(param:get(), true) end}
+
   for _,p in ipairs(prams) do
     params:add_control(self.id..p.eng,p.name,controlspec.new(p.min,p.max,p.exp and 'exp' or 'lin',p.div,p.default,p.unit or "",p.div/(p.max-p.min)))
     params:set_action(self.id..p.eng,function(x)
@@ -60,7 +64,7 @@ function AP:init()
 
   -- https://acidpattern.bandcamp.com/album/july-acid-pattern-2014
   self.current=1
-  self.note_scale={36,38,40,41,43,45,47}
+  self.note_scale={0,2,4,5,7,9,11}
   self.key_step={"0","1","2","3","4","5","6","7","8","9","A","B","C","D","E","F"}
   self.key_notes={"C","D","E","F","G","A","B"}
   self.key_accid={"b","","#"}
@@ -139,7 +143,7 @@ function AP:process(beat)
   if self.punct[i]~=PUNCUATION_NOTE then
     do return end
   end
-  local note=self.note_scale[self.note[i]]+(self.accid[i]-2)+(self.octave[i]-2)*12+12
+  local note=params:get("root_note")+self.note_scale[self.note[i]]+(self.accid[i]-2)+(self.octave[i]-2)*12+12
   -- do something with the note
   local accent=self.accent[i]==2 and 1 or 0
   local slide=self.accent[i]==3 and 1 or 0

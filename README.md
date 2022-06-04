@@ -6,3 +6,5 @@
 - ~~clamps on all the variables in SuperCollider~~
 - duration working
 - stutter fx (gated etc)
+- ~~fix amen cleanup~~
+- add scale changes? root note changes?
