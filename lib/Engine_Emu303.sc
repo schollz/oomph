@@ -234,14 +234,14 @@ Engine_Emu303 : CroneEngine {
             snd=SelectX.ar(VarLag.kr(LFNoise0.kr(1/10),10,warp:\sine).range(0.1,0.7),[snd,snd*LFPar.ar(VarLag.kr(LFNoise0.kr(1/10),10,warp:\sine).range(1,6))]); 
             env=EnvGen.ar(Env.new([0.00001,1.0,sustain,0.00001],[attack,decay,release],curve:[\welch,\sine,\exp]),doneAction:2);
             snd=snd*env*amp*EnvGen.ar(Env.new([0,1],[0.1]));
-            5.do({ snd = AllpassN.ar(snd, 0.050, [Rand(0, 0.05), Rand(0, 0.05)], 1) });
             Out.ar(outDry,snd*(1-wet));
             Out.ar(outWet,snd*wet);
         }).add;
         SynthDef("defReverb",{
             arg in, out;
-            5.do({ in = AllpassN.ar(in, 0.050, [Rand(0, 0.05), Rand(0, 0.05)], 1) });
-            Out.ar(out,in);
+            var snd=In.ar(in,2);
+            5.do({ snd = AllpassN.ar(snd, 0.050, [Rand(0, 0.05), Rand(0, 0.05)], 1) });
+            Out.ar(out,snd);
         }).add;
 
         // <mods>
@@ -286,22 +286,22 @@ Engine_Emu303 : CroneEngine {
         busTape=Bus.audio(context.server,2);
         busReverb=Bus.audio(context.server,2);
         busAccent=Bus.control(context.server,1);
+        context.server.sync;
+        synTape=Synth.new("defTape",[\in,busTape]);
         context.server.sync;        
         // define always-on synths
-        synThreeOhThree=Synth("defThreeOhThree",[\busAccent,busAccent,\out,busTape]); // TODO: switch back to busTape
+        synThreeOhThree=Synth.before(synTape,"defThreeOhThree",[\busAccent,busAccent,\out,busTape]); // TODO: switch back to busTape
+        synReverb=Synth.before(synTape,"defReverb",[\in,busReverb,\out,busTape]); // TODO: switch back to busTape
         //TODO add back playerVinyl = Synth("defVinyl",[\bufnum,sampleVinyl,\amp,0],target:context.xg);
         synAmen = Array.fill(2,{arg i;
-            Synth("defAmen",[\out,busTape])
+            Synth.before(synTape,"defAmen",[\out,busTape])
         });
-        synReverb=Synth("defReverb",[\in,busReverb,\out,busTape]);
-        context.server.sync;
-        synTape=Synth.tail(context.server,"defTape",[\in,busTape]);
         context.server.sync;
 
         // <pad>
             // arg outDry, outWet, amp=0.5, wet=1.0, buf=0,note=53,attack=1,decay=1,sustain=0.5,release=2,notelpf=80;
         this.addCommand("pad", "ffffffff", { arg msg;
-            Synth.head(context.server,"defSine",[\outDry,busTape,\outWet,busReverb,\buf,bufCheby,
+            Synth.before(synReverb,"defSine",[\outDry,busTape,\outWet,busReverb,\buf,bufCheby,
                 \amp,msg[1],
                 \wet,msg[2],
                 \note,msg[3],
@@ -470,6 +470,8 @@ Engine_Emu303 : CroneEngine {
         busAccent.free;
         synTape.free;
         busTape.free;
+        synReverb.free;
+        busReverb.free;
     }
 
 }
