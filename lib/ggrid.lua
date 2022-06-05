@@ -74,7 +74,7 @@ function GGrid:get_visual()
   -- clear visual
   for row=1,8 do
     for col=1,self.grid_width do
-      self.visual[row][col]=self.visual[row][col]-1
+      self.visual[row][col]=self.visual[row][col]-4
       if self.visual[row][col]<0 then
         self.visual[row][col]=0
       end
@@ -91,11 +91,11 @@ function GGrid:get_visual()
   end
   self.visual[8][self.apm:current_step()]=10
 
-  -- illuminate currently pressed button
-  for k,_ in pairs(self.pressed_buttons) do
-    local row,col=k:match("(%d+),(%d+)")
-    self.visual[tonumber(row)][tonumber(col)]=15
-  end
+  -- -- illuminate currently pressed button
+  -- for k,_ in pairs(self.pressed_buttons) do
+  --   local row,col=k:match("(%d+),(%d+)")
+  --   self.visual[tonumber(row)][tonumber(col)]=15
+  -- end
 
   return self.visual
 end

@@ -1,9 +1,9 @@
 local AP={}
 local MusicUtil=require("musicutil")
 
-local PUNCUATION_NOTE=1
-local PUNCTUATION_REST=2
-local PUNCTUATION_TIE=3
+local PUNCTUATION_REST=1
+local PUNCTUATION_TIE=2
+local PUNCUATION_NOTE=3
 
 function AP:new(o)
   -- https://www.lua.org/pil/16.1.html
@@ -28,9 +28,9 @@ function AP:init()
   self.key_accent={"","O","F"}
   self.key_punctuation={"o","-","@"}
   -- do initialize here
-  self.note={1,1,3,1,1,1,2,1,1,3,1,1,6,7,1,1}
-  self.accid={2,2,2,2,2,2,2,3,1,2,2,2,2,2,2,2}
-  self.octave={2,1,2,2,2,2,1,2,2,2,2,1,2,2,1,2}
+  self.note={6,6,3,4,6,1,2,1,1,3,6,3,6,7,3,5}
+  self.accid={2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2}
+  self.octave={2,1,3,2,2,3,1,3,2,2,3,1,3,2,1,2}
   self.accent={2,2,1,3,1,2,2,1,3,1,2,2,1,3,1,2}
   self.duration={1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}
   self.punct={3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3}
@@ -127,8 +127,8 @@ function AP:process(beat)
   end
   local note=params:get("root_note")+self.note_scale[self.note[i]]+(self.accid[i]-2)+(self.octave[i]-2)*12+12
   -- do something with the note
-  local accent=self.accent[i]==2 and 1 or 0
-  local slide=self.accent[i]==3 and 1 or 0
+  local accent=self.accent[i]==3 and 1 or 0
+  local slide=self.accent[i]==2 and 1 or 0
   engine.threeohthree_trig(note,self.duration[i],slide,accent)
 end
 

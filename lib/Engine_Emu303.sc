@@ -154,8 +154,8 @@ Engine_Emu303 : CroneEngine {
         SynthDef("defThreeOhThree", {
             arg out, busAccent, 
             t_trig=1, note=33, latency=0.0,pwBus, detuneBus, waveBus, ampBus, subBus,
-            cutoffBus, gainBus, portamentoBus, slideBus,
-            durationBus, sustainBus, decayBus,
+            cutoffBus, gainBus, portamentoBus, slide,
+            duration, sustainBus, decayBus,
             res_adjustBus, res_accentBus,
             env_adjustBus,   env_accentBus, latencyBus;
             var env,waves,filterEnv,filter,snd,res,accentVal,noteVal;
@@ -167,8 +167,6 @@ Engine_Emu303 : CroneEngine {
             var sub=In.kr(subBus);
             var gain=In.kr(gainBus);
             var portamento=In.kr(portamentoBus);
-            var slide=In.kr(slideBus);
-            var duration=In.kr(durationBus);
             var sustain=In.kr(sustainBus);
             var decay=In.kr(decayBus);
             var res_adjust=In.kr(res_adjustBus);
@@ -177,7 +175,7 @@ Engine_Emu303 : CroneEngine {
             var env_accent=In.kr(env_accentBus);
             noteVal=Lag.kr(note,portamento*slide);
             accentVal=In.kr(busAccent);
-            res = res_adjust+(res_accent*accentVal);
+            res = Clip.kr(res_adjust+(res_accent*accentVal),0.001,0.99);
             env = EnvGen.ar(Env.new([10e-3,1,1,10e-9],[0.03,sustain*duration,decay],'exp'),t_trig)+(env_accent*accentVal);
             waves = [Saw.ar([noteVal-detune,noteVal+detune].midicps, mul: env), Pulse.ar([note-detune,note+detune].midicps, 0.5, mul: env)];
             filterEnv =  EnvGen.ar( Env.new([10e-9, 1, 10e-9], [0.01, decay],  'exp'), t_trig);
@@ -315,7 +313,7 @@ Engine_Emu303 : CroneEngine {
         // </pad>
 
         // <303>
-        [\amp,\pw,\detune,\wave,\sub,\cutoff,\gain,\duration,\sustain,\decay,\res_adjust,\res_accent,\env_adjust,\env_accent,\portamento].do({ arg fx;
+        [\amp,\pw,\detune,\wave,\sub,\cutoff,\gain,\sustain,\decay,\res_adjust,\res_accent,\env_adjust,\env_accent,\portamento].do({ arg fx;
             var domain="threeohthree";
             var key=domain++"_"++fx;
             fxbus.put(key,Bus.control(context.server,1));
