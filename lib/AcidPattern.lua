@@ -26,45 +26,43 @@ function AP:init()
   self.key_accid={"b","","#"}
   self.key_octave={"D","","U"}
   self.key_accent={"","O","F"}
-  self.key_punctuation={"@","o","-"}
+  self.key_punctuation={"o","-","@"}
   -- do initialize here
   self.note={1,1,3,1,1,1,2,1,1,3,1,1,6,7,1,1}
   self.accid={2,2,2,2,2,2,2,3,1,2,2,2,2,2,2,2}
   self.octave={2,1,2,2,2,2,1,2,2,2,2,1,2,2,1,2}
   self.accent={2,2,1,3,1,2,2,1,3,1,2,2,1,3,1,2}
   self.duration={1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}
-  self.punct={1,1,1,1,2,1,1,1,1,2,1,1,1,1,2,1}
-  self.punct={3,1,1,1,1,1,1,1,1,1,1,1,1,3,3,3}
+  self.punct={3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3}
   self.step={1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16}
 end
 
 function AP:save(filename)
   filename=filename.."_"..self.id..".json"
-	local to_save={"note","accid","octave","accent","duration","punct","step"}
-	local data={}
-	for _, key in ipairs(to_save) do 
-		data[key]=self[key]
-	end
-	local file=io.open(filename,"w+")
-	io.output(file)
-	io.write(json.encode(data))
-	io.close(file)
+  local to_save={"note","accid","octave","accent","duration","punct","step"}
+  local data={}
+  for _,key in ipairs(to_save) do
+    data[key]=self[key]
+  end
+  local file=io.open(filename,"w+")
+  io.output(file)
+  io.write(json.encode(data))
+  io.close(file)
 end
 
 function AP:open(filename)
   filename=filename.."_"..self.id..".json"
-  if not util.file_exists(filename) then 
-    do return end 
+  if not util.file_exists(filename) then
+    do return end
   end
-	local f=io.open(filename,"rb")
-	local content=f:read("*all")
-	f:close()
-	local data=json.decode(content)
-	for k,v in pairs(data) do 
-		self[k]=v
-	end
+  local f=io.open(filename,"rb")
+  local content=f:read("*all")
+  f:close()
+  local data=json.decode(content)
+  for k,v in pairs(data) do
+    self[k]=v
+  end
 end
-
 
 function AP:set(ind,pos,d)
   local setters={"note","accid","octave","accent","punct"}

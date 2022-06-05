@@ -1,13 +1,11 @@
 -- local pattern_time = require("pattern")
 local GGrid={}
 
-
-local ROW_NOTE=1
-local ROW_ACCID=2
+local ROW_STEP=1
+local ROW_NOTE=2
 local ROW_OCTAVE=3
 local ROW_ACCENT=4
 local ROW_PUNCT=5
-local ROW_STEP=7
 
 function GGrid:new(args)
   local m=setmetatable({},{__index=GGrid})
@@ -35,7 +33,6 @@ function GGrid:new(args)
     end
   end
 
-
   -- keep track of pressed buttons
   m.pressed_buttons={}
 
@@ -52,7 +49,6 @@ function GGrid:new(args)
   return m
 end
 
-
 function GGrid:grid_key(x,y,z)
   self:key_press(y,x,z==1)
   self:grid_redraw()
@@ -65,10 +61,14 @@ function GGrid:key_press(row,col,on)
     self.pressed_buttons[row..","..col]=nil
   end
   if on and row<6 then
+    if row==1 then
+      row=7
+    elseif row==ROW_NOTE then
+      row=1
+    end
     self.apm:set(row,col,1)
   end
 end
-
 
 function GGrid:get_visual()
   -- clear visual
@@ -85,10 +85,9 @@ function GGrid:get_visual()
   for i=1,16 do
     self.visual[ROW_STEP][i]=self.apm:get("step",i)-1
     self.visual[ROW_NOTE][i]=self.apm:get("note",i)*2
-    self.visual[ROW_ACCID][i]=self.apm:get("accid",i)*4
-    self.visual[ROW_OCTAVE][i]=self.apm:get("octave",i)*4
-    self.visual[ROW_ACCENT][i]=self.apm:get("accent",i)*4
-    self.visual[ROW_PUNCT][i]=self.apm:get("punct",i)*4
+    self.visual[ROW_OCTAVE][i]=(self.apm:get("octave",i)-1)*4
+    self.visual[ROW_ACCENT][i]=(self.apm:get("accent",i)-1)*4
+    self.visual[ROW_PUNCT][i]=(self.apm:get("punct",i)-1)*4
   end
   self.visual[8][self.apm:current_step()]=10
 
@@ -100,7 +99,6 @@ function GGrid:get_visual()
 
   return self.visual
 end
-
 
 function GGrid:grid_redraw()
   self.g:all(0)
