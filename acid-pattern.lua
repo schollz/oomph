@@ -55,8 +55,8 @@ function init()
     end)
   end
   params:add_group("TAPE FX MOD",#tape_prams*5)
-  local mod_ops_ids={"sine","xline","line"}
-  local mod_ops_nom={"sine","exp ramp","linear ramp"}
+  local mod_ops_ids={"sine","drunk","xline","line"}
+  local mod_ops_nom={"sine","drunk","exp ramp","linear ramp"}
   for _,p in ipairs(tape_prams) do
     params:add_option("tape"..p.eng.."modoption",p.name.." form",mod_ops_nom,1)
     params:add_control("tape"..p.eng.."modperiod",p.name.." period",controlspec.new(0.1,120,'exp',0.1,2,"s",0.1/119.9))

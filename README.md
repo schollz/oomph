@@ -13,5 +13,5 @@
 - ~~allow pattern to draw itself~~
 - ~~allow multiple patterns~~
 - add more chaotic lfos
-- add start and stop buttons
-- add start and stop transport
+- ~~add start and stop buttons~~
+- ~~add start and stop transport~~

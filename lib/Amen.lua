@@ -39,8 +39,8 @@ function Amen:init()
     end)
   end
   params:add_group("AMEN MOD",#prams*5)
-  local mod_ops_ids={"sine","xline","line"}
-  local mod_ops_nom={"sine","exp ramp","linear ramp"}
+  local mod_ops_ids={"sine","drunk","xline","line"}
+  local mod_ops_nom={"sine","drunk","exp ramp","linear ramp"}
   for _,p in ipairs(prams) do
     params:add_option("amen_"..p.eng.."modoption",p.name.." form",mod_ops_nom,1)
     params:add_control("amen_"..p.eng.."modperiod",p.name.." period",controlspec.new(0.1,120,'exp',0.1,2,"s",0.1/119.9))

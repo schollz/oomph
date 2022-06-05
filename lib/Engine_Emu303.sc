@@ -251,6 +251,11 @@ Engine_Emu303 : CroneEngine {
             Out.kr(out,Lag.kr(msg2,msg3));
         }).add;
 
+        SynthDef("defMod_drunk",{
+            arg out, msg1=0,msg2=1.0,msg3=1.0;
+            Out.kr(out,VarLag.kr(LFNoise0.kr(1/msg3),msg3,warp:\sine).range(msg1,msg2));
+        }).add;
+
         SynthDef("defMod_sine",{
             arg out, msg1=2,msg2=0.0,msg3=1.0;
             Out.kr(out,SinOsc.kr(freq:1/msg3).range(msg1,msg2));
