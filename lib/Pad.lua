@@ -39,10 +39,16 @@ function Pad:init()
       table.insert(self.available_chords,c..v)
     end
   end
-  local available_chords_default={6,4,3,1}
+  local available_chords_default={6,1,4,4,6,1,4,5}
   for chord_num=1,8 do
-    params:add_option("chord"..chord_num,"chord "..chord_num,self.available_chords,available_chords_default[(chord_num-1)%4+1])
+    params:add_option("chord"..chord_num,"chord "..chord_num,self.available_chords,available_chords_default[chord_num])
     params:add{type="number",id="beats"..chord_num,name="beats "..chord_num,min=0,max=16,default=8}
+    params:set_action("chord"..chord_num,function()
+      self:update_chords()
+    end)
+    params:set_action("beats"..chord_num,function()
+      self:update_chords()
+    end)
   end
 
   self:update_chords()
