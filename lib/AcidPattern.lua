@@ -65,6 +65,7 @@ function AP:open(filename)
 	end
 end
 
+
 function AP:set(ind,pos,d)
   local setters={"note","accid","octave","accent","punct"}
   local maxes={7,3,3,3,3}

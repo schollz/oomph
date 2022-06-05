@@ -62,7 +62,7 @@ function init()
     params:add_control("tape"..p.eng.."modperiod",p.name.." period",controlspec.new(0.1,120,'exp',0.1,2,"s",0.1/119.9))
     params:add_control("tape"..p.eng.."modmin",p.name.." min",controlspec.new(p.min,p.max,p.exp and 'exp' or 'lin',p.div,p.min,p.unit or "",p.div/(p.max-p.min)))
     params:add_control("tape"..p.eng.."modmax",p.name.." max",controlspec.new(p.min,p.max,p.exp and 'exp' or 'lin',p.div,p.max,p.unit or "",p.div/(p.max-p.min)))
-    params:binary("tape"..p.eng.."modtrig",p.name.." trig","toggle")
+    params:add_binary("tape"..p.eng.."modtrig",p.name.." trig","toggle")
     params:set_action("tape"..p.eng.."modtrig",function(x)
       if x==1 then 
         print(mod_ops_ids[params:get("tape"..p.eng.."modoption")],params:get("tape"..p.eng.."modmin"),
@@ -128,10 +128,11 @@ function init()
 
   -- setup midi transports
   local device={}
+  local device_list={}
   for i,dev in pairs(midi.devices) do
     if dev.port~=nil then
       local name=string.lower(dev.name).." "..i
-      table.insert(self.device_list,name)
+      table.insert(device_list,name)
       print("adding "..name.." to port "..dev.port)
       device[name]={
         name=name,
@@ -150,6 +151,7 @@ function init()
       end
     end
   end
+  ignore_transport=false
 
   -- load in the default parameters
   params:default()
@@ -157,14 +159,23 @@ function init()
 end
 
 function clock.transport.start()
+  if ignore_transport then
+    do return end 
+  end
   toggle_start(true)
 end
 
 function clock.transport.stop()
+  if ignore_transport then
+    do return end 
+  end
   toggle_start(false)
 end
 
 function clock.transport.reset()
+  if ignore_transport then
+    do return end 
+  end
   toggle_start(true)
 end
 
@@ -176,10 +187,17 @@ function toggle_start(start)
   if start==nil then 
     start=not playing
   end
+  ignore_transport=true 
+  clock.run(function()
+    clock.sleep(1)
+    ignore_transport=false
+  end)
   if start then 
-    lattice:hard_restart()
+    print("starting")
     beat_count=beat_num
+    lattice:hard_restart()
   else
+    print("stopping")
     lattice:stop()
   end
   amen:toggle_start(start)

@@ -23,6 +23,13 @@ Engine_Emu303 : CroneEngine {
     var amenparams;
     // </Amen>
 
+    // <pad>
+    var synPad;
+    var synReverb;
+    var bufCheby;
+    var busReverb;
+    // </pad>
+
 	alloc { 
         
         // <Amen>
@@ -216,25 +223,25 @@ Engine_Emu303 : CroneEngine {
         }).add;
 
 
-        // pads
-        // b = Buffer.alloc(s, 512, 1, { |buf| buf.chebyMsg([1,0,1,1,0,1])});
-        // (
-        // {
-        //     var snd;
-        //     snd={
-        //         var snd2;
-        //         snd2=Shaper.ar(b,SinOsc.ar([53.04,53+5.07,53+2-0.04,53-12].choose.midicps,0,SinOsc.kr(rrand(1/30,1/5)).range(0.1,1.5)));
-        //     }!3;
-        //     snd=snd/10;
-        //     snd=snd*EnvGen.ar(Env.new([0,1],[1]));
-        //     snd=Splay.ar(snd);
-        //     snd=RLPF.ar(snd,((53+12).midicps),0.707);
-        //     snd=SelectX.ar(VarLag.kr(LFNoise0.kr(1/10),10,warp:\sine).range(0.1,0.7),[snd,snd*LFPar.ar(VarLag.kr(LFNoise0.kr(1/10),10,warp:\sine).range(1,6))]);    
-            
-        //     5.do({ snd = AllpassN.ar(snd, 0.050, [Rand(0, 0.05), Rand(0, 0.05)], 1) });
-        //     Out.ar(0,snd)
-        // }.scope;
-        // )
+        // <pad>
+        bufCheby = Buffer.alloc(context.server, 512, 1, { |buf| buf.chebyMsg([1,0,1,1,0,1])});
+        SynthDef("defSine",{
+            arg outDry, outWet, amp=0.5, wet=1.0, buf=0,note=53,attack=1,decay=1,sustain=0.5,release=2,notelpf=80;
+            var snd,env;
+            snd=Shaper.ar(buf,SinOsc.ar(note.midicps,0,SinOsc.kr(rrand(1/30,1/5)).range(0.1,1.5)));
+            snd=Pan2.ar(snd,rrand(-0.25,0.25));
+            snd=RLPF.ar(snd,notelpf.midicps,0.707);
+            snd=SelectX.ar(VarLag.kr(LFNoise0.kr(1/10),10,warp:\sine).range(0.1,0.7),[snd,snd*LFPar.ar(VarLag.kr(LFNoise0.kr(1/10),10,warp:\sine).range(1,6))]); 
+            env=EnvGen.ar(Env.new([0.00001,1.0,sustain,0.00001],[attack,decay,release],curve:[\welch,\sine,\exp]),doneAction:2);
+            snd=snd*env*amp;
+            Out.ar(outDry,snd*(1-wet));
+            Out.ar(outWet,snd*wet);
+        }).add;
+        SynthDef("defReverb",{
+            arg in, out;
+            5.do({ in = AllpassN.ar(in, 0.050, [Rand(0, 0.05), Rand(0, 0.05)], 1) });
+            Out.ar(out,in);
+        }).add;
 
         // <mods>
         // msg1 = start value
@@ -276,6 +283,7 @@ Engine_Emu303 : CroneEngine {
 
         context.server.sync;
         busTape=Bus.audio(context.server,2);
+        busReverb=Bus.audio(context.server,2);
         busAccent=Bus.control(context.server,1);
         context.server.sync;        
         // define always-on synths
@@ -284,8 +292,26 @@ Engine_Emu303 : CroneEngine {
         synAmen = Array.fill(2,{arg i;
             Synth("defAmen",[\out,busTape])
         });
+        synReverb=Synth.tail(context.server,"defReverb",[\in,busReverb,\out,busTape]);
+        context.server.sync;
         synTape=Synth.tail(context.server,"defTape",[\in,busTape]);
         context.server.sync;
+
+        // <pad>
+            // arg outDry, outWet, amp=0.5, wet=1.0, buf=0,note=53,attack=1,decay=1,sustain=0.5,release=2,notelpf=80;
+        this.addCommand("pad", "ffffffff", { arg msg;
+            Synth.new("defSine",[\outDry,busTape,\outWet,busReverb,\buf,bufCheby,
+                \amp,msg[1],
+                \wet,msg[2],
+                \note,msg[3],
+                \attack,msg[4],
+                \decay,msg[5],
+                \sustain,msg[6],
+                \release,msg[7],
+                \notelpf,msg[8],
+            ]);
+        });
+        // </pad>
 
         // <303>
         [\amp,\pw,\detune,\wave,\sub,\cutoff,\gain,\duration,\sustain,\decay,\res_adjust,\res_accent,\env_adjust,\env_accent,\portamento].do({ arg fx;

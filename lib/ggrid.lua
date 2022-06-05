@@ -13,7 +13,7 @@ function GGrid:new(args)
   local m=setmetatable({},{__index=GGrid})
   local args=args==nil and {} or args
 
-  m.ap=args.ap or {}
+  m.apm=args.apm or {}
   m.grid_on=args.grid_on==nil and true or args.grid_on
 
   -- initiate the grid
@@ -83,7 +83,6 @@ function GGrid:get_visual()
 
   -- draw steps
   for i=1,16 do
-    -- TODO: implement these gets
     self.visual[ROW_STEP][i]=self.apm:get("step",i)-1
     self.visual[ROW_NOTE][i]=self.apm:get("note",i)*2
     self.visual[ROW_ACCID][i]=self.apm:get("accid",i)*4
@@ -91,7 +90,7 @@ function GGrid:get_visual()
     self.visual[ROW_ACCENT][i]=self.apm:get("accent",i)*4
     self.visual[ROW_PUNCT][i]=self.apm:get("punct",i)*4
   end
-  self.visual[8][self.ap:get("current")]=10
+  self.visual[8][self.apm:current_step()]=10
 
   -- illuminate currently pressed button
   for k,_ in pairs(self.pressed_buttons) do

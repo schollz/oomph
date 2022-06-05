@@ -80,6 +80,13 @@ function APM:set(ind,pos,d)
   self.ap[self.current]:set(ind,pos,d)
 end
 
+function APM:get(ind,i)
+  return self.ap[self.current][ind][i]
+end
+
+function APM:current_step()
+  return self.ap[self.current].current 
+end
 
 function APM:process(beat)
   -- TODO: allow chaining?
@@ -88,7 +95,6 @@ end
 
 function APM:redraw(x,y,sh,sw)
   self.ap[self.current]:redraw(x,y,sh,sw)
-  -- TODO draw a thing showing which pattern we are on
   screen.move(10+10*self.current,60)
   screen.text_center(".")
 end
