@@ -20,6 +20,9 @@ end
 json=require("cjson")
 local shift=false
 local pos={1,3}
+local playing=false
+local beat_num=16
+local beat_count=beat_num
 
 function init()
   -- setup audio folders
@@ -95,8 +98,6 @@ function init()
   timer:start()
 
   -- setup the lattice clock
-  local beat_num=16
-  local beat_count=beat_num
   lattice=lattice_:new()
   lattice:new_pattern{
     action=function(t)
@@ -128,14 +129,36 @@ function init()
   -- load in the default parameters
   params:default()
   params:bang()
+end
 
+function clock.transport.start()
+  toggle_start(true)
+end
 
-  -- start the lattice
-  lattice:start()
+function clock.transport.stop()
+  toggle_start(false)
+end
+
+function clock.transport.reset()
+  toggle_start(true)
 end
 
 function update_screen()
   redraw()
+end
+
+function toggle_start(start)
+  if start==nil then 
+    start=not playing
+  end
+  if start then 
+    lattice:hard_restart()
+    beat_count=beat_num
+  else
+    lattice:stop()
+  end
+  amen:toggle_start(start)
+  playing=start
 end
 
 function key(k,z)
@@ -145,7 +168,8 @@ function key(k,z)
   if shift then
     if k==1 then
     elseif k==2 then
-    else
+    elseif k==3 and z==1 then 
+      toggle_start()
     end
   else
     if k==1 then
@@ -164,6 +188,7 @@ function enc(k,d)
     end
   else
     if k==1 then
+      apm:change_pattern(d)
     elseif k>1 then
       local k_=k==2 and 2 or 1
       pos[k_]=pos[k_]+(k==2 and d or-d)

@@ -61,36 +61,6 @@ function Amen:init()
   self.tempo_known=0
 end
 
-function Amen:stutter_build()
-  if self.fname==nil then
-    do return end
-  end
-  local divs={8,12,14,16,24}
-  local gains={0.808,0.909}
-  local bends={-100,0,0,0,0,100,200}
-
-  for i=1,16 do
-    local fname2=string.format("/home/we/dust/audio/acid-pattern/stutter_%s_%d.wav",self.filename,i)
-    samples=nil
-    repeat
-      _,samples,_=audio.file_info(fname2)
-      sox.stutter({
-        fname=self.fname,
-        fname2=fname2,
-        bpm=self.bpm,
-        start=self.duration*math.random(2,30)/32,
-        beat=1/divs[math.random(#divs)],
-        div=1/16,
-        repeats=math.random(9,18),
-        gain=gains[math.random(#gains)],
-        bend=bends[math.random(#bends)],
-        no_reverse=false,
-      })
-      print(samples)
-    until(samples~=nil and samples>10)
-  end
-end
-
 function Amen:load(fname)
   self.fname=fname
   pathname,filename,ext=string.match(self.fname,"(.-)([^\\/]-%.?([^%.\\/]*))$")
@@ -127,12 +97,25 @@ function Amen:load(fname)
   self.beats_eigth_notes=self.beats_total*4
   self.beats_reset=true
   self.beat=self.beats_eigth_notes
-
+  self.playing=false
   -- engine.amenload("/home/we/dust/code/acid-pattern/lib/amenbreak_bpm136.wav",136)
   engine.amen_load(fname,self.bpm)
   engine.amen_bpm_target(clock.get_tempo())
-  engine.amen_amp("dc",0,params:get("amen_amp"),0)
-  engine.amen_jump(0.0,0.0,1.0)
+  engine.amen_amp("dc",0,0,0)
+end
+
+function Amen:toggle_start(start)
+  if start==nil then 
+    start=not self.playing
+  end
+  self.playing=start 
+  if self.playing then 
+    engine.amen_bpm_target(clock.get_tempo())
+    engine.amen_jump(0.0,0.0,1.0)
+    engine.amen_amp("dc",0,params:get("amen_amp"),0)
+  else 
+    engine.amen_amp("dc",0,0,0)
+  end
 end
 
 function Amen:stutter()
