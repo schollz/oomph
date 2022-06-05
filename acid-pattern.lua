@@ -126,6 +126,31 @@ function init()
 	  apm:open(filename)
   end
 
+  -- setup midi transports
+  local device={}
+  for i,dev in pairs(midi.devices) do
+    if dev.port~=nil then
+      local name=string.lower(dev.name).." "..i
+      table.insert(self.device_list,name)
+      print("adding "..name.." to port "..dev.port)
+      device[name]={
+        name=name,
+        port=dev.port,
+        midi=midi.connect(dev.port),
+      }
+      device[name].midi.event=function(data)
+        local msg=midi.to_msg(data)
+        if msg.type=="clock" then do return end end
+        -- OP-1 fix for transport
+        if msg.type=='start' or msg.type=='continue' then
+          toggle_start(true)
+        elseif msg.type=="stop" then
+          toggle_start(false)
+        end
+      end
+    end
+  end
+
   -- load in the default parameters
   params:default()
   params:bang()
