@@ -48,6 +48,7 @@ function init()
     params:add_control("tape"..p.eng,p.name,controlspec.new(p.min,p.max,p.exp and 'exp' or 'lin',p.div,p.default,p.unit or "",p.div/(p.max-p.min)))
     params:set_action("tape"..p.eng,function(x)
       engine["tape_"..p.eng]("lag",0,x,0)
+      params:set("tape"..p.eng.."modtrig",0)
     end)
   end
   params:add_group("TAPE FX MOD",#tape_prams*5)
@@ -58,14 +59,16 @@ function init()
     params:add_control("tape"..p.eng.."modperiod",p.name.." period",controlspec.new(0.1,120,'exp',0.1,2,"s",0.1/119.9))
     params:add_control("tape"..p.eng.."modmin",p.name.." min",controlspec.new(p.min,p.max,p.exp and 'exp' or 'lin',p.div,p.min,p.unit or "",p.div/(p.max-p.min)))
     params:add_control("tape"..p.eng.."modmax",p.name.." max",controlspec.new(p.min,p.max,p.exp and 'exp' or 'lin',p.div,p.max,p.unit or "",p.div/(p.max-p.min)))
-    params:add_trigger("tape"..p.eng.."modtrig",p.name.." trig")
+    params:binary("tape"..p.eng.."modtrig",p.name.." trig","toggle")
     params:set_action("tape"..p.eng.."modtrig",function(x)
-      print(mod_ops_ids[params:get("tape"..p.eng.."modoption")],params:get("tape"..p.eng.."modmin"),
-        params:get("tape"..p.eng.."modmax"),
-      params:get("tape"..p.eng.."modperiod"))
-      engine["tape_"..p.eng](mod_ops_ids[params:get("tape"..p.eng.."modoption")],params:get("tape"..p.eng.."modmin"),
-        params:get("tape"..p.eng.."modmax"),
-      params:get("tape"..p.eng.."modperiod"))
+      if x==1 then 
+        print(mod_ops_ids[params:get("tape"..p.eng.."modoption")],params:get("tape"..p.eng.."modmin"),
+          params:get("tape"..p.eng.."modmax"),
+        params:get("tape"..p.eng.."modperiod"))
+        engine["tape_"..p.eng](mod_ops_ids[params:get("tape"..p.eng.."modoption")],params:get("tape"..p.eng.."modmin"),
+          params:get("tape"..p.eng.."modmax"),
+        params:get("tape"..p.eng.."modperiod"))
+      end
     end)
   end
 
