@@ -39,10 +39,10 @@ function Pad:init()
       table.insert(self.available_chords,c..v)
     end
   end
-  local available_chords_default={6,4,1,5}
+  local available_chords_default={6,4,3,1}
   for chord_num=1,8 do
-      params:add_option("chord"..chord_num,"chord "..chord_num,self.available_chords,available_chords_default[(chord_num-1)%4+1])
-      params:add{type="number",id="beats"..chord_num,name="beats "..chord_num,min=0,max=16,default=4}
+    params:add_option("chord"..chord_num,"chord "..chord_num,self.available_chords,available_chords_default[(chord_num-1)%4+1])
+    params:add{type="number",id="beats"..chord_num,name="beats "..chord_num,min=0,max=16,default=8}
   end
 
   self:update_chords()
@@ -50,32 +50,32 @@ end
 
 function Pad:update_chords()
   self.chords={}
-  for i=1,params:get("number_of_chords") do 
+  for i=1,params:get("number_of_chords") do
     table.insert(self.chords,{chord=self.available_chords[params:get("chord"..i)],beats=params:get("beats"..i)})
-    for j=1,params:get("beats"..i)-1 do 
+    for j=1,params:get("beats"..i)-1 do
       table.insert(self.chords,{})
     end
   end
 end
 
 function Pad:process(beat)
-  if (beat-1)%4~=0 then 
-    do return end 
+  if (beat-1)%4~=0 then
+    do return end
   end
   local qn=(beat-1)/4+1
   local chord_note=(qn-1)%#self.chords+1
-  if next(self.chords[chord_note])==nil then 
-    do return end 
+  if next(self.chords[chord_note])==nil then
+    do return end
   end
   local chord=self.chords[chord_note]
   print(chord.chord,chord.beats)
   local notes=MusicUtil.generate_chord_roman(params:get("pad_root_note"),params:get("pad_scale"),chord.chord)
   local duration=chord.beats*clock.get_beat_sec()
-  for _, note in ipairs(notes) do 
+  for _,note in ipairs(notes) do
     engine.pad(
-      params:get("pad_volume")/3,
+      params:get("pad_volume")/10,
       params:get("pad_reverb"),
-      note, 
+      note,
       duration*params:get("pad_attack")/100,
       duration*params:get("pad_decay")/100,
       params:get("pad_attack")/100,

@@ -51,6 +51,7 @@ function init()
   for _,p in ipairs(tape_prams) do
     params:add_control("tape"..p.eng,p.name,controlspec.new(p.min,p.max,p.exp and 'exp' or 'lin',p.div,p.default,p.unit or "",p.div/(p.max-p.min)))
     params:set_action("tape"..p.eng,function(x)
+      print(p.eng,x)
       engine["tape_"..p.eng]("lag",0,x,0)
       params:set("tape"..p.eng.."modtrig",0)
     end)
@@ -65,7 +66,8 @@ function init()
     params:add_control("tape"..p.eng.."modmax",p.name.." max",controlspec.new(p.min,p.max,p.exp and 'exp' or 'lin',p.div,p.max,p.unit or "",p.div/(p.max-p.min)))
     params:add_binary("tape"..p.eng.."modtrig",p.name.." trig","toggle")
     params:set_action("tape"..p.eng.."modtrig",function(x)
-      if x==1 then 
+      print(p.eng,x)
+      if x==1 then
         print(mod_ops_ids[params:get("tape"..p.eng.."modoption")],params:get("tape"..p.eng.."modmin"),
           params:get("tape"..p.eng.."modmax"),
         params:get("tape"..p.eng.."modperiod"))
@@ -75,7 +77,6 @@ function init()
       end
     end)
   end
-
 
   -- setup global parameters
   params:add_control("drumlatency","drum latency",controlspec.new(-1,1,'lin',0.01,0,"beats",0.01/2))
@@ -115,14 +116,13 @@ function init()
   amen:load("/home/we/dust/code/acid-pattern/lib/beats16_bpm150_Ultimate_Jack_Loops_014__BPM_150_.wav")
   -- amen:stutter_build()
 
-
   params.action_write=function(filename,name)
-	  print("write",filename,name)
-	  apm:save(filename)
+    print("write",filename,name)
+    apm:save(filename)
   end
   params.action_read=function(filename,silent)
-	  print("read",filename,silent)
-	  apm:open(filename)
+    print("read",filename,silent)
+    apm:open(filename)
   end
 
   -- setup midi transports
@@ -141,7 +141,7 @@ function init()
       device[name].midi.event=function(data)
         local msg=midi.to_msg(data)
         if msg.type=="clock" then do return end end
-        -- OP-1 fix for transport
+-- OP-1 fix for transport
         if msg.type=='start' or msg.type=='continue' then
           toggle_start(true)
         elseif msg.type=="stop" then
@@ -161,21 +161,21 @@ end
 
 function clock.transport.start()
   if ignore_transport then
-    do return end 
+    do return end
   end
   toggle_start(true)
 end
 
 function clock.transport.stop()
   if ignore_transport then
-    do return end 
+    do return end
   end
   toggle_start(false)
 end
 
 function clock.transport.reset()
   if ignore_transport then
-    do return end 
+    do return end
   end
   toggle_start(true)
 end
@@ -185,15 +185,15 @@ function update_screen()
 end
 
 function toggle_start(start)
-  if start==nil then 
+  if start==nil then
     start=not playing
   end
-  ignore_transport=true 
+  ignore_transport=true
   clock.run(function()
     clock.sleep(1)
     ignore_transport=false
   end)
-  if start then 
+  if start then
     print("starting")
     beat_num=-1
     lattice:hard_restart()
@@ -212,7 +212,7 @@ function key(k,z)
   if shift then
     if k==1 then
     elseif k==2 then
-    elseif k==3 and z==1 then 
+    elseif k==3 and z==1 then
       toggle_start()
     end
   else
