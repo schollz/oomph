@@ -8,8 +8,8 @@
 - ~~fix amen cleanup~~
 - ~~add scale changes? root note changes?~~
 - ~~recover sequence on save~~
-- use toggles instead of triggers for lfos
-- stutter fx (gated etc)
+- use toggles instead of triggers for lfos: TODO test
+- stutter fx (gated etc): TODO test
 - ~~allow pattern to draw itself~~
 - ~~allow multiple patterns~~
 - add more chaotic lfos

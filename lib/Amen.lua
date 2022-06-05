@@ -127,6 +127,20 @@ function Amen:stutter()
 
 end
 
+function Amen:stutter1()
+  local stutters=math.random(4,8)
+  local total_time=stutters*clock.get_beat_sec()/4
+  -- TODO: try other linear ramps??
+  engine.amen_amp("line",params:get("amen_amp")/10,params:get("amen_amp"),total_time)
+  local s=math.random(0,31)/32
+  local e=s+(clock.get_beat_sec()/4)/self.duratoin 
+  engine.amen_jump(s,s,e)
+  clock.run(function()
+    clock.sleep(total_time)
+    engine.amen_jump(s,0.0,1.0)
+  end)
+end
+
 function Amen:process(beat)
   -- modify the known tempo if it changes
   if clock.get_tempo()~=self.tempo_known then
