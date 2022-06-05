@@ -14,6 +14,7 @@ local lattice_=require("lattice")
 local apm_=include("lib/AcidPatternManager")
 local amen_=include("lib/Amen")
 local ggrid_=include("lib/ggrid")
+local pad_=include("lib/Pad")
 if not string.find(package.cpath,"/home/we/dust/code/acid-pattern/lib/") then
   package.cpath=package.cpath..";/home/we/dust/code/acid-pattern/lib/?.so"
 end
@@ -21,8 +22,7 @@ json=require("cjson")
 local shift=false
 local pos={1,3}
 local playing=false
-local beat_num=16
-local beat_count=beat_num
+local beat_num=-1
 
 function init()
   -- setup audio folders
@@ -30,6 +30,7 @@ function init()
 
   apm=apm_:new()
   amen=amen_:new()
+  pad=pad_:new()
   ggrid=ggrid_:new{apm=apm}
 
   -- setup tape fx
@@ -99,15 +100,13 @@ function init()
 
   -- setup the lattice clock
   lattice=lattice_:new()
+  beat_num=-1
   lattice:new_pattern{
     action=function(t)
-      beat_count=beat_count+1
-      if beat_count>beat_num then
-        beat_count=1
-      end
-      -- process
-      amen:process(beat_count)
-      apm:process(beat_count)
+      beat_num=beat_num+1 -- beat % 16 + 1 => [1,16]
+      amen:process(beat_num)
+      apm:process(beat_num)
+      pad:process(beat_num)
     end,
     division=1/16,
   }
@@ -156,6 +155,8 @@ function init()
   -- load in the default parameters
   params:default()
   params:bang()
+
+  toggle_start(true)
 end
 
 function clock.transport.start()
@@ -194,7 +195,7 @@ function toggle_start(start)
   end)
   if start then 
     print("starting")
-    beat_count=beat_num
+    beat_num=-1
     lattice:hard_restart()
   else
     print("stopping")

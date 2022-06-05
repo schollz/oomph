@@ -1,5 +1,6 @@
 local APM={}
 local ap_=include("lib/AcidPattern")
+local MusicUtil=require("musicutil")
 
 function APM:new(o)
   -- https://www.lua.org/pil/16.1.html

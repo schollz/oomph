@@ -122,7 +122,7 @@ function AP:rotate_step(step,d)
 end
 
 function AP:process(beat)
-  self.current=self.step[beat]
+  self.current=self.step[beat%16+1]
   local i=self.current
   if self.punct[i]~=PUNCUATION_NOTE then
     do return end

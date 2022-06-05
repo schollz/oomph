@@ -128,12 +128,12 @@ function Amen:stutter()
 end
 
 function Amen:stutter1()
-  local stutters=math.random(4,8)
+  local stutters=math.random(4,16)
   local total_time=stutters*clock.get_beat_sec()/4
   -- TODO: try other linear ramps??
-  engine.amen_amp("line",params:get("amen_amp")/10,params:get("amen_amp"),total_time)
+  engine.amen_amp("line",0,params:get("amen_amp"),total_time)
   local s=math.random(0,31)/32
-  local e=s+(clock.get_beat_sec()/4)/self.duratoin 
+  local e=s+(clock.get_beat_sec()/4)/self.duration 
   engine.amen_jump(s,s,e)
   clock.run(function()
     clock.sleep(total_time)
@@ -142,22 +142,12 @@ function Amen:stutter1()
 end
 
 function Amen:process(beat)
+  self.beat=beat%self.beats_eigth_notes+1
+
   -- modify the known tempo if it changes
   if clock.get_tempo()~=self.tempo_known then
     self.tempo_known=clock.get_tempo()
     engine.amen_bpm_target(self.tempo_known)
-  end
-
-  -- if incoming beat is anew and beats reset, then reset the internal beat
-  if beat==1 and self.beats_reset==true then
-    self.beats_reset=false
-    self.beat=self.beats_eigth_notes
-  end
-
-  -- iterate the internal beat
-  self.beat=self.beat+1
-  if self.beat>self.beats_eigth_notes then
-    self.beat=1
   end
 
   -- if the internal beat hits 1, reset the drums
