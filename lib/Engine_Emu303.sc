@@ -216,6 +216,26 @@ Engine_Emu303 : CroneEngine {
         }).add;
 
 
+        // pads
+        // b = Buffer.alloc(s, 512, 1, { |buf| buf.chebyMsg([1,0,1,1,0,1])});
+        // (
+        // {
+        //     var snd;
+        //     snd={
+        //         var snd2;
+        //         snd2=Shaper.ar(b,SinOsc.ar([53.04,53+5.07,53+2-0.04,53-12].choose.midicps,0,SinOsc.kr(rrand(1/30,1/5)).range(0.1,1.5)));
+        //     }!3;
+        //     snd=snd/10;
+        //     snd=snd*EnvGen.ar(Env.new([0,1],[1]));
+        //     snd=Splay.ar(snd);
+        //     snd=RLPF.ar(snd,((53+12).midicps),0.707);
+        //     snd=SelectX.ar(VarLag.kr(LFNoise0.kr(1/10),10,warp:\sine).range(0.1,0.7),[snd,snd*LFPar.ar(VarLag.kr(LFNoise0.kr(1/10),10,warp:\sine).range(1,6))]);    
+            
+        //     5.do({ snd = AllpassN.ar(snd, 0.050, [Rand(0, 0.05), Rand(0, 0.05)], 1) });
+        //     Out.ar(0,snd)
+        // }.scope;
+        // )
+
         // <mods>
         // msg1 = start value
         // msg2 = final value 
