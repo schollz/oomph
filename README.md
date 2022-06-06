@@ -1,5 +1,33 @@
 # acid-pattern
 
+## install
+
+install mx.samples2
+```
+;install https://github.com/schollz/mx.samples2
+```
+
+get the nessecary patch
+
+```
+os.execute("mkdir -p ~/dust/audio/mx.samples/ultra_synth")
+os.execute("wget https://github.com/schollz/mx.samples/releases/download/samples/ultra_synth.zip -P /tmp/")
+os.execute("unzip /tmp/ultra_synth.zip -d ~/dust/audio/mx.samples/ultra_synth/")
+```
+
+install tapedeck
+
+```
+os.execute("cd /tmp && wget https://github.com/schollz/tapedeck/releases/download/PortedPlugins/PortedPlugins.tar.gz && tar -xvzf PortedPlugins.tar.gz && rm PortedPlugins.tar.gz && sudo rsync -avrP PortedPlugins /home/we/.local/share/SuperCollider/Extensions/")
+```
+
+install acid-pattern
+
+```
+;install https://github.com/schollz/acid-pattern
+```
+
+
 ## todos
 
 - ~~lfos for each parameter (depth and period)~~
