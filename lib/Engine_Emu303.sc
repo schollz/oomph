@@ -28,6 +28,7 @@ Engine_Emu303 : CroneEngine {
     var synReverb;
     var bufCheby;
     var busReverb;
+    var mxsamples;
     // </pad>
 
 	alloc { 
@@ -296,20 +297,26 @@ Engine_Emu303 : CroneEngine {
             Synth.before(synTape,"defAmen",[\out,busTape])
         });
         context.server.sync;
+        mxsamples=MxSamples(context.server,400,busTape);
+        context.server.sync;
 
         // <pad>
-            // arg outDry, outWet, amp=0.5, wet=1.0, buf=0,note=53,attack=1,decay=1,sustain=0.5,release=2,notelpf=80;
-        this.addCommand("pad", "ffffffff", { arg msg;
-            Synth.before(synReverb,"defPad",[\outDry,busTape,\outWet,busReverb,\buf,bufCheby,
-                \amp,msg[1],
-                \wet,msg[2],
-                \note,msg[3],
-                \attack,msg[4],
-                \decay,msg[5],
-                \sustain,msg[6],
-                \release,msg[7],
-                \notelpf,msg[8],
-            ]);
+        [\amp,\pan,\attack,\decay,\sustain,\release,\delaysend,\reverbsend,\lpf].do({ arg fx;
+            var domain="pad";
+            var key=domain++"_"++fx;
+            this.addCommand(key, "sf", { arg msg;
+                mxsamples.setParam(msg[1].asString,fx.asString,msg[2]);
+            });
+        });
+
+        this.addCommand("pad_note", "sfff", { arg msg;
+            mxsamples.noteOn(msg[1].asString,msg[2],msg[3]);
+            Routine{
+                msg[4].asFloat.wait;
+                "note off".postln;
+                mxsamples.noteOff(msg[1].asString,msg[2]);
+            }.play;
+
         });
         // </pad>
 
@@ -471,6 +478,7 @@ Engine_Emu303 : CroneEngine {
         busTape.free;
         synReverb.free;
         busReverb.free;
+        mxsamples.free;
     }
 
 }

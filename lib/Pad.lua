@@ -13,17 +13,20 @@ end
 
 function Pad:init()
   local prams={
-    {name="volume",min=0,max=4,default=0.5,div=0.01,unit="amp"},
-    {name="reverb",min=0,max=1,default=0.0,div=0.01,unit="wet/dry"},
-    {name="attack",min=0,max=200,default=10,div=1,unit="%"},
-    {name="decay",min=0,max=200,default=60,div=1,unit="%"},
-    {name="sustain",min=0,max=200,default=90,div=1,unit="%"},
-    {name="release",min=0,max=200,default=30,div=1,unit="%"},
-    {name="lpf mult",min=0,max=4,default=1,div=0.1,unit="x"},
+    {name="volume",eng="amp",min=0,max=4,default=0.5,div=0.01,unit="amp"},
+    {name="attack",eng="attack",min=0,max=10,default=clock.get_beat_sec()/2,div=0.1,unit="s"},
+    {name="decay",eng="decay",min=0,max=10,default=clock.get_beat_sec(),div=0.1,unit="s"},
+    {name="sustain",eng="sustain",min=0,max=2,default=1,div=0.1,unit="amp"},
+    {name="release",eng="release",min=0,max=10,default=clock.get_beat_sec()*2,div=0.1,unit="s"},
+    {name="pan",eng="pan",min=-1,max=1,default=0,div=0.01},
+    {name="lpf",eng="lpf",min=50,max=20000,default=20000,div=100,exp=true,unit='Hz'},
   }
   params:add_group("PAD",#prams+19)
   for _,p in ipairs(prams) do
-    params:add_control("pad_"..p.name,p.name,controlspec.new(p.min,p.max,p.exp and 'exp' or 'lin',p.div,p.default,p.unit or "",p.div/(p.max-p.min)))
+    params:add_control("pad_"..p.eng,p.name,controlspec.new(p.min,p.max,p.exp and 'exp' or 'lin',p.div,p.default,p.unit or "",p.div/(p.max-p.min)))
+    params:set_action("pad_"..p.eng,function(x)
+      engine["pad_"..p.eng]("/home/we/dust/audio/mx.samples/ultra_synth/",x)
+    end)
   end
 
   params:add{type="number",id="number_of_chords",name="num chords",min=1,max=8,default=4}
@@ -77,7 +80,7 @@ function Pad:process(beat)
   local chord=self.chords[chord_note]
   print(chord.chord,chord.beats)
   local notes=MusicUtil.generate_chord_roman(params:get("pad_root_note"),params:get("pad_scale"),chord.chord)
-  local duration=chord.beats*clock.get_beat_sec()
+  local duration=(chord.beats-2)*clock.get_beat_sec()
   local highestnote=0
   for _,note in ipairs(notes) do
     if note>highestnote then
@@ -86,16 +89,17 @@ function Pad:process(beat)
   end
 
   for _,note in ipairs(notes) do
-    engine.pad(
-      params:get("pad_volume")/5,
-      params:get("pad_reverb"),
-      note,
-      duration*params:get("pad_attack")/100,
-      duration*params:get("pad_decay")/100,
-      params:get("pad_attack")/100,
-      duration*params:get("pad_release")/100,
-      highestnote+12*params:get("pad_lpf mult") -- TODO change this to the top note
-    )
+    engine.pad_note("/home/we/dust/audio/mx.samples/ultra_synth/",note,math.random(80,110),duration)
+    -- engine.pad(
+    --   params:get("pad_volume")/5,
+    --   params:get("pad_reverb"),
+    --   note,
+    --   duration*params:get("pad_attack")/100,
+    --   duration*params:get("pad_decay")/100,
+    --   params:get("pad_attack")/100,
+    --   duration*params:get("pad_release")/100,
+    --   highestnote+12*params:get("pad_lpf mult") -- TODO change this to the top note
+    -- )
   end
 end
 
