@@ -25,6 +25,7 @@ function Pad:init()
   for _,p in ipairs(prams) do
     params:add_control("pad_"..p.eng,p.name,controlspec.new(p.min,p.max,p.exp and 'exp' or 'lin',p.div,p.default,p.unit or "",p.div/(p.max-p.min)))
     params:set_action("pad_"..p.eng,function(x)
+	    -- TODO: make the ultra_synth a parameter
       engine["pad_"..p.eng]("/home/we/dust/audio/mx.samples/ultra_synth/",x)
     end)
   end

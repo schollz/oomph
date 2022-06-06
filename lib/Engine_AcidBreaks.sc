@@ -38,7 +38,7 @@ Engine_AcidBreaks : CroneEngine {
         fxbus=Dictionary.new();
         fxsyn=Dictionary.new();
         sampleBuffAmen = Buffer.new(context.server);
-        sampleVinyl = Buffer.read(context.server, "/home/we/dust/code/acid-pattern/lib/vinyl2.wav"); 
+        sampleVinyl = Buffer.read(context.server, "/home/we/dust/code/acid-breaks/lib/vinyl2.wav"); 
         playerSwap = 0;
         valDecayFactor=1.0;
 

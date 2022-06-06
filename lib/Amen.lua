@@ -1,6 +1,6 @@
 local Amen={}
 
-local sox=include("acid-pattern/lib/sox")
+local sox=include("acid-breaks/lib/sox")
 
 function Amen:new(o)
   -- https://www.lua.org/pil/16.1.html
@@ -33,9 +33,9 @@ function Amen:init()
   }
   local fxs={"stutter1","jump1","reverse1"}
   params:add_group("AMEN",#prams+#fxs+1)
-  os.execute("mkdir -p ".._path.audio.."acid-pattern/")
-  os.execute("cp ".._path.code.."acid-pattern/lib/*.wav ".._path.audio.."acid-pattern/")
-  params:add_file("amen_file","load file",_path.audio.."acid-pattern/amenbreak_bpm136.wav")
+  os.execute("mkdir -p ".._path.audio.."acid-breaks/")
+  os.execute("cp ".._path.code.."acid-breaks/lib/*.wav ".._path.audio.."acid-breaks/")
+  params:add_file("amen_file","load file",_path.audio.."acid-breaks/amenbreak_bpm136.wav")
   params:set_action("amen_file",function(x)
     self:load(x)
   end)

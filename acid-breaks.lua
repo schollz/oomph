@@ -15,8 +15,8 @@ local apm_=include("lib/AcidPatternManager")
 local amen_=include("lib/Amen")
 local ggrid_=include("lib/ggrid")
 local pad_=include("lib/Pad")
-if not string.find(package.cpath,"/home/we/dust/code/acid-pattern/lib/") then
-  package.cpath=package.cpath..";/home/we/dust/code/acid-pattern/lib/?.so"
+if not string.find(package.cpath,"/home/we/dust/code/acid-breaks/lib/") then
+  package.cpath=package.cpath..";/home/we/dust/code/acid-breaks/lib/?.so"
 end
 json=require("cjson")
 local shift=false
@@ -26,7 +26,7 @@ local beat_num=-1
 
 function init()
   -- setup audio folders
-  util.os_capture("mkdir -p /home/we/dust/audio/acid-pattern")
+  util.os_capture("mkdir -p /home/we/dust/audio/acid-breaks")
 
   apm=apm_:new()
   amen=amen_:new()
@@ -113,7 +113,7 @@ function init()
   }
 
   -- dev stuff
-  amen:load("/home/we/dust/code/acid-pattern/lib/beats16_bpm150_Ultimate_Jack_Loops_014__BPM_150_.wav")
+  amen:load("/home/we/dust/code/acid-breaks/lib/beats16_bpm150_Ultimate_Jack_Loops_014__BPM_150_.wav")
   -- amen:stutter_build()
 
   params.action_write=function(filename,name)

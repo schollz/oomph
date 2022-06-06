@@ -1,4 +1,4 @@
-# acid-pattern
+# acid-breaks
 
 ## about
 
@@ -52,10 +52,10 @@ install tapedeck
 os.execute("cd /tmp && wget https://github.com/schollz/tapedeck/releases/download/PortedPlugins/PortedPlugins.tar.gz && tar -xvzf PortedPlugins.tar.gz && rm PortedPlugins.tar.gz && sudo rsync -avrP PortedPlugins /home/we/.local/share/SuperCollider/Extensions/")
 ```
 
-install acid-pattern
+install acid-breaks
 
 ```
-;install https://github.com/schollz/acid-pattern
+;install https://github.com/schollz/acid-breaks
 ```
 
 
