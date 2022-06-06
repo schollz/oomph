@@ -13,12 +13,13 @@ end
 
 function Pad:init()
   local prams={
-    {name="volume",min=0,max=1,default=0.5,div=0.01,unit="amp"},
+    {name="volume",min=0,max=4,default=0.5,div=0.01,unit="amp"},
     {name="reverb",min=0,max=1,default=0.0,div=0.01,unit="wet/dry"},
     {name="attack",min=0,max=200,default=10,div=1,unit="%"},
     {name="decay",min=0,max=200,default=60,div=1,unit="%"},
     {name="sustain",min=0,max=200,default=90,div=1,unit="%"},
     {name="release",min=0,max=200,default=30,div=1,unit="%"},
+    {name="lpf mult",min=0,max=4,default=1,div=0.1,unit="x"},
   }
   params:add_group("PAD",#prams+19)
   for _,p in ipairs(prams) do
@@ -77,16 +78,23 @@ function Pad:process(beat)
   print(chord.chord,chord.beats)
   local notes=MusicUtil.generate_chord_roman(params:get("pad_root_note"),params:get("pad_scale"),chord.chord)
   local duration=chord.beats*clock.get_beat_sec()
+  local highestnote=0
+  for _,note in ipairs(notes) do
+    if note>highestnote then
+      highestnote=note
+    end
+  end
+
   for _,note in ipairs(notes) do
     engine.pad(
-      params:get("pad_volume")/10,
+      params:get("pad_volume")/5,
       params:get("pad_reverb"),
       note,
       duration*params:get("pad_attack")/100,
       duration*params:get("pad_decay")/100,
       params:get("pad_attack")/100,
       duration*params:get("pad_release")/100,
-      80 -- TODO change this to the top note
+      highestnote+12*params:get("pad_lpf mult") -- TODO change this to the top note
     )
   end
 end

@@ -223,15 +223,16 @@ Engine_Emu303 : CroneEngine {
 
         // <pad>
         bufCheby = Buffer.alloc(context.server, 512, 1, { |buf| buf.chebyMsg([1,0,1,1,0,1])});
-        SynthDef("defSine",{
+        SynthDef("defPad",{
             arg outDry, outWet, amp=0.5, wet=1.0, buf=0,note=53,attack=1,decay=1,sustain=0.5,release=2,notelpf=80;
             var snd,env;
-            snd=Shaper.ar(buf,SinOsc.ar(note.midicps,0,SinOsc.kr(rrand(1/30,1/5)).range(0.1,1.5)));
+            snd=Shaper.ar(buf,Saw.ar(note.midicps,SinOsc.kr(rrand(1/30,1/5)).range(0.1,1.0)));
             snd=Pan2.ar(snd,rrand(-0.25,0.25));
             snd=RLPF.ar(snd,notelpf.midicps,0.707);
             snd=SelectX.ar(VarLag.kr(LFNoise0.kr(1/10),10,warp:\sine).range(0.1,0.7),[snd,snd*LFPar.ar(VarLag.kr(LFNoise0.kr(1/10),10,warp:\sine).range(1,6))]); 
             env=EnvGen.ar(Env.new([0.00001,1.0,sustain,0.00001],[attack,decay,release],curve:[\welch,\sine,\exp]),doneAction:2);
             snd=snd*env*amp*EnvGen.ar(Env.new([0,1],[0.1]));
+            snd=snd.tanh;
             Out.ar(outDry,snd*(1-wet));
             Out.ar(outWet,snd*wet);
         }).add;
@@ -299,7 +300,7 @@ Engine_Emu303 : CroneEngine {
         // <pad>
             // arg outDry, outWet, amp=0.5, wet=1.0, buf=0,note=53,attack=1,decay=1,sustain=0.5,release=2,notelpf=80;
         this.addCommand("pad", "ffffffff", { arg msg;
-            Synth.before(synReverb,"defSine",[\outDry,busTape,\outWet,busReverb,\buf,bufCheby,
+            Synth.before(synReverb,"defPad",[\outDry,busTape,\outWet,busReverb,\buf,bufCheby,
                 \amp,msg[1],
                 \wet,msg[2],
                 \note,msg[3],

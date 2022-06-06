@@ -31,7 +31,13 @@ function Amen:init()
     {name="lpf",eng="lpf",min=50,max=20000,default=20000,div=100,exp=true,unit='Hz'},
     {name="hpf",eng="hpf",min=20,max=500,default=20,div=10,exp=true,unit='Hz'},
   }
-  params:add_group("AMEN",#prams)
+  params:add_group("AMEN",#prams+1)
+  os.execute("mkdir -p ".._path.audio.."acid-pattern/")
+  os.execute("cp ".._path.code.."acid-pattern/lib/*.wav ".._path.audio.."acid-pattern/")
+  params:add_file("amen_file","load file",_path.audio.."acid-pattern/amenbreak_bpm136.wav")
+  params:set_action("amen_file",function(x)
+    self:load(x)
+  end)
   for _,p in ipairs(prams) do
     params:add_control("amen_"..p.eng,p.name,controlspec.new(p.min,p.max,p.exp and 'exp' or 'lin',p.div,p.default,p.unit or "",p.div/(p.max-p.min)))
     params:set_action("amen_"..p.eng,function(x)
@@ -66,6 +72,10 @@ function Amen:load(fname)
   pathname,filename,ext=string.match(self.fname,"(.-)([^\\/]-%.?([^%.\\/]*))$")
   self.filename=filename
   local ch,samples,samplerate=audio.file_info(fname)
+  if samples<10 or samples==nil then
+    print("ERROR PROCESSING FILE: "..fname)
+    do return end
+  end
   local duration=samples/samplerate
 
   local bpm=fname:match("bpm%d+")
@@ -79,7 +89,7 @@ function Amen:load(fname)
     local closet_bpm={0,100000}
     for bpm=100,200 do
       local measures=duration/((60/bpm)*4)
-      if math.round(measures)%2==0 then
+      if util.round(measures)%2==0 then
         local dif=math.abs(math.round(measures)-measures)
         dif=dif-math.round(measures)/60
         if dif<closet_bpm[2] then
@@ -98,22 +108,21 @@ function Amen:load(fname)
   self.beats_reset=true
   self.beat=self.beats_eigth_notes
   self.playing=false
-  -- engine.amenload("/home/we/dust/code/acid-pattern/lib/amenbreak_bpm136.wav",136)
+
   engine.amen_load(fname,self.bpm)
   engine.amen_bpm_target(clock.get_tempo())
-  engine.amen_amp("dc",0,0,0)
 end
 
 function Amen:toggle_start(start)
-  if start==nil then 
+  if start==nil then
     start=not self.playing
   end
-  self.playing=start 
-  if self.playing then 
+  self.playing=start
+  if self.playing then
     engine.amen_bpm_target(clock.get_tempo())
     engine.amen_jump(0.0,0.0,1.0)
     engine.amen_amp("dc",0,params:get("amen_amp"),0)
-  else 
+  else
     engine.amen_amp("dc",0,0,0)
   end
 end
@@ -133,7 +142,7 @@ function Amen:stutter1()
   -- TODO: try other linear ramps??
   engine.amen_amp("line",0,params:get("amen_amp"),total_time)
   local s=math.random(0,31)/32
-  local e=s+(clock.get_beat_sec()/4)/self.duration 
+  local e=s+(clock.get_beat_sec()/4)/self.duration
   engine.amen_jump(s,s,e)
   clock.run(function()
     clock.sleep(total_time)
