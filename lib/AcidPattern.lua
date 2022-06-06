@@ -37,28 +37,20 @@ function AP:init()
   self.step={1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16}
 end
 
-function AP:save(filename)
-  filename=filename.."_"..self.id..".json"
+function AP:dumps()
   local to_save={"note","accid","octave","accent","duration","punct","step"}
   local data={}
   for _,key in ipairs(to_save) do
     data[key]=self[key]
   end
-  local file=io.open(filename,"w+")
-  io.output(file)
-  io.write(json.encode(data))
-  io.close(file)
+  return json.encode(data)
 end
 
-function AP:open(filename)
-  filename=filename.."_"..self.id..".json"
-  if not util.file_exists(filename) then
+function AP:loads(s)
+  local data=json.decode(s)
+  if data==nil then
     do return end
   end
-  local f=io.open(filename,"rb")
-  local content=f:read("*all")
-  f:close()
-  local data=json.decode(content)
   for k,v in pairs(data) do
     self[k]=v
   end

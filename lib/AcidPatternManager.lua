@@ -9,7 +9,7 @@ function APM:new(o)
   self.__index=self
 
   -- define defaults if they are not defined
-  o.pattern_num=o.pattern_num or 4
+  o.pattern_num=o.pattern_num or 16
   o:init()
   return o
 end
@@ -30,8 +30,8 @@ function APM:init()
     {name="detune",eng="detune",min=0.0,max=1,default=0.02,div=0.01,'notes'},
   }
   params:add_group("303",#prams+1)
-  params:add{type = "number", id = "root_note", name = "root note",
-    min = 0, max = 127, default = 36, formatter = function(param) return MusicUtil.note_num_to_name(param:get(), true) end}
+  params:add{type="number",id="root_note",name="root note",
+  min=0,max=127,default=36,formatter=function(param) return MusicUtil.note_num_to_name(param:get(),true) end}
 
   for _,p in ipairs(prams) do
     params:add_control("threeohthree_"..p.eng,p.name,controlspec.new(p.min,p.max,p.exp and 'exp' or 'lin',p.div,p.default,p.unit or "",p.div/(p.max-p.min)))
@@ -60,20 +60,35 @@ function APM:init()
 
   self.ap={}
   self.current=1
-  for i=1,self.pattern_num do 
+  for i=1,self.pattern_num do
     table.insert(self.ap,ap_:new{id=i})
   end
 end
 
 function APM:save(filename)
-  for i=1,self.pattern_num do 
-    self.ap[i]:save(filename)
+  local data={}
+  for i=1,self.pattern_num do
+    table.insert(data,self.ap[i]:dumps())
   end
+
+  filename=filename..".json"
+  local file=io.open(filename,"w+")
+  io.output(file)
+  io.write(json.encode(data))
+  io.close(file)
 end
 
-function APM:open(filename)
-  for i=1,self.pattern_num do 
-    self.ap[i]:open(filename)
+function AP:open(filename)
+  filename=filename..".json"
+  if not util.file_exists(filename) then
+    do return end
+  end
+  local f=io.open(filename,"rb")
+  local content=f:read("*all")
+  f:close()
+  local data=json.decode(content)
+  for i,v in ipairs(data) do
+    self.ap[i].loads(data)
   end
 end
 
@@ -86,7 +101,7 @@ function APM:get(ind,i)
 end
 
 function APM:current_step()
-  return self.ap[self.current].current 
+  return self.ap[self.current].current
 end
 
 function APM:process(beat)
@@ -102,8 +117,8 @@ end
 
 function APM:change_pattern(d)
   self.current=self.current+d
-  if self.current>self.pattern_num then 
-    self.current = self.current-self.pattern_num
+  if self.current>self.pattern_num then
+    self.current=self.current-self.pattern_num
   elseif self.current<1 then
     self.current=self.current+self.pattern_num
   end
