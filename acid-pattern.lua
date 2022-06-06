@@ -9,7 +9,7 @@
 --
 -- ?
 
-engine.name="Emu303"
+engine.name="AcidBreaks"
 local lattice_=require("lattice")
 local apm_=include("lib/AcidPatternManager")
 local amen_=include("lib/Amen")
