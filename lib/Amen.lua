@@ -109,9 +109,10 @@ function Amen:load(fname)
     bpm=closet_bpm[1]
   end
 
-  self.bpm=bpm
+  self.beats_total=util.round(duration/(60/bpm))
+  -- recalculate the exact bpm based on the rounded beats
+  self.bpm=self.beats_total/(duration/60)
   self.duration=duration
-  self.beats_total=duration/(60/bpm)
   self.beats_eigth_notes=self.beats_total*4
   self.beats_reset=true
   self.beat=self.beats_eigth_notes
