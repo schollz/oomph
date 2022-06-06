@@ -43,7 +43,7 @@ Engine_AcidBreaks : CroneEngine {
         valDecayFactor=1.0;
 
         SynthDef("defVinyl",{
-            | bufnum = 0,amp=0,hpf=800,lpf=4000,rate=1,rateslew=4,scratch=0,bpm_target=120,t_trig=1|
+            | out=0,bufnum = 0,amp=0,hpf=800,lpf=4000,rate=1,rateslew=4,scratch=0,bpm_target=120,t_trig=1|
             var snd,pos;
             amp = Lag.kr(amp,2);
             amp = amp * VarLag.kr(LFNoise0.kr(1).range(0.1,1),2,warp:\sine);
@@ -60,7 +60,7 @@ Engine_AcidBreaks : CroneEngine {
             );
             snd = HPF.ar(snd,hpf);
             snd = LPF.ar(snd,lpf);
-            Out.ar(0,snd*amp*EnvGen.ar(Env.new([0,1],[4])));
+            Out.ar(out,snd*amp*EnvGen.ar(Env.new([0,1],[4])));
         }).add;
 
         SynthDef("defAmen",{ 
@@ -293,9 +293,9 @@ Engine_AcidBreaks : CroneEngine {
         synTape=Synth.new("defTape",[\in,busTape]);
         context.server.sync;        
         // define always-on synths
-        synThreeOhThree=Synth.before(synTape,"defThreeOhThree",[\busAccent,busAccent,\out,busTape]); // TODO: switch back to busTape
-        synReverb=Synth.before(synTape,"defReverb",[\in,busReverb,\out,busTape]); // TODO: switch back to busTape
-        //TODO add back playerVinyl = Synth("defVinyl",[\bufnum,sampleVinyl,\amp,0],target:context.xg);
+        synThreeOhThree=Synth.before(synTape,"defThreeOhThree",[\busAccent,busAccent,\out,busTape]);
+        synReverb=Synth.before(synTape,"defReverb",[\in,busReverb,\out,busTape]); 
+        playerVinyl = Synth("defVinyl",[\bufnum,sampleVinyl,\amp,0,\out,busTape],target:context.xg);
         synAmen = Array.fill(2,{arg i;
             Synth.before(synTape,"defAmen",[\out,busTape])
         });

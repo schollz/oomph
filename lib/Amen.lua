@@ -140,7 +140,6 @@ function Amen:stutter1()
   local divisions={4,6,8}
   local division=divisions[math.random(#divisions)]
   local total_time=stutters*clock.get_beat_sec()/division
-  -- TODO: try other linear ramps??
   engine.amen_amp("xline",params:get("amen_amp")/3,params:get("amen_amp"),total_time)
   engine.amen_lpf("xline",200,params:get("amen_lpf"),total_time)
   local s=math.random(0,31)/32

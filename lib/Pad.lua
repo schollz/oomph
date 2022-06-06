@@ -107,7 +107,7 @@ function Pad:process(beat)
     --   duration*params:get("pad_decay")/100,
     --   params:get("pad_attack")/100,
     --   duration*params:get("pad_release")/100,
-    --   highestnote+12*params:get("pad_lpf mult") -- TODO change this to the top note
+    --   highestnote+12*params:get("pad_lpf mult") 
     -- )
   end
 end

@@ -66,7 +66,7 @@ function AP:set(ind,pos,d)
     self[setters[ind]][pos]=self[setters[ind]][pos]-maxes[ind]
   end
   if setters[ind]=="punct" then
-    -- TODO: figure out the durations of all the notes
+    -- figure out the durations of all the notes
     local punct={}
     local durations={}
     for i=1,2 do
