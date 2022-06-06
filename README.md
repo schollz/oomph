@@ -1,6 +1,11 @@
 # acid-breaks
 
+this script is meant to turn the norns into an "[acid breaks](https://electronicmusic.fandom.com/wiki/Acid_Breaks)"-style groovebox. 
+
+
+
 ## about
+
 
 I wanted to make a 303-esque thing and at the heart its very simple - a resonant filter with a saw/square wave. the tricky bit is having the right "accent", the accent envelope circuit affects the amplitude and the filter opening. apparently its not a typical envelope generator - it has a capacitor that doesn't completely discharge allowing you to get "higher" as you add more accents. its well described [in this classic article](https://www.firstpr.com.au/rwi/dfish/303-unique.html):
 
