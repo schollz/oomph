@@ -33,6 +33,8 @@ c=Bus.control(s);
 
 ## install
 
+# NOTE! this is an *unreleased* WIP script. it may be unstable. if you have problems, please contact me directly so other support systems are not drained 
+
 install mx.samples2
 ```
 ;install https://github.com/schollz/mx.samples2
