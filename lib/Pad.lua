@@ -21,7 +21,7 @@ function Pad:init()
     {name="pan",eng="pan",min=-1,max=1,default=0,div=0.01},
     {name="lpf",eng="lpf",min=50,max=20000,default=20000,div=100,exp=true,unit='Hz'},
   }
-  params:add_group("PAD",#prams+19)
+  params:add_group("PAD",#prams+27)
   for _,p in ipairs(prams) do
     params:add_control("pad_"..p.eng,p.name,controlspec.new(p.min,p.max,p.exp and 'exp' or 'lin',p.div,p.default,p.unit or "",p.div/(p.max-p.min)))
     params:set_action("pad_"..p.eng,function(x)
@@ -47,6 +47,7 @@ function Pad:init()
   for chord_num=1,8 do
     params:add_option("chord"..chord_num,"chord "..chord_num,self.available_chords,available_chords_default[chord_num])
     params:add{type="number",id="beats"..chord_num,name="beats "..chord_num,min=0,max=16,default=8}
+    params:add{type="number",id="transpose"..chord_num,name="transpose "..chord_num,min=0,max=8,default=0}
     params:set_action("chord"..chord_num,function()
       self:update_chords()
     end)
@@ -61,9 +62,11 @@ end
 function Pad:update_chords()
   self.chords={}
   for i=1,params:get("number_of_chords") do
-    table.insert(self.chords,{chord=self.available_chords[params:get("chord"..i)],beats=params:get("beats"..i)})
-    for j=1,params:get("beats"..i)-1 do
-      table.insert(self.chords,{})
+    if params:get("beats"..i)>0 then
+      table.insert(self.chords,{chord_num=i,chord=self.available_chords[params:get("chord"..i)],beats=params:get("beats"..i)})
+      for j=1,params:get("beats"..i)-1 do
+        table.insert(self.chords,{})
+      end
     end
   end
 end
@@ -80,6 +83,12 @@ function Pad:process(beat)
   local chord=self.chords[chord_note]
   print(chord.chord,chord.beats)
   local notes=MusicUtil.generate_chord_roman(params:get("pad_root_note"),params:get("pad_scale"),chord.chord)
+  if params:get("transpose"..chord.chord_num)>0 then
+    for i=1,params:get("transpose"..chord.chord_num) do
+      local notei=(i-1)%#notes+1
+      notes[notei]=notes[notei]+12
+    end
+  end
   local duration=(chord.beats-2)*clock.get_beat_sec()
   local highestnote=0
   for _,note in ipairs(notes) do

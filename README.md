@@ -43,3 +43,5 @@ install acid-pattern
 - add more chaotic lfos
 - ~~add start and stop buttons~~
 - ~~add start and stop transport~~
+- allow using other samples for the pad
+- allow 16 tracks

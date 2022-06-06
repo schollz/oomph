@@ -31,7 +31,8 @@ function Amen:init()
     {name="lpf",eng="lpf",min=50,max=20000,default=20000,div=100,exp=true,unit='Hz'},
     {name="hpf",eng="hpf",min=20,max=500,default=20,div=10,exp=true,unit='Hz'},
   }
-  params:add_group("AMEN",#prams+1)
+  local fxs={"stutter1","jump1","reverse1"}
+  params:add_group("AMEN",#prams+#fxs+1)
   os.execute("mkdir -p ".._path.audio.."acid-pattern/")
   os.execute("cp ".._path.code.."acid-pattern/lib/*.wav ".._path.audio.."acid-pattern/")
   params:add_file("amen_file","load file",_path.audio.."acid-pattern/amenbreak_bpm136.wav")
@@ -44,6 +45,13 @@ function Amen:init()
       engine["amen_"..p.eng]("dc",0,x,0)
     end)
   end
+  for _,fxname in ipairs(fxs) do
+    params:add{type="binary",name=fxname,id="amen_"..fxname,behavior="trigger",action=function(x)
+      print(fxname)
+      self.fx=self[fxname](self)
+    end}
+  end
+
   params:add_group("AMEN MOD",#prams*5)
   local mod_ops_ids={"sine","drunk","xline","line"}
   local mod_ops_nom={"sine","drunk","exp ramp","linear ramp"}
@@ -127,26 +135,32 @@ function Amen:toggle_start(start)
   end
 end
 
-function Amen:stutter()
-  if not self.stutter_ready then
-    self.stutter_ready=true
-    do return end
-  end
-  self.stutter_ready=nil
-
-end
-
 function Amen:stutter1()
-  local stutters=math.random(4,16)
-  local total_time=stutters*clock.get_beat_sec()/4
+  local stutters=math.random(4,24)
+  local divisions={4,6,8}
+  local division=divisions[math.random(#divisions)]
+  local total_time=stutters*clock.get_beat_sec()/division
   -- TODO: try other linear ramps??
-  engine.amen_amp("line",0,params:get("amen_amp"),total_time)
+  engine.amen_amp("xline",params:get("amen_amp")/3,params:get("amen_amp"),total_time)
+  engine.amen_lpf("xline",200,params:get("amen_lpf"),total_time)
   local s=math.random(0,31)/32
-  local e=s+(clock.get_beat_sec()/4)/self.duration
+  local e=s+(clock.get_beat_sec()/division)/self.duration
   engine.amen_jump(s,s,e)
   clock.run(function()
     clock.sleep(total_time)
     engine.amen_jump(s,0.0,1.0)
+  end)
+end
+
+function Amen:jump1()
+  engine.amen_jump(math.random(0,31)/32,0.0,1.0)
+end
+
+function Amen:reverse1()
+  engine.amen_rate("line",params:get("amen_rate"),-1*params:get("amen_rate"),0.01)
+  clock.run(function()
+    clock.sync(math.random(1,4))
+    engine.amen_rate("line",-1*params:get("amen_rate"),params:get("amen_rate"),0.01)
   end)
 end
 
@@ -165,8 +179,8 @@ function Amen:process(beat)
   end
 
   -- if a stutter is activated then play it
-  if self.stutter_ready then
-    self:stutter()
+  if self.fx~=nil then
+    self.fx()
   end
 end
 

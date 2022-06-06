@@ -8,6 +8,7 @@ Engine_Emu303 : CroneEngine {
 	var synThreeOhThree;
     var busAccent;
     var busTape;
+    var valDecayFactor;
     // </Emu303>
 
     // <Tape>
@@ -39,6 +40,7 @@ Engine_Emu303 : CroneEngine {
         sampleBuffAmen = Buffer.new(context.server);
         sampleVinyl = Buffer.read(context.server, "/home/we/dust/code/acid-pattern/lib/vinyl2.wav"); 
         playerSwap = 0;
+        valDecayFactor=1.0;
 
         SynthDef("defVinyl",{
             | bufnum = 0,amp=0,hpf=800,lpf=4000,rate=1,rateslew=4,scratch=0,bpm_target=120,t_trig=1|
@@ -176,7 +178,7 @@ Engine_Emu303 : CroneEngine {
             var env_accent=In.kr(env_accentBus);
             noteVal=Lag.kr(note,portamento*slide);
             accentVal=In.kr(busAccent);
-            res = Clip.kr(res_adjust+(res_accent*accentVal),0.001,0.99);
+            res = Clip.kr(res_adjust+(res_accent*accentVal),0.001,2);
             env = EnvGen.ar(Env.new([10e-3,1,1,10e-9],[0.03,sustain*duration,decay],'exp'),t_trig)+(env_accent*accentVal);
             waves = [Saw.ar([noteVal-detune,noteVal+detune].midicps, mul: env), Pulse.ar([note-detune,note+detune].midicps, 0.5, mul: env)];
             filterEnv =  EnvGen.ar( Env.new([10e-9, 1, 10e-9], [0.01, decay],  'exp'), t_trig);
@@ -188,7 +190,8 @@ Engine_Emu303 : CroneEngine {
         
         SynthDef("defThreeOhThreeAccent",{
             arg out,decay;
-            Out.kr(out,EnvGen.ar( Env.new([10e-9, 1, 10e-9], [0.01, decay],  'exp'),doneAction:2));
+            Out.kr(out,EnvGen.ar( Env.new([0,1,0], [0.01, decay], -8),doneAction:2));
+            // Out.kr(out,EnvGen.ar( Env.new([10e-9, 1, 10e-9], [0.01, decay],  'exp'),doneAction:2));
         }).add;
 
         SynthDef("defTape",{
@@ -353,9 +356,12 @@ Engine_Emu303 : CroneEngine {
             if (msg[4].asFloat>0.0,{
                 // trigger accent
                 fxbus.at("threeohthree_decay").get({ arg val;
-                    Synth("defThreeOhThreeAccent",[\out,busAccent,\decay,val]);
+                    Synth("defThreeOhThreeAccent",[\out,busAccent,\decay,val*valDecayFactor]);
                 });
             });
+        });
+        this.addCommand("threeohthree_decayfactor", "f", { arg msg;
+            valDecayFactor=msg[1].asFloat;
         });
         // </303>
 
@@ -464,10 +470,10 @@ Engine_Emu303 : CroneEngine {
 
     free {
         // <Amen>
-        synAmen.do({ arg item,i; item.free; i.postln; });
+        synAmen[0].free;
+        synAmen[1].free;
         fxbus.keysValuesDo{ |key,value| value.free };
         fxsyn.keysValuesDo{ |key,value| value.free };
-        synAmen.free;
         sampleBuffAmen.free;
         playerVinyl.free;
         sampleVinyl.free;
