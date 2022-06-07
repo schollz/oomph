@@ -128,6 +128,10 @@ function APM:process(beat)
   self.ap[self.current]:process(beat)
 end
 
+function APM:next_pattern()
+	return params:get("pattern"..self.current)
+end
+
 function APM:redraw(x,y,sh,sw)
   self.ap[self.current]:redraw(x,y,sh,sw)
   local width=8

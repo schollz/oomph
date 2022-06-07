@@ -7,6 +7,12 @@ you may recognize some of these aspects as they are combinations of scripts I've
 "groovebox" that would have all these pieces to play with.
 
 
+## instructions
+
+### grid
+
+the first five rows edit the parameters of the monophonic synth. the last row can be used to control the patterns by holding down one button and clicking another to register changing patterns.
+
 ## about
 
 

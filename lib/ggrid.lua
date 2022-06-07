@@ -1,8 +1,8 @@
 -- local pattern_time = require("pattern")
 local GGrid={}
 
-local ROW_STEP=1
-local ROW_NOTE=2
+local ROW_NOTE=1
+local ROW_ACCID=2
 local ROW_OCTAVE=3
 local ROW_ACCENT=4
 local ROW_PUNCT=5
@@ -61,12 +61,19 @@ function GGrid:key_press(row,col,on)
     self.pressed_buttons[row..","..col]=nil
   end
   if on and row<6 then
-    if row==1 then
-      row=7
-    elseif row==ROW_NOTE then
-      row=1
-    end
     self.apm:set(row,col,1)
+  end
+  if row==8 then
+    if on then
+      if self.row8~=nil then
+        params:set("pattern"..self.row8,col)
+      else
+        self.row8=col
+        self.apm.current=col
+      end
+    else
+      self.row8=nil
+    end
   end
 end
 
@@ -74,22 +81,25 @@ function GGrid:get_visual()
   -- clear visual
   for row=1,8 do
     for col=1,self.grid_width do
-      self.visual[row][col]=self.visual[row][col]-4
-      if self.visual[row][col]<0 then
-        self.visual[row][col]=0
-      end
+      self.visual[row][col]=0
     end
   end
 
   -- draw steps
   for i=1,16 do
-    self.visual[ROW_STEP][i]=self.apm:get("step",i)-1
     self.visual[ROW_NOTE][i]=self.apm:get("note",i)*2
+    self.visual[ROW_ACCID][i]=(self.apm:get("accid",i)-1)*4
     self.visual[ROW_OCTAVE][i]=(self.apm:get("octave",i)-1)*4
     self.visual[ROW_ACCENT][i]=(self.apm:get("accent",i)-1)*4
     self.visual[ROW_PUNCT][i]=(self.apm:get("punct",i)-1)*4
+    if self.apm.current==i then
+      self.visual[8][i]=10
+    elseif self.apm:next_pattern()==i then
+      self.visual[8][i]=5
+    end
+
   end
-  self.visual[8][self.apm:current_step()]=10
+  self.visual[8][self.apm:current_step()]=self.visual[8][self.apm:current_step()]+5
 
   -- -- illuminate currently pressed button
   -- for k,_ in pairs(self.pressed_buttons) do

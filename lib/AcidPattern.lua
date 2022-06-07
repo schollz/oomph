@@ -23,7 +23,7 @@ function AP:init()
   self.note_scale={0,2,4,5,7,9,11}
   self.key_step={"0","1","2","3","4","5","6","7","8","9","A","B","C","D","E","F"}
   self.key_notes={"C","D","E","F","G","A","B"}
-  self.key_accid={"b","","#"}
+  self.key_accid={"","b","#"}
   self.key_octave={"D","","U"}
   self.key_accent={"","F","O"}
   self.key_punctuation={"o","-","@"}
@@ -119,7 +119,11 @@ function AP:process(beat)
   if self.punct[i]~=PUNCUATION_NOTE then
     do return end
   end
-  local note=params:get("root_note")+self.note_scale[self.note[i]]+(self.accid[i]-2)+(self.octave[i]-2)*12+12
+  local accid=self.accid[i]==2 and 1 or 0
+  if accid==0 then
+  	accid=self.accid[i]==1 and -1 or 0
+  end
+  local note=params:get("root_note")+self.note_scale[self.note[i]]+accid+(self.octave[i]-2)*12+12
   -- do something with the note
   local accent=self.accent[i]==3 and 1 or 0
   local slide=self.accent[i]==2 and 1 or 0
