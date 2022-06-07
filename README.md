@@ -1,4 +1,4 @@
-# acid-breaks
+# triped
 
 this script is meant to turn the norns into an "[acid breaks](https://electronicmusic.fandom.com/wiki/Acid_Breaks)"-style groovebox. 
 
@@ -57,10 +57,10 @@ install tapedeck
 os.execute("cd /tmp && wget https://github.com/schollz/tapedeck/releases/download/PortedPlugins/PortedPlugins.tar.gz && tar -xvzf PortedPlugins.tar.gz && rm PortedPlugins.tar.gz && sudo rsync -avrP PortedPlugins /home/we/.local/share/SuperCollider/Extensions/")
 ```
 
-install acid-breaks
+install triped
 
 ```
-;install https://github.com/schollz/acid-breaks
+;install https://github.com/schollz/triped
 ```
 
 

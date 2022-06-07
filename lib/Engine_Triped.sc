@@ -1,15 +1,15 @@
-Engine_AcidBreaks : CroneEngine {
+Engine_Triped : CroneEngine {
 // All norns engines follow the 'Engine_MySynthName' convention above
     // all
     var fxbus;
     var fxsyn;
 
-    // <AcidBreaks>
+    // <Triped>
 	var synThreeOhThree;
     var busAccent;
     var busTape;
     var valDecayFactor;
-    // </AcidBreaks>
+    // </Triped>
 
     // <Tape>
     var synTape;
@@ -38,7 +38,7 @@ Engine_AcidBreaks : CroneEngine {
         fxbus=Dictionary.new();
         fxsyn=Dictionary.new();
         sampleBuffAmen = Buffer.new(context.server);
-        sampleVinyl = Buffer.read(context.server, "/home/we/dust/code/acid-breaks/lib/vinyl2.wav"); 
+        sampleVinyl = Buffer.read(context.server, "/home/we/dust/code/triped/lib/vinyl2.wav"); 
         playerSwap = 0;
         valDecayFactor=1.0;
 
