@@ -25,7 +25,7 @@ function Pad:init()
   for _,p in ipairs(prams) do
     params:add_control("pad_"..p.eng,p.name,controlspec.new(p.min,p.max,p.exp and 'exp' or 'lin',p.div,p.default,p.unit or "",p.div/(p.max-p.min)))
     params:set_action("pad_"..p.eng,function(x)
-	    -- TODO: make the ultra_synth a parameter
+      -- TODO: make the ultra_synth a parameter
       engine["pad_"..p.eng]("/home/we/dust/audio/mx.samples/ultra_synth/",x)
     end)
   end
@@ -82,7 +82,7 @@ function Pad:process(beat)
     do return end
   end
   local chord=self.chords[chord_note]
-  print(chord.chord,chord.beats)
+  -- print(chord.chord,chord.beats)
   local notes=MusicUtil.generate_chord_roman(params:get("pad_root_note"),params:get("pad_scale"),chord.chord)
   if params:get("transpose"..chord.chord_num)>0 then
     for i=1,params:get("transpose"..chord.chord_num) do
@@ -108,7 +108,7 @@ function Pad:process(beat)
     --   duration*params:get("pad_decay")/100,
     --   params:get("pad_attack")/100,
     --   duration*params:get("pad_release")/100,
-    --   highestnote+12*params:get("pad_lpf mult") 
+    --   highestnote+12*params:get("pad_lpf mult")
     -- )
   end
 end

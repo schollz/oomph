@@ -86,9 +86,13 @@ function APM:open(filename)
   local f=io.open(filename,"rb")
   local content=f:read("*all")
   f:close()
+  if content==nil then
+    do return end
+  end
   local data=json.decode(content)
   for i,v in ipairs(data) do
-    self.ap[i].loads(data)
+    print(v)
+    self.ap[i]:loads(v)
   end
 end
 
