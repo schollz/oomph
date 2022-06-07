@@ -55,7 +55,7 @@ function init()
     -- {name="high gain",eng="dist_high",min=0,max=1,default=0.1,div=0.01},
     -- {name="shelf",eng="dist_shelf",min=10,max=1000,default=600,div=10,exp=true},
   }
-  params:add_group("TAPE FX",#tape_prams)
+  params:add_group("FX",#tape_prams)
   for _,p in ipairs(tape_prams) do
     params:add_control("tape"..p.eng,p.name,controlspec.new(p.min,p.max,p.exp and 'exp' or 'lin',p.div,p.default,p.unit or "",p.div/(p.max-p.min)))
     params:set_action("tape"..p.eng,function(x)
@@ -64,7 +64,7 @@ function init()
       params:set("tape"..p.eng.."modtrig",0)
     end)
   end
-  params:add_group("TAPE FX MOD",#tape_prams*5)
+  params:add_group("FX MOD",#tape_prams*5)
   local mod_ops_ids={"sine","drunk","xline","line"}
   local mod_ops_nom={"sine","drunk","exp ramp","linear ramp"}
   for _,p in ipairs(tape_prams) do
