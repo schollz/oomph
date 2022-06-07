@@ -1,7 +1,10 @@
 # triped
 
-this script is meant to turn the norns into an "[acid breaks](https://electronicmusic.fandom.com/wiki/Acid_Breaks)"-style groovebox. 
 
+triped is (in keeping with the [namelessness](https://llllllll.co/t/namelessness)) is simply a monophonic synthesizer with accented filters, a sample loop player with customizable effects, and a sample-based chord sequencer - which is all mixed and processed through a tape emulator.
+
+you may recognize some of these aspects as they are combinations of scripts I've previously contributed - notably [amen](https://github.com/schollz/amen) (sample looper), [acid-test](https://github.com/schollz/acid-test) (303-style monosynth), [synthy](https://github.com/schollz/synthy) (chord sequencer) and [tapedeck](https://github.com/schollz/tapedeck) (tape emulator). I thought it would be fun to have a single norns script to serve as a
+"groovebox" that would have all these pieces to play with.
 
 
 ## about
@@ -81,3 +84,4 @@ install triped
 - ~~add start and stop transport~~
 - allow using other samples for the pad
 - allow 16 tracks
+- add midi out to things

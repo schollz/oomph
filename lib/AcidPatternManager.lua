@@ -37,6 +37,7 @@ function APM:init()
     params:add_control("threeohthree_"..p.eng,p.name,controlspec.new(p.min,p.max,p.exp and 'exp' or 'lin',p.div,p.default,p.unit or "",p.div/(p.max-p.min)))
     params:set_action("threeohthree_"..p.eng,function(x)
       engine["threeohthree_"..p.eng]("dc",0,x,0.2)
+      params:set("threeohthree_"..p.eng.."modtrig",0)
     end)
   end
 
@@ -56,8 +57,11 @@ function APM:init()
     params:add_control("threeohthree_"..p.eng.."modperiod",p.name.." period",controlspec.new(0.1,120,'exp',0.1,2,"s",0.1/119.9))
     params:add_control("threeohthree_"..p.eng.."modmin",p.name.." min",controlspec.new(p.min,p.max,p.exp and 'exp' or 'lin',p.div,p.min,p.unit or "",p.div/(p.max-p.min)))
     params:add_control("threeohthree_"..p.eng.."modmax",p.name.." max",controlspec.new(p.min,p.max,p.exp and 'exp' or 'lin',p.div,p.max,p.unit or "",p.div/(p.max-p.min)))
-    params:add_trigger("threeohthree_"..p.eng.."modtrig",p.name.." trig")
+    params:add_binary("threeohthree_"..p.eng.."modtrig",p.name.." trig","toggle")
     params:set_action("threeohthree_"..p.eng.."modtrig",function(x)
+      if x~=1 then 
+	      do return end 
+      end
       print(mod_ops_ids[params:get("threeohthree_"..p.eng.."modoption")],params:get("threeohthree_"..p.eng.."modmin"),
         params:get("threeohthree_"..p.eng.."modmax"),
       params:get("threeohthree_"..p.eng.."modperiod"))

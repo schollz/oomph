@@ -43,6 +43,7 @@ function Amen:init()
     params:add_control("amen_"..p.eng,p.name,controlspec.new(p.min,p.max,p.exp and 'exp' or 'lin',p.div,p.default,p.unit or "",p.div/(p.max-p.min)))
     params:set_action("amen_"..p.eng,function(x)
       engine["amen_"..p.eng]("dc",0,x,0)
+      params:set("amen_"..p_eng.."modtrig",0)
     end)
   end
   for _,fxname in ipairs(fxs) do
@@ -60,8 +61,11 @@ function Amen:init()
     params:add_control("amen_"..p.eng.."modperiod",p.name.." period",controlspec.new(0.1,120,'exp',0.1,2,"s",0.1/119.9))
     params:add_control("amen_"..p.eng.."modmin",p.name.." min",controlspec.new(p.min,p.max,p.exp and 'exp' or 'lin',p.div,p.min,p.unit or "",p.div/(p.max-p.min)))
     params:add_control("amen_"..p.eng.."modmax",p.name.." max",controlspec.new(p.min,p.max,p.exp and 'exp' or 'lin',p.div,p.max,p.unit or "",p.div/(p.max-p.min)))
-    params:add_trigger("amen_"..p.eng.."modtrig",p.name.." trig")
+    params:add_toggle("amen_"..p.eng.."modtrig",p.name.." trig","toggle")
     params:set_action("amen_"..p.eng.."modtrig",function(x)
+      if x~=1 then
+        do return end
+      end
       print(mod_ops_ids[params:get("amen_"..p.eng.."modoption")],params:get("amen_"..p.eng.."modmin"),
         params:get("amen_"..p.eng.."modmax"),
       params:get("amen_"..p.eng.."modperiod"))
