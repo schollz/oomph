@@ -1,13 +1,17 @@
--- acid pattern v0.0.1
--- ?
+-- acid-breaks v0.0.1
+-- :) :) :) ;) :) :0 :)
 --
--- llllllll.co/t/?
+-- llllllll.co/t/acid-breaks
 --
 --
 --
 --    ▼ instructions below ▼
 --
--- ?
+-- E1 selects pattern
+-- E2/E3 select parameter
+-- K2 change parameter
+-- K3 stop/start
+--
 
 engine.name="AcidBreaks"
 local lattice_=require("lattice")
@@ -37,15 +41,19 @@ function init()
 
   local tape_prams={
     {name="aux",eng="auxin",min=0,max=1,default=0.5,div=0.01,unit="wet/dry"},
+    {name="lpf",eng="lpf",min=100,max=20000,default=20000,div=100,exp=true,units="Hz"},
+    {name="lpf rq",eng="lpfqr",min=0,max=1,default=0.707,div=0.01},
+    {name="hpf",eng="hpf",min=10,max=5000,default=30,div=10,exp=true,units="Hz"},
+    {name="hpf rq",eng="hpfqr",min=0,max=1,default=0.707,div=0.01},
     {name="tape",eng="tape_wet",min=0,max=1,default=0.5,div=0.01,unit="wet/dry"},
-    {name="bias",eng="tape_bias",min=0,max=1,default=0.8,div=0.01},
-    {name="saturate",eng="tape_sat",min=0,max=1,default=0.8,div=0.01},
-    {name="drive",eng="tape_drive",min=0,max=1,default=0.8,div=0.01},
-    {name="distortion",eng="dist_wet",min=0,max=1,default=0.1,div=0.01,unit="wet/dry"},
-    {name="gain",eng="dist_drive",min=0,max=1,default=0.1,div=0.01},
-    {name="low gain",eng="dist_low",min=0,max=1,default=0.1,div=0.01},
-    {name="high gain",eng="dist_high",min=0,max=1,default=0.1,div=0.01},
-    {name="shelf",eng="dist_shelf",min=10,max=1000,default=600,div=10,exp=true},
+    {name="tape bias",eng="tape_bias",min=0,max=1,default=0.8,div=0.01},
+    {name="tape saturate",eng="tape_sat",min=0,max=2,default=0.8,div=0.01},
+    {name="tape drive",eng="tape_drive",min=0,max=2,default=0.8,div=0.01},
+    -- {name="distortion",eng="dist_wet",min=0,max=1,default=0.1,div=0.01,unit="wet/dry"},
+    -- {name="gain",eng="dist_drive",min=0,max=1,default=0.1,div=0.01},
+    -- {name="low gain",eng="dist_low",min=0,max=1,default=0.1,div=0.01},
+    -- {name="high gain",eng="dist_high",min=0,max=1,default=0.1,div=0.01},
+    -- {name="shelf",eng="dist_shelf",min=10,max=1000,default=600,div=10,exp=true},
   }
   params:add_group("TAPE FX",#tape_prams)
   for _,p in ipairs(tape_prams) do
@@ -156,7 +164,7 @@ function init()
   params:default()
   params:bang()
 
-  toggle_start(true)
+  toggle_start(false)
 end
 
 function clock.transport.start()
@@ -217,10 +225,15 @@ function key(k,z)
     end
   else
     if k==1 then
-    elseif k>1 and z==1 then
-      local d=k*2-5
-      apm:set(pos[1],pos[2],d)
+    elseif k==2 and z==1 then
+      apm:set(pos[1],pos[2],1)
+    elseif k==3 and z==1 then
+      toggle_start()
     end
+    -- elseif k>1 and z==1 then
+    --   local d=k*2-5
+    --   apm:set(pos[1],pos[2],d)
+    -- end
   end
 end
 
@@ -255,10 +268,11 @@ end
 function redraw()
   screen.clear()
   local x=2.5
-  local y=10
+  local y=7
   local sh=9
   local sw=8
   apm:redraw(x,y,sh,sw)
+  screen.level(10)
   screen.blend_mode(1)
   screen.rect(x+sw*(pos[2]-1)-4,y+sh*(pos[1]-1)+2,10,9)
   screen.fill()

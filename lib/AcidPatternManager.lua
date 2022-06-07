@@ -29,7 +29,7 @@ function APM:init()
     {name="saw/square",eng="wave",min=0.0,max=1,default=0.0,div=0.01},
     {name="detune",eng="detune",min=0.0,max=1,default=0.02,div=0.01,'notes'},
   }
-  params:add_group("303",#prams+1)
+  params:add_group("BASS",#prams+1)
   params:add{type="number",id="root_note",name="root note",
   min=0,max=127,default=36,formatter=function(param) return MusicUtil.note_num_to_name(param:get(),true) end}
 
@@ -39,7 +39,16 @@ function APM:init()
       engine["threeohthree_"..p.eng]("dc",0,x,0.2)
     end)
   end
-  params:add_group("303 MOD",#prams*5)
+
+  params:add_group("BASS SEQUENCER",self.pattern_num+1)
+  params:add_binary("sequencer_on","sequencer on","toggle")
+  for i=1,self.pattern_num do
+    local s=" ----------------"
+    s=s..(i>9 and ">" or "->")
+    params:add{type="number",id="pattern"..i,name="pattern "..i..s,min=1,max=self.pattern_num,default=i}
+  end
+
+  params:add_group("BASS MOD",#prams*5)
   local mod_ops_ids={"sine","xline","line"}
   local mod_ops_nom={"sine","exp ramp","linear ramp"}
   for _,p in ipairs(prams) do
@@ -109,7 +118,9 @@ function APM:current_step()
 end
 
 function APM:process(beat)
-  -- TODO: allow chaining?
+  if self.ap[self.current].current==16 and params:get("sequencer_on")==1 then
+    self.current=params:get("pattern"..self.current)
+  end
   self.ap[self.current]:process(beat)
 end
 
@@ -117,12 +128,14 @@ function APM:redraw(x,y,sh,sw)
   self.ap[self.current]:redraw(x,y,sh,sw)
   local width=8
   for i=1,self.pattern_num do
-    screen.rect(2+(i-1)*width-2,59,width-2,4)
-    screen.level(self.current==i and 15 or 2)
+    screen.rect(2+(i-1)*width-2,56,width-2,4)
+    local level=self.current==i and 15 or 1
+    if params:get("sequencer_on") and self.current~=i and i==params:get("pattern"..self.current) then
+      level=4
+    end
+    screen.level(level)
     screen.fill()
   end
-  screen.move(5+10*self.current,60)
-  screen.text_center(".")
 end
 
 function APM:change_pattern(d)

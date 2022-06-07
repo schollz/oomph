@@ -32,7 +32,7 @@ function Amen:init()
     {name="hpf",eng="hpf",min=20,max=500,default=20,div=10,exp=true,unit='Hz'},
   }
   local fxs={"stutter1","jump1","reverse1"}
-  params:add_group("AMEN",#prams+#fxs+1)
+  params:add_group("SAMPLE LOOP",#prams+#fxs+1)
   os.execute("mkdir -p ".._path.audio.."acid-breaks/")
   os.execute("cp ".._path.code.."acid-breaks/lib/*.wav ".._path.audio.."acid-breaks/")
   params:add_file("amen_file","load file",_path.audio.."acid-breaks/amenbreak_bpm136.wav")
@@ -52,7 +52,7 @@ function Amen:init()
     end}
   end
 
-  params:add_group("AMEN MOD",#prams*5)
+  params:add_group("SAMPLE LOOP MOD",#prams*5)
   local mod_ops_ids={"sine","drunk","xline","line"}
   local mod_ops_nom={"sine","drunk","exp ramp","linear ramp"}
   for _,p in ipairs(prams) do

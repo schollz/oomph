@@ -21,7 +21,7 @@ function Pad:init()
     {name="pan",eng="pan",min=-1,max=1,default=0,div=0.01},
     {name="lpf",eng="lpf",min=50,max=20000,default=20000,div=100,exp=true,unit='Hz'},
   }
-  params:add_group("PAD",#prams+27)
+  params:add_group("CHORDS",#prams+27)
   for _,p in ipairs(prams) do
     params:add_control("pad_"..p.eng,p.name,controlspec.new(p.min,p.max,p.exp and 'exp' or 'lin',p.div,p.default,p.unit or "",p.div/(p.max-p.min)))
     params:set_action("pad_"..p.eng,function(x)

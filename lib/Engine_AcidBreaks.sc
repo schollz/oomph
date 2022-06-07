@@ -93,7 +93,7 @@ Engine_AcidBreaks : CroneEngine {
 
             rate = rate * bpm_target / bpm_sample;
             // scratch effect
-            rate = SelectX.kr(scratch,[rate,LFTri.kr(bpm_target/60*scratchrate)]);
+            rate = SelectX.kr(scratch,[rate,LFTri.kr(bpm_target/60*scratchrate)],wrap:0);
             pos = Phasor.ar(
                 trig:t_trig,
                 rate:BufRateScale.kr(bufnum)*rate,
@@ -182,7 +182,7 @@ Engine_AcidBreaks : CroneEngine {
             env = EnvGen.ar(Env.new([10e-3,1,1,10e-9],[0.03,sustain*duration,decay],'exp'),t_trig)+(env_accent*accentVal);
             waves = [Saw.ar([noteVal-detune,noteVal+detune].midicps, mul: env), Pulse.ar([note-detune,note+detune].midicps, 0.5, mul: env)];
             filterEnv =  EnvGen.ar( Env.new([10e-9, 1, 10e-9], [0.01, decay],  'exp'), t_trig);
-            filter = RLPFD.ar(SelectX.ar(wave, waves), cutoff +(filterEnv*env_adjust), res,gain);
+            filter = RLPFD.ar(SelectX.ar(wave, waves, wrap:0), cutoff +(filterEnv*env_adjust), res,gain);
             snd=(filter*amp).tanh;
             snd=snd+SinOsc.ar([noteVal-12-detune,noteVal-12+detune].midicps,mul:sub*env/10.0);
             Out.ar(out, DelayN.ar(snd,delaytime:latency)*EnvGen.ar(Env.new([0,1],[4])));
@@ -198,11 +198,11 @@ Engine_AcidBreaks : CroneEngine {
             arg in, auxinBus,tape_wetBus,tape_biasBus,tape_satBus,tape_driveBus,
             tape_oversample=1,mode=0,
             dist_wetBus,dist_driveBus,dist_biasBus,dist_lowBus,dist_highBus,
-            dist_shelfBus,dist_oversample=2,
+            dist_shelfBus,dist_oversample=0,
             wowflu=1.0,
             wobble_rpm=33, wobble_amp=0.05, flutter_amp=0.03, flutter_fixedfreq=6, flutter_variationfreq=2,
-            hpf=60,hpfqr=0.6,
-            lpf=18000,lpfqr=0.6,
+            hpfBus=60,hpfqrBus=0.6,
+            lpfBus=18000,lpfqrBus=0.6,
             buf;
             var snd=In.ar(in,2);
             var auxin=In.kr(auxinBus);//bus
@@ -216,9 +216,13 @@ Engine_AcidBreaks : CroneEngine {
             var dist_low=In.kr(dist_lowBus);//bus
             var dist_high=In.kr(dist_highBus);//bus
             var dist_shelf=In.kr(dist_shelfBus);//bus
+            var hpf=In.kr(hpfBus);//bus
+            var hpfqr=In.kr(hpfqrBus);//bus
+            var lpf=In.kr(lpfBus);//bus
+            var lpfqr=In.kr(lpfqrBus);//bus
             snd=snd+(auxin*SoundIn.ar([0,1]));
-            snd=SelectX.ar(Lag.kr(tape_wet,1),[snd,AnalogTape.ar(snd,tape_bias,tape_sat,tape_drive,tape_oversample,mode)]);
-            snd=SelectX.ar(Lag.kr(dist_wet,1),[snd,AnalogVintageDistortion.ar(snd,dist_drive,dist_bias,dist_low,dist_high,dist_shelf,dist_oversample)]);          
+            snd=SelectX.ar(Lag.kr(tape_wet,1),[snd,AnalogTape.ar(snd,tape_bias,tape_sat,tape_drive,tape_oversample,mode)],wrap:0);
+            // snd=SelectX.ar(Lag.kr(dist_wet,1),[snd,AnalogVintageDistortion.ar(snd,dist_drive,dist_bias,dist_low,dist_high,dist_shelf,dist_oversample)],wrap:0);          
             snd=RHPF.ar(snd,hpf,hpfqr);
             snd=RLPF.ar(snd,lpf,lpfqr);
             Out.ar(0,snd*EnvGen.ar(Env.new([0,1],[4])));
@@ -233,7 +237,7 @@ Engine_AcidBreaks : CroneEngine {
             snd=Shaper.ar(buf,Saw.ar(note.midicps,SinOsc.kr(rrand(1/30,1/5)).range(0.1,1.0)));
             snd=Pan2.ar(snd,rrand(-0.25,0.25));
             snd=RLPF.ar(snd,notelpf.midicps,0.707);
-            snd=SelectX.ar(VarLag.kr(LFNoise0.kr(1/10),10,warp:\sine).range(0.1,0.7),[snd,snd*LFPar.ar(VarLag.kr(LFNoise0.kr(1/10),10,warp:\sine).range(1,6))]); 
+            snd=SelectX.ar(VarLag.kr(LFNoise0.kr(1/10),10,warp:\sine).range(0.1,0.7),[snd,snd*LFPar.ar(VarLag.kr(LFNoise0.kr(1/10),10,warp:\sine).range(1,6))],wrap:0); 
             env=EnvGen.ar(Env.new([0.00001,1.0,sustain,0.00001],[attack,decay,release],curve:[\welch,\sine,\exp]),doneAction:2);
             snd=snd*env*amp*EnvGen.ar(Env.new([0,1],[0.1]));
             snd=snd.tanh;
@@ -367,7 +371,7 @@ Engine_AcidBreaks : CroneEngine {
 
 
         // <Tape>
-        [\auxin,\tape_wet,\tape_bias,\tape_sat,\tape_drive,\dist_wet,\dist_drive,\dist_bias,\dist_low,\dist_high,\dist_shelf].do({ arg fx;
+        [\auxin,\tape_wet,\tape_bias,\tape_sat,\tape_drive,\dist_wet,\dist_drive,\dist_bias,\dist_low,\dist_high,\dist_shelf,\lpf,\lpfqr,\hpf,\hpfqr].do({ arg fx;
             var domain="tape";
             var key=domain++"_"++fx;
             fxbus.put(key,Bus.control(context.server,1));

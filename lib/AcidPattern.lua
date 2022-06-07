@@ -131,8 +131,8 @@ function AP:redraw(x,y,sh,sw)
   screen.level(15)
   screen.blend_mode(0)
   for i=1,16 do
-    screen.move(x+sw*(i-1),y)
-    screen.text_center(self.key_step[self.step[i]])
+    -- screen.move(x+sw*(i-1),y)
+    -- screen.text_center(self.key_step[self.step[i]])
     screen.move(x+sw*(i-1),y+sh*1)
     screen.text_center(self.key_notes[self.note[i]])
     screen.move(x+sw*(i-1),y+sh*2)
@@ -144,7 +144,7 @@ function AP:redraw(x,y,sh,sw)
     screen.move(x+sw*(i-1),y+sh*5)
     screen.text_center(self.key_punctuation[self.punct[i]])
   end
-  screen.move(x+sw*(self.current-1),y-5)
+  screen.move(x+sw*(self.current-1),y+4)
   screen.text_center("^")
 end
 
