@@ -90,7 +90,6 @@ function AP:set(ind,pos,d)
     for i=1,#self.duration do
       self.duration[i]=durations[i]
     end
-    tab.print(self.duration)
   end
 end
 

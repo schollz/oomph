@@ -12,6 +12,10 @@ function Pad:new(o)
 end
 
 function Pad:init()
+  self.mx_samples="/home/we/dust/audio/mx.samples/ultra_synth/"
+  if not util.file_exists(self.mx_samples) then
+    print("ERROR ERROR ERROR - PLEASE SEE README TO INSTALL MX.SAMPLES DEFAULT")
+  end
   local prams={
     {name="volume",eng="amp",min=0,max=4,default=0.5,div=0.01,unit="amp"},
     {name="attack",eng="attack",min=0,max=10,default=clock.get_beat_sec()/2,div=0.1,unit="s"},
@@ -21,12 +25,27 @@ function Pad:init()
     {name="pan",eng="pan",min=-1,max=1,default=0,div=0.01},
     {name="lpf",eng="lpf",min=50,max=20000,default=20000,div=100,exp=true,unit='Hz'},
   }
-  params:add_group("CHORDS",#prams+27)
+  params:add_group("CHORDS",#prams+28)
+  params:add_file("mx_samples","load mx.samples",_path.audio.."mx.samples/")
+  params:set_action("mx_samples",function(x)
+    if x==nil then
+      do return end
+    end
+    pathname,filename,ext=string.match(x,"(.-)([^\\/]-%.?([^%.\\/]*))$")
+    if string.find(pathname,"mx.samples/") then
+      local suffix="mx.samples/"
+      if pathname:sub(-string.len(suffix))==suffix then
+        do return end
+      end
+      print("loading "..pathname)
+      self.mx_samples=pathname
+    end
+  end)
   for _,p in ipairs(prams) do
     params:add_control("pad_"..p.eng,p.name,controlspec.new(p.min,p.max,p.exp and 'exp' or 'lin',p.div,p.default,p.unit or "",p.div/(p.max-p.min)))
     params:set_action("pad_"..p.eng,function(x)
       -- TODO: make the ultra_synth a parameter
-      engine["pad_"..p.eng]("/home/we/dust/audio/mx.samples/ultra_synth/",x)
+      engine["pad_"..p.eng](self.mx_samples,x)
     end)
   end
 
@@ -99,7 +118,7 @@ function Pad:process(beat)
   end
 
   for _,note in ipairs(notes) do
-    engine.pad_note("/home/we/dust/audio/mx.samples/ultra_synth/",note,math.random(80,110),duration)
+    engine.pad_note(self.mx_samples,note,math.random(80,110),duration)
     -- engine.pad(
     --   params:get("pad_volume")/5,
     --   params:get("pad_reverb"),
