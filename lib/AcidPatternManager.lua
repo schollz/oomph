@@ -78,7 +78,7 @@ function APM:save(filename)
   io.close(file)
 end
 
-function AP:open(filename)
+function APM:open(filename)
   filename=filename..".json"
   if not util.file_exists(filename) then
     do return end
@@ -111,18 +111,13 @@ end
 
 function APM:redraw(x,y,sh,sw)
   self.ap[self.current]:redraw(x,y,sh,sw)
-  local width=128/self.pattern_num
+  local width=8
   for i=1,self.pattern_num do
-    screen.rect(2+(i-1)*width,60,width-2,3)
-    if self.current==i then
-      screen.level(15)
-      screen.fill()
-    else
-      screen.level(5)
-      screen.stroke()
-    end
+    screen.rect(2+(i-1)*width-2,59,width-2,4)
+    screen.level(self.current==i and 15 or 2)
+    screen.fill()
   end
-  screen.move(10+10*self.current,60)
+  screen.move(5+10*self.current,60)
   screen.text_center(".")
 end
 
