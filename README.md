@@ -31,6 +31,7 @@ the first five rows edit the parameters of the monophonic synth. the sixth row c
 
 ## install
 
+*oomph* will need 100mb of disk space (95 mb for wav files and 5 mb for SuperCollider files).
 
 there are three steps to install.
 
