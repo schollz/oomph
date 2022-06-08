@@ -1,5 +1,5 @@
 -- oomph v0.0.1
--- :) :) :) ;) :) :0 :)
+-- put a little into it.
 --
 -- llllllll.co/t/oomph
 --

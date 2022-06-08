@@ -3,29 +3,29 @@
 > put a little oomph into it.
 
 
-oomph is sequencer with multiple built-in voices. this script combines some previously contributed projects with additions. it currently encompasses:
+oomph is sequencer with multiple built-in synth and sample voices. 
 
-- a monophonic synthesizer with accented filters (from [acid-test](https://github.com/schollz/acid-test))
+this script combines some previously contributed projects with additions. it currently encompasses:
+
+- a monophonic synthesizer w/ 16-step sequencer (from [acid-test](https://github.com/schollz/acid-test) w/ better accenting dynamics)
 - a sample loop player with customizable effects (from [amen](https://github.com/schollz/amen))
-- a sample-based chord sequencer (from [synthy](https://github.com/schollz/synthy))
-- a [plaits module](TODO) (from [mi-ugens]())
+- a sample-based chord sequencer (from [synthy](https://github.com/schollz/synthy) and the unreleased [mx.samples2](https://github.com/schollz/mx.samples2"))
+- a [plaits module](https://mutable-instruments.net/modules/plaits/) (from [mi-ugens](https://github.com/v7b1/mi-UGens))
 - a tape emulator (from [portedplugins]()/[tapedeck](https://github.com/schollz/tapedeck))
 
-the additional features that differ scripts from their original counterparts include:
-
-- better accenting dynamics for the monophonic synth
-- internal modulation toggles for nearly every parameter
-- chainable sequencer with 16 tracks and 16 steps/track for monophonic synth
+following guidance from @sixolet I worked out a way to make almost every parameter modulateable through internal ramps/lfos.
 
 ## Requirements
 
 - norns
-- (optional) midi controller
-- (optional) grid
+- midi controller (optional)
+- grid (optional)
 
 ## Documentation
 
 most of the usage can be found in the parameters - you can directly edit parameters or use a midi controller to map devices for easy manipulation. there are also LFOs for nearly every parameter accessible through the "MOD" menus. 
+
+## monophonic sequencer
 
 the main screen allows you to sequence the monophonic synth.
 
@@ -52,13 +52,10 @@ audio input is re-routed through norns into the tape emulator. because of this, 
 
 ### sample looper
 
-the sample looper has its functionality available in the parameters menu. there are additionally special triggered effects which are hardcoded. 
+the sample looper attempts to sync to the tempo by changing playback speed and resetting to the beginning at the beginning of the 16 step sequencer (can be controlled by a probability in the parametrs). the script tries to determine bpm from the filename if there is a "bpmX" in the name (i.e. `mysample-bpm120-1.wav` => 120 bpm). if there is no bpm available then the script figures out the bpm by a "best guess" approach by assuming that the loop is quantized to the nearest beat and checking to see which bpm allocates the most even number of beats. 
 
-the script tries to determine bpm from the filename if there is a "bpmX" in the name (i.e. mysample_bpm120_1.wav = 120 bpm). if there is no bpm available then the script figures out the bpm by a "best guess" approach by assuming that the loop is quantized to the nearest beat and checking to see which bpm allocates the most even number of beats. 
 
-the sample loop is automatically synced to the beat - the sync probability can be set in the parameters (which controls how often it resets at the beginning of a loop). the tempo of the loop is sped/slowed to match the current tempo based on the estimated bpm of the loop.
-
-its possible to add your own since every parameter in the sample looper can be modulated using a variety of functions (sine, ramps, etc) - all you do is make a function that you want toggled ([like this](https://github.com/schollz/oomph/blob/main/lib/Amen.lua#L194-L196)) and then add the name of that function [to this array](https://github.com/schollz/oomph/blob/main/lib/Amen.lua#L34).
+there are some hard coded triggerable effects in the parameters menu and its possible to add your own since every parameter in the sample looper can be modulated using a variety of functions (sine, ramps, etc) - all you do is make a function that you want toggled ([like this](https://github.com/schollz/oomph/blob/main/lib/Amen.lua#L194-L196)) and then add the name of that function [to this array](https://github.com/schollz/oomph/blob/main/lib/Amen.lua#L34).
 
 if you need a script to create quantized loops - checkout [amen](https://llllllll.co/t/amen).
 
@@ -92,7 +89,7 @@ the first five rows edit the parameters of the monophonic synth. the sixth row c
 
 - (cosmetic bug) if you goto a "MOD" and toggle one, and you go to the non-MOD page and change the parameter it will automatically turn off the toggle *but the toggle won't appeared to be turned off in the menu* until you exit the menu and come back into the menu.
 - (ux bug) MOD lfos are set according to the current tempo, if you change tempos the MOD lfos will stay with periods from the previous tempo
-- the sample looper may not work with mono sound files
+- the sample looper may not work fully with mono sound files
 
 
 ## install
@@ -113,7 +110,7 @@ there are three steps to install.
 dofile("~/dust/code/oomph/lib/update.lua")
 ```
 
-**thirdly**, you need to restart your norns.
+**thirdly**, you need to restart your norns. now you can run `oomph` without issues.
 
 ## update
 
