@@ -19,19 +19,22 @@ scandir=function(directory)
   return t
 end
 
--- install ultra synth patch
-if not file_exists("~/dust/code/mx.samples/ultra_synth") then
-  os.execute("mkdir -p ~/dust/audio/mx.samples/ultra_synth")
-  os.execute("wget https://github.com/schollz/mx.samples/releases/download/samples/ultra_synth.zip -P /tmp/")
-  os.execute("unzip /tmp/ultra_synth.zip -d ~/dust/audio/mx.samples/ultra_synth/")
-  os.execute("rm /tmp/ultra_synth.zip")
-end
+-- update self
+os.execute("cd ~/dust/code/oomph && git pull")
 
 -- install or update mx.samples2
 if not file_exists("~/dust/code/mx.samples2") then 
 	os.execute("git clone https://github.com/schollz/mx.samples2 ~/dust/code/mx.samples2")
 else
 	os.execute("cd ~/dust/code/mx.samples2 && git pull")
+end
+
+-- install ultra synth patch
+if not file_exists("~/dust/code/mx.samples/ultra_synth") then
+  os.execute("mkdir -p ~/dust/audio/mx.samples/ultra_synth")
+  os.execute("wget https://github.com/schollz/mx.samples/releases/download/samples/ultra_synth.zip -P /tmp/")
+  os.execute("unzip /tmp/ultra_synth.zip -d ~/dust/audio/mx.samples/ultra_synth/")
+  os.execute("rm /tmp/ultra_synth.zip")
 end
 
 -- install ported plugins if not already
