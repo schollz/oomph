@@ -21,17 +21,56 @@ function Plaits:init()
     {name="engine",eng="engine",min=1,max=15,default=13,div=1},
     {name="harm",eng="harm",min=0,max=1,default=0.15,div=0.01},
     {name="timbre",eng="timbre",min=0,max=1,default=0.87,div=0.01},
-    {name="morph",eng="morph",min=0,max=1,default=0.76,div=0.01},
+    {name="morph",eng="morph",min=0,max=1,default=0.38,div=0.01},
     {name="decay",eng="decay",min=0,max=1,default=0.9,div=0.01},
+  }
+  local prams_extra={
     {name="euclid n",eng="n",min=0,max=64,default=16,div=1},
     {name="euclid k",eng="k",min=0,max=64,default=4,div=1},
     {name="euclid shift",eng="w",min=0,max=64,default=0,div=1},
   }
-  params:add_group("PLAITS"..self.id,#prams+1)
+  params:add_group("PLAITS"..self.id,#prams+1+#prams_extra)
   params:add{type="number",id="plaits_pitch"..self.id,name="note",min=0,max=127,default=36,formatter=function(param) return MusicUtil.note_num_to_name(param:get(),true) end}
+  params:set_action("plaits_pitch"..self.id,function(x)
+    engine["plaits_pitch"..self.id]("dc",0,x,0)
+  end)
   for _,p in ipairs(prams) do
     params:add_control("plaits_"..p.eng..self.id,p.name,controlspec.new(p.min,p.max,p.exp and 'exp' or 'lin',p.div,p.default,p.unit or "",p.div/(p.max-p.min)))
+    params:set_action("plaits_"..p.eng..self.id,function(x)
+      engine["plaits_"..p.eng..self.id]("dc",0,x,0)
+      params:set("plaits_"..p.eng..self.id.."modtrig",0)
+    end)
   end
+  for _,p in ipairs(prams_extra) do
+    params:add_control("plaits_"..p.eng..self.id,p.name,controlspec.new(p.min,p.max,p.exp and 'exp' or 'lin',p.div,p.default,p.unit or "",p.div/(p.max-p.min)))
+    params:set_action("plaits_"..p.eng..self.id,function(x)
+      engine["plaits_"..p.eng..self.id]("dc",0,x,0)
+      params:set("plaits_"..p.eng..self.id.."modtrig",0)
+    end)
+  end
+
+  params:add_group("PLAITS MOD",#prams*5)
+  local mod_ops_ids={"sine","drunk","xline","line"}
+  local mod_ops_nom={"sine","drunk","exp ramp","linear ramp"}
+  for _,p in ipairs(prams) do
+    params:add_option("plaits_"..p.eng..self.id.."modoption",p.name.." form",mod_ops_nom,1)
+    params:add_control("plaits_"..p.eng..self.id.."modperiod",p.name.." period",controlspec.new(0.1,120,'exp',0.1,2,"s",0.1/119.9))
+    params:add_control("plaits_"..p.eng..self.id.."modmin",p.name.." min",controlspec.new(p.min,p.max,p.exp and 'exp' or 'lin',p.div,p.min,p.unit or "",p.div/(p.max-p.min)))
+    params:add_control("plaits_"..p.eng..self.id.."modmax",p.name.." max",controlspec.new(p.min,p.max,p.exp and 'exp' or 'lin',p.div,p.max,p.unit or "",p.div/(p.max-p.min)))
+    params:add_binary("plaits_"..p.eng..self.id.."modtrig",p.name.." trig","toggle")
+    params:set_action("plaits_"..p.eng..self.id.."modtrig",function(x)
+      if x~=1 then
+        do return end
+      end
+      print(mod_ops_ids[params:get("plaits_"..p.eng..self.id.."modoption")],params:get("plaits_"..p.eng..self.id.."modmin"),
+        params:get("plaits_"..p.eng..self.id.."modmax"),
+      params:get("plaits_"..p.eng..self.id.."modperiod"))
+      engine["plaits_"..p.eng..self.id](mod_ops_ids[params:get("plaits_"..p.eng..self.id.."modoption")],params:get("plaits_"..p.eng..self.id.."modmin"),
+        params:get("plaits_"..p.eng..self.id.."modmax"),
+      params:get("plaits_"..p.eng..self.id.."modperiod"))
+    end)
+  end
+
   for _,nn in ipairs({"n","k","w"}) do
     params:set_action("plaits_"..nn..self.id,function(x)
       self.euclid=er.gen(params:get("plaits_k"..self.id),params:get("plaits_n"..self.id),params:get("plaits_w"..self.id))
@@ -43,21 +82,8 @@ end
 function Plaits:process(beat)
   local beat=beat%params:get("plaits_n"..self.id)+1
   if self.euclid[beat] then
-    self:hit()
+    engine.plaits()
   end
-end
-
-function Plaits:hit()
-  engine.plaits(
-    params:get("plaits_amp"..self.id),
-    params:get("plaits_attack"..self.id),
-    params:get("plaits_decayEnv"..self.id),
-    math.floor(params:get("plaits_engine"..self.id)),
-    params:get("plaits_pitch"..self.id),
-    params:get("plaits_harm"..self.id),
-    params:get("plaits_morph"..self.id),
-    params:get("plaits_timbre"..self.id),
-  params:get("plaits_decay"..self.id))
 end
 
 return Plaits

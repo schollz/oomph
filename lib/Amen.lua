@@ -169,7 +169,7 @@ function Amen:reverse1()
 end
 
 function Amen:process(beat)
-  self.beat=beat%self.beats_eigth_notes+1
+  self.beat=beat%self.beats_eigth_notes
 
   -- modify the known tempo if it changes
   if clock.get_tempo()~=self.tempo_known then
@@ -178,7 +178,8 @@ function Amen:process(beat)
   end
 
   -- if the internal beat hits 1, reset the drums
-  if self.beat==1 then
+  if beat%(math.ceil(self.beats_eigth_notes/16)*16)==0 and math.random()<0.5 then
+    print("reset")
     engine.amen_jump(0.0,0.0,1.0)
   end
 

@@ -64,8 +64,17 @@ Engine_Oomph : CroneEngine {
         }).add;
 
         SynthDef("defPlaits",{
-            arg out,amp=0.5,attack,decayEnv,engine,pitch,harm,morph,timbre,decay;
+            arg out,ampBus=0.5,attackBus,decayEnvBus,engineBus,pitchBus,harmBus,morphBus,timbreBus,decayBus;
             var snd,env;
+            var amp=DC.kr(In.kr(ampBus));
+            var attack=DC.kr(In.kr(attackBus));
+            var decayEnv=DC.kr(In.kr(decayEnvBus));
+            var engine=DC.kr(In.kr(engineBus));
+            var pitch=DC.kr(In.kr(pitchBus));
+            var harm=DC.kr(In.kr(harmBus));
+            var morph=DC.kr(In.kr(morphBus));
+            var timbre=DC.kr(In.kr(timbreBus));
+            var decay=DC.kr(In.kr(decayBus));
             env=EnvGen.ar(Env.perc(attack,decayEnv),1,doneAction:2);
             snd=MiPlaits.ar(
                 pitch:pitch,
@@ -412,19 +421,44 @@ Engine_Oomph : CroneEngine {
         // </Tape>
 
         // <Plaits>
-        this.addCommand("plaits","fffffffff", { arg msg;
+        [\amp,\attack,\decayEnv,\engine,\pitch,\harm,\morph,\timbre,\decay].do({ arg fx;
+            var domain="plaits";
+            var key=domain++"_"++fx;
+            fxbus.put(key,Bus.control(context.server,1));
+            fxbus.at(key).value=1.0;
+            this.addCommand(key, "sfff", { arg msg;
+                if (key=="lag",{
+                    if (fxsyn.at(key).isNil,{
+                        fxsyn.put(key,Synth.new("defMod_"++msg[1].asString,[\out,fxbus.at(key),\msg1,msg[2],\msg2,msg[3],\msg3,msg[4]]));
+                    },{
+                        fxsyn.at(key).set(\msg1,msg[2],\msg2,msg[3],\msg3,msg[4]);
+                    });
+                },{
+                    if (fxsyn.at(key).notNil,{
+                        fxsyn.at(key).free;
+                    });
+                    fxsyn.put(key,Synth.new("defMod_"++msg[1].asString,[\out,fxbus.at(key),\msg1,msg[2],\msg2,msg[3],\msg3,msg[4]]));
+                })
+            });
+        });
+
+        this.addCommand("plaits","", { arg msg;
             // arg out,amp=0.5,attack,decayEnv,engine,pitch,harm,morph,timbre,decay;
+            fxbus.at("plaits_pitch").index;
+                         fxbus.at("plaits_pitch").get({ arg val;
+                    ["plaits_pitch",val].postln;
+                });
             Synth.before(synTape,"defPlaits",[
                 \out,busTape,
-                \amp,msg[1],
-                \attack,msg[2],
-                \decayEnv,msg[3],
-                \engine,msg[4],
-                \pitch,msg[5],
-                \harm,msg[6],
-                \morph,msg[7],
-                \timbre,msg[8],
-                \decay,msg[9],
+                \ampBus,fxbus.at("plaits_amp"),
+                \attackBus,fxbus.at("plaits_attack"),
+                \decayEnvBus,fxbus.at("plaits_decayEnv"),
+                \engineBus,fxbus.at("plaits_engine"),
+                \pitchBus,fxbus.at("plaits_pitch"),
+                \harmBus,fxbus.at("plaits_harm"),
+                \morphBus,fxbus.at("plaits_morph"),
+                \timbreBus,fxbus.at("plaits_timbre"),
+                \decayBus,fxbus.at("plaits_decay"),
             ]);
         });
 
