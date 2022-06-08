@@ -47,40 +47,19 @@ c=Bus.control(s);
 
 ## install
 
-install mx.samples2
-```
-;install https://github.com/schollz/mx.samples2
-```
-
-get the nessecary patch
-
-```
-os.execute("mkdir -p ~/dust/audio/mx.samples/ultra_synth")
-os.execute("wget https://github.com/schollz/mx.samples/releases/download/samples/ultra_synth.zip -P /tmp/")
-os.execute("unzip /tmp/ultra_synth.zip -d ~/dust/audio/mx.samples/ultra_synth/")
-```
-
-install tapedeck
-
-```
-wget https://github.com/schollz/tapedeck/releases/download/PortedPlugins/PortedPlugins.tar.gz
-tar -xvzf PortedPlugins.tar.gz -C ~/.local/share/SuperCollider/Extensions/
-rm PortedPlugins.tar.gz
-```
-
-install mi-ugens
-
-```
-wget https://github.com/schollz/oomph/releases/download/prereqs/mi-UGens.762548fd3d1fcf30e61a3176c1b764ec1cc82020.tar.gz
-tar -xvzf mi-UGens.762548fd3d1fcf30e61a3176c1b764ec1cc82020.tar.gz -C ~/.local/share/SuperCollider/Extensions/
-rm i-UGens.762548fd3d1fcf30e61a3176c1b764ec1cc82020.tar.gz
-```
-
-install oomph
 
 ```
 ;install https://github.com/schollz/oomph
 ```
+
+then (very important) run the install:
+
+```lua
+dofile("~/dust/code/oomph/lib/install.lua")
+```
+
+then it is very very important that you restart your norns.
+
 
 
 
