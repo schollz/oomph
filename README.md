@@ -3,15 +3,15 @@
 > put a little oomph into it.
 
 
-oomph is a norns script that combines some previously contributed projects with additions. it currently encompasses:
+oomph is sequencer with multiple built-in voices. this script combines some previously contributed projects with additions. it currently encompasses:
 
 - a monophonic synthesizer with accented filters (from [acid-test](https://github.com/schollz/acid-test))
 - a sample loop player with customizable effects (from [amen](https://github.com/schollz/amen))
 - a sample-based chord sequencer (from [synthy](https://github.com/schollz/synthy))
--  a [plaits module](TODO) (from [mi-ugens]())
--  a tape emulator (from [portedplugins]()/[tapedeck](https://github.com/schollz/tapedeck))
+- a [plaits module](TODO) (from [mi-ugens]())
+- a tape emulator (from [portedplugins]()/[tapedeck](https://github.com/schollz/tapedeck))
 
-the additional features include:
+the additional features that differ scripts from their original counterparts include:
 
 - better accenting dynamics for the monophonic synth
 - internal modulation toggles for nearly every parameter
@@ -48,13 +48,13 @@ the fifth row can change the articulation of the sequence. the "@" denotes a gat
 
 ### audio input
 
-audio input is re-routed through norns into the tape emulator. because of this, instead of using the "MONITOR" control in the audio mixer, you should instead use the "aux input" control.
+audio input is re-routed through norns into the tape emulator. because of this, instead of using the "MONITOR" control in the audio mixer, you should instead use the "INPUT LEVEL" control in the parameters menu.
 
 ### grid
 
+grid is simply an alternative interface for the main norns screen - it is totally optional.
+
 the first five rows edit the parameters of the monophonic synth. the sixth row can be used to change patterns. the sixth row also allows chaining patterns by holding down one pattern key and pressing another *while playing*. the sixth row also allows copying patterns by holding down one pattern key and pressing another *while not playing*.
-
-
 
 
 ## todos
@@ -69,11 +69,11 @@ the first five rows edit the parameters of the monophonic synth. the sixth row c
 - ~~stutter fx (gated etc)~~
 - ~~allow pattern to draw itself~~
 - ~~allow multiple patterns~~
-- add more chaotic lfos
 - ~~add start and stop buttons~~
 - ~~add start and stop transport~~
 - ~~allow using other samples for the pad~~
 - ~~allow 16 tracks~~
+- add more chaotic lfos
 - add midi out to things
 
 ## known bugs
