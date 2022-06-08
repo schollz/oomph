@@ -67,9 +67,10 @@ function GGrid:key_press(row,col,on)
     if on then
       if self.row8~=nil then
         params:set("pattern"..self.row8,col)
+        params:set("sequencer_on",1)
       else
         self.row8=col
-        self.apm.current=col
+        self.apm:set_current(col)
       end
     else
       self.row8=nil

@@ -64,7 +64,7 @@ Engine_Oomph : CroneEngine {
         }).add;
 
         SynthDef("defPlaits",{
-            arg out,ampBus=0.5,attackBus,decayEnvBus,engineBus,pitchBus,harmBus,morphBus,timbreBus,decayBus;
+            arg out,ampBus=0.5,panBus,attackBus,decayEnvBus,engineBus,pitchBus,harmBus,morphBus,timbreBus,decayBus;
             var snd,env;
             var amp=DC.kr(In.kr(ampBus));
             var attack=DC.kr(In.kr(attackBus));
@@ -75,6 +75,7 @@ Engine_Oomph : CroneEngine {
             var morph=DC.kr(In.kr(morphBus));
             var timbre=DC.kr(In.kr(timbreBus));
             var decay=DC.kr(In.kr(decayBus));
+            var pan=DC.kr(In.kr(panBus));
             env=EnvGen.ar(Env.perc(attack,decayEnv),1,doneAction:2);
             snd=MiPlaits.ar(
                 pitch:pitch,
@@ -85,7 +86,8 @@ Engine_Oomph : CroneEngine {
                 engine:engine,
                 trigger:1,
             );
-            Out.ar(out,snd*env*amp);
+            snd=snd*env*amp;
+            Out.ar(out,Balance2.ar(snd[0],snd[1],pan));
         }).add;
 
         SynthDef("defAmen",{ 
@@ -421,7 +423,7 @@ Engine_Oomph : CroneEngine {
         // </Tape>
 
         // <Plaits>
-        [\amp,\attack,\decayEnv,\engine,\pitch,\harm,\morph,\timbre,\decay].do({ arg fx;
+        [\amp,\attack,\decayEnv,\engine,\pitch,\harm,\morph,\timbre,\decay,\pan].do({ arg fx;
             var domain="plaits";
             var key=domain++"_"++fx;
             fxbus.put(key,Bus.control(context.server,1));
@@ -443,11 +445,6 @@ Engine_Oomph : CroneEngine {
         });
 
         this.addCommand("plaits","", { arg msg;
-            // arg out,amp=0.5,attack,decayEnv,engine,pitch,harm,morph,timbre,decay;
-            fxbus.at("plaits_pitch").index;
-                         fxbus.at("plaits_pitch").get({ arg val;
-                    ["plaits_pitch",val].postln;
-                });
             Synth.before(synTape,"defPlaits",[
                 \out,busTape,
                 \ampBus,fxbus.at("plaits_amp"),
@@ -459,6 +456,7 @@ Engine_Oomph : CroneEngine {
                 \morphBus,fxbus.at("plaits_morph"),
                 \timbreBus,fxbus.at("plaits_timbre"),
                 \decayBus,fxbus.at("plaits_decay"),
+                \panBus,fxbus.at("plaits_pan"),
             ]);
         });
 

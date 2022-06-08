@@ -59,8 +59,8 @@ function APM:init()
     params:add_control("threeohthree_"..p.eng.."modmax",p.name.." max",controlspec.new(p.min,p.max,p.exp and 'exp' or 'lin',p.div,p.max,p.unit or "",p.div/(p.max-p.min)))
     params:add_binary("threeohthree_"..p.eng.."modtrig",p.name.." trig","toggle")
     params:set_action("threeohthree_"..p.eng.."modtrig",function(x)
-      if x~=1 then 
-	      do return end 
+      if x~=1 then
+        do return end
       end
       print(mod_ops_ids[params:get("threeohthree_"..p.eng.."modoption")],params:get("threeohthree_"..p.eng.."modmin"),
         params:get("threeohthree_"..p.eng.."modmax"),
@@ -121,6 +121,11 @@ function APM:current_step()
   return self.ap[self.current].current
 end
 
+function APM:set_current(i)
+  self.ap[i].current=self.ap[self.current].current
+  self.current=i
+end
+
 function APM:process(beat)
   if self.ap[self.current].current==16 and params:get("sequencer_on")==1 then
     self.current=params:get("pattern"..self.current)
@@ -129,7 +134,7 @@ function APM:process(beat)
 end
 
 function APM:next_pattern()
-	return params:get("pattern"..self.current)
+  return params:get("pattern"..self.current)
 end
 
 function APM:redraw(x,y,sh,sw)
