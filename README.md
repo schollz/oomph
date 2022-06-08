@@ -48,19 +48,29 @@ c=Bus.control(s);
 ## install
 
 
+there are three steps to install.
+
+**first* open maiden and run the following:
+
 ```
 ;install https://github.com/schollz/oomph
 ```
 
-then (very important) run the install:
+**second*, keep maiden open and run the following line to make sure everything is copasetic:
 
 ```lua
-dofile("~/dust/code/oomph/lib/install.lua")
+dofile("~/dust/code/oomph/lib/update.lua")
 ```
 
-then it is very very important that you restart your norns.
+**finally* you need to restart your norns.
 
+## update
 
+to update the script just run the following in maiden:
+
+```lua
+dofile("~/dust/code/oomph/lib/update.lua")
+```
 
 
 ## todos
