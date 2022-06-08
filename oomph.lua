@@ -31,7 +31,10 @@ local beat_num=-1
 
 function init()
   -- setup audio folders
-  util.os_capture("mkdir -p /home/we/dust/audio/oomph")
+  if not util.file_exists("/home/we/dust/audio/oomph") then
+    os.execute("mkdir -p /home/we/dust/audio/oomph")
+    os.execute("cp /home/we/dust/code/oomph/lib/*.wav /home/we/dust/audio/oomph/")
+  end
 
   apm=apm_:new()
   amen=amen_:new()
