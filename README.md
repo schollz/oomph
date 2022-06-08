@@ -17,8 +17,15 @@ the additional features include:
 - internal modulation toggles for nearly every parameter
 - chainable sequencer with 16 tracks and 16 steps/track for monophonic synth
 
+## Requirements
 
-## usage
+- norns
+- (optional) midi controller
+- (optional) grid
+
+## Documentation
+
+most of the usage can be found in the parameters - you can directly edit parameters or use a midi controller to map devices for easy manipulation. there are also LFOs for nearly every parameter accessible through the "MOD" menus. 
 
 the main screen allows you to sequence the monophonic synth.
 
@@ -39,14 +46,41 @@ the fourth row allows you to add an accent or slide. "O" does an accent (i.e. pr
 
 the fifth row can change the articulation of the sequence. the "@" denotes a gate, the "o" is a rest" and a "-" after a gate provides a legato. the actual strength of a legato is controlled in teh parameters by the "sustain" parameter.
 
+### audio input
 
-### mono synth sequencer
-
-the screen shows the monophonic synth sequencer.
+audio input is re-routed through norns into the tape emulator. because of this, instead of using the "MONITOR" control in the audio mixer, you should instead use the "aux input" control.
 
 ### grid
 
 the first five rows edit the parameters of the monophonic synth. the sixth row can be used to change patterns. the sixth row also allows chaining patterns by holding down one pattern key and pressing another *while playing*. the sixth row also allows copying patterns by holding down one pattern key and pressing another *while not playing*.
+
+
+
+
+## todos
+
+- ~~lfos for each parameter (depth and period)~~
+- ~~clamps on all the variables in SuperCollider~~
+- ~~duration working~~
+- ~~fix amen cleanup~~
+- ~~add scale changes? root note changes?~~
+- ~~recover sequence on save~~
+- ~~use toggles instead of triggers for lfos~~
+- ~~stutter fx (gated etc)~~
+- ~~allow pattern to draw itself~~
+- ~~allow multiple patterns~~
+- add more chaotic lfos
+- ~~add start and stop buttons~~
+- ~~add start and stop transport~~
+- ~~allow using other samples for the pad~~
+- ~~allow 16 tracks~~
+- add midi out to things
+
+## known bugs
+
+- (cosmetic bug) if you goto a "MOD" and toggle one, and you go to the non-MOD page and change the parameter it will automatically turn off the toggle *but the toggle won't appeared to be turned off in the menu* until you exit the menu and come back into the menu.
+- (ux bug) MOD lfos are set according to the current tempo, if you change tempos the MOD lfos will stay with periods from the previous tempo
+- the sample looper may not work with mono sound files
 
 
 ## install
@@ -76,28 +110,3 @@ to update the script just run the following in maiden:
 ```lua
 dofile("~/dust/code/oomph/lib/update.lua")
 ```
-
-
-## todos
-
-- ~~lfos for each parameter (depth and period)~~
-- ~~clamps on all the variables in SuperCollider~~
-- ~~duration working~~
-- ~~fix amen cleanup~~
-- ~~add scale changes? root note changes?~~
-- ~~recover sequence on save~~
-- ~~use toggles instead of triggers for lfos~~
-- ~~stutter fx (gated etc)~~
-- ~~allow pattern to draw itself~~
-- ~~allow multiple patterns~~
-- add more chaotic lfos
-- ~~add start and stop buttons~~
-- ~~add start and stop transport~~
-- ~~allow using other samples for the pad~~
-- ~~allow 16 tracks~~
-- add midi out to things
-
-## known bugs
-
-- (cosmetic bug) if you goto a "MOD" and toggle one, and you go to the non-MOD page and change the parameter it will automatically turn off the toggle *but the toggle won't appeared to be turned off in the menu* until you exit the menu and come back into the menu.
-- (ux bug) MOD lfos are set according to the current tempo, if you change tempos the MOD lfos will stay with periods from the previous tempo

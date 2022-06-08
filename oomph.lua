@@ -36,16 +36,25 @@ function init()
     os.execute("cp /home/we/dust/code/oomph/lib/*.wav /home/we/dust/audio/oomph/")
   end
 
+  -- INPUT level control
+  local global_prams={
+    {name="INPUT LEVEL",eng="auxin",min=0,max=1,default=0.5,div=0.01,unit="amp"},
+  }
+  for _,p in ipairs(global_prams) do
+    params:add_control("tape"..p.eng,p.name,controlspec.new(p.min,p.max,p.exp and 'exp' or 'lin',p.div,p.default,p.unit or "",p.div/(p.max-p.min)))
+    params:set_action("tape"..p.eng,function(x)
+      engine["tape_"..p.eng]("lag",0,x,0)
+    end)
+  end
+
+
   apm=apm_:new()
   amen=amen_:new()
   pad=pad_:new()
   plaits=plaits_:new()
   ggrid=ggrid_:new{apm=apm}
 
-  -- setup tape fx
-
   local tape_prams={
-    {name="aux",eng="auxin",min=0,max=1,default=0.5,div=0.01,unit="wet/dry"},
     {name="lpf",eng="lpf",min=100,max=20000,default=20000,div=100,exp=true,units="Hz"},
     {name="lpf rq",eng="lpfqr",min=0,max=1,default=0.707,div=0.01},
     {name="hpf",eng="hpf",min=10,max=5000,default=30,div=10,exp=true,units="Hz"},
