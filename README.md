@@ -47,8 +47,6 @@ c=Bus.control(s);
 
 ## install
 
-# NOTE! this is an *unreleased* WIP script. it may be unstable. if you have problems, please contact me directly so other support systems are not drained 
-
 install mx.samples2
 ```
 ;install https://github.com/schollz/mx.samples2
@@ -65,7 +63,17 @@ os.execute("unzip /tmp/ultra_synth.zip -d ~/dust/audio/mx.samples/ultra_synth/")
 install tapedeck
 
 ```
-os.execute("cd /tmp && wget https://github.com/schollz/tapedeck/releases/download/PortedPlugins/PortedPlugins.tar.gz && tar -xvzf PortedPlugins.tar.gz && rm PortedPlugins.tar.gz && sudo rsync -avrP PortedPlugins /home/we/.local/share/SuperCollider/Extensions/")
+wget https://github.com/schollz/tapedeck/releases/download/PortedPlugins/PortedPlugins.tar.gz
+tar -xvzf PortedPlugins.tar.gz -C ~/.local/share/SuperCollider/Extensions/
+rm PortedPlugins.tar.gz
+```
+
+install mi-ugens
+
+```
+wget https://github.com/schollz/oomph/releases/download/prereqs/mi-UGens.762548fd3d1fcf30e61a3176c1b764ec1cc82020.tar.gz
+tar -xvzf mi-UGens.762548fd3d1fcf30e61a3176c1b764ec1cc82020.tar.gz -C ~/.local/share/SuperCollider/Extensions/
+rm i-UGens.762548fd3d1fcf30e61a3176c1b764ec1cc82020.tar.gz
 ```
 
 install oomph
@@ -73,6 +81,7 @@ install oomph
 ```
 ;install https://github.com/schollz/oomph
 ```
+
 
 
 ## todos
@@ -92,11 +101,9 @@ install oomph
 - ~~add start and stop transport~~
 - allow using other samples for the pad
 - allow 16 tracks
-
 - add midi out to things
 
 ## known bugs
 
 - if you goto a "MOD" and toggle one, and you go to the non-MOD page and change the parameter it will automatically turn off the toggle but the toggle won't appeared to be turned off until you exit the menu and come back into the menu.
 - MOD lfos are set according to the current tempo, if you change tempos the MOD lfos will stay with periods from the previous tempo
-
