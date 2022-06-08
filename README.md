@@ -50,6 +50,18 @@ the fifth row can change the articulation of the sequence. the "@" denotes a gat
 
 audio input is re-routed through norns into the tape emulator. because of this, instead of using the "MONITOR" control in the audio mixer, you should instead use the "INPUT LEVEL" control in the parameters menu.
 
+### sample looper
+
+the sample looper has its functionality available in the parameters menu. there are additionally special triggered effects which are hardcoded. 
+
+the script tries to determine bpm from the filename if there is a "bpmX" in the name (i.e. mysample_bpm120_1.wav = 120 bpm). if there is no bpm available then the script figures out the bpm by a "best guess" approach by assuming that the loop is quantized to the nearest beat and checking to see which bpm allocates the most even number of beats. 
+
+the sample loop is automatically synced to the beat - the sync probability can be set in the parameters (which controls how often it resets at the beginning of a loop). the tempo of the loop is sped/slowed to match the current tempo based on the estimated bpm of the loop.
+
+its possible to add your own since every parameter in the sample looper can be modulated using a variety of functions (sine, ramps, etc) - all you do is make a function that you want toggled ([like this](https://github.com/schollz/oomph/blob/main/lib/Amen.lua#L194-L196)) and then add the name of that function [to this array](https://github.com/schollz/oomph/blob/main/lib/Amen.lua#L34).
+
+if you need a script to create quantized loops - checkout [amen](https://llllllll.co/t/amen).
+
 ### grid
 
 grid is simply an alternative interface for the main norns screen - it is totally optional.

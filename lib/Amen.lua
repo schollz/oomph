@@ -13,6 +13,7 @@ function Amen:new(o)
 end
 
 function Amen:init()
+
   local prams={
     {name="volume",eng="amp",min=-96,max=16,default=0.0,div=0.5,unit="dB"},
     {name="rate",eng="rate",min=-1,max=2,default=1,div=0.01},
@@ -33,12 +34,12 @@ function Amen:init()
   }
   local fxs={"stutter1","jump1","reverse1"}
   params:add_group("SAMPLE LOOP",#prams+#fxs+2)
-  os.execute("mkdir -p ".._path.audio.."oomph/")
-  os.execute("cp ".._path.code.."oomph/lib/*.wav ".._path.audio.."oomph/")
   params:add_file("amen_file","load file",_path.audio.."oomph/amenbreak_bpm136.wav")
   params:set_action("amen_file",function(x)
     self:load(x)
   end)
+  params:add_control("amen_sync","sync probability",controlspec.new(0,100,'lin',1,75,"%"))
+
   for _,p in ipairs(prams) do
     params:add_control("amen_"..p.eng,p.name,controlspec.new(p.min,p.max,p.exp and 'exp' or 'lin',p.div,p.default,p.unit or "",p.div/(p.max-p.min)))
     params:set_action("amen_"..p.eng,function(x)
@@ -213,7 +214,7 @@ function Amen:process(beat)
   end
 
   -- if the internal beat hits 1, reset the drums
-  if beat%(math.ceil(self.beats_eigth_notes/16)*16)==0 and math.random()<0.5 then
+  if beat%(math.ceil(self.beats_eigth_notes/16)*16)==0 and math.random(1,100)<params:get("amen_sync") then
     print("reset")
     engine.amen_jump(0.0,0.0,1.0)
   end
