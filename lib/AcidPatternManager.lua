@@ -26,6 +26,7 @@ function APM:init()
     {name="portamento",eng="portamento",min=0,max=2,default=0.1,div=0.01,unit="s"},
     {name="sustain",eng="sustain",min=0,max=2,default=clock.get_beat_sec(),div=0.01,unit="s"},
     {name="decay",eng="decay",min=0.01,max=30,default=clock.get_beat_sec()*4,div=0.01,unit="s",exp=true},
+    {name="accent decay mult",eng="decayfactor",min=0.01,max=4,default=1,div=0.01,unit="x"},
     {name="saw/square",eng="wave",min=0.0,max=1,default=0.0,div=0.01},
     {name="detune",eng="detune",min=0.0,max=1,default=0.02,div=0.01,'notes'},
   }
@@ -41,8 +42,18 @@ function APM:init()
     end)
   end
 
-  params:add_group("BASS SEQUENCER",self.pattern_num+1)
+  params:add_group("BASS SEQUENCER",self.pattern_num+1+3+1)
   params:add_binary("sequencer_on","sequencer on","toggle")
+  params:add{type="number",id="copy_from",name="copy from",min=1,max=self.pattern_num,default=1}
+  params:add{type="number",id="copy_to",name="copy to",min=1,max=self.pattern_num,default=1}
+  params:add_trigger("do_copy","make copy")
+  params:set_action("do_copy",function(x)
+    if params:get("copy_to")~=params:get("copy_from") then
+      print("copied "..params:get("copy_from").." to "..params:get("copy_to"))
+      self.ap[params:get("copy_to")]:loads(self.ap[params:get("copy_from")]:dumps())
+    end
+  end)
+  params:add_separator("pattern chaining")
   for i=1,self.pattern_num do
     local s=" ----------------"
     s=s..(i>9 and ">" or "->")

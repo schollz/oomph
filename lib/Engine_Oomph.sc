@@ -391,8 +391,8 @@ Engine_Oomph : CroneEngine {
                 });
             });
         });
-        this.addCommand("threeohthree_decayfactor", "f", { arg msg;
-            valDecayFactor=msg[1].asFloat;
+        this.addCommand("threeohthree_decayfactor", "sfff", { arg msg;
+            valDecayFactor=msg[3].asFloat;
         });
         // </303>
 

@@ -213,6 +213,7 @@ function toggle_start(start)
     lattice:stop()
   end
   amen:toggle_start(start)
+  ggrid:toggle_start(start)
   playing=start
 end
 

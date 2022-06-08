@@ -45,7 +45,8 @@ function GGrid:new(args)
     end
   end
   m.grid_refresh:start()
-
+  m.last_press=clock.get_beats()*clock.get_beat_sec()
+  m.last_key=m.apm.current
   return m
 end
 
@@ -63,19 +64,40 @@ function GGrid:key_press(row,col,on)
   if on and row<6 then
     self.apm:set(row,col,1)
   end
-  if row==8 then
+  if row==6 then
     if on then
-      if self.row8~=nil then
-        params:set("pattern"..self.row8,col)
-        params:set("sequencer_on",1)
+      local current_press=clock.get_beats()*clock.get_beat_sec()
+      if self.row6~=nil then
+        if self.is_playing==true then
+          params:set("pattern"..self.row6,col)
+          params:set("sequencer_on",1)
+        else
+          params:set("copy_from",self.row6)
+          params:set("copy_to",col)
+          params:set("do_copy",1)
+        end
       else
-        self.row8=col
+        -- if self.is_playing==false and (current_press-self.last_press)>1
+        --   and self.last_key==col then
+        --   toggle_start()
+        -- elseif (current_press-self.last_press)>0
+        --   and (current_press-self.last_press)<1
+        --   and self.last_key==col then
+        --   toggle_start()
+        -- end
+        self.row6=col
         self.apm:set_current(col)
       end
+      self.last_press=current_press
+      self.last_key=col
     else
-      self.row8=nil
+      self.row6=nil
     end
   end
+end
+
+function GGrid:toggle_start(is_playing)
+  self.is_playing=is_playing
 end
 
 function GGrid:get_visual()
@@ -94,13 +116,13 @@ function GGrid:get_visual()
     self.visual[ROW_ACCENT][i]=(self.apm:get("accent",i)-1)*4
     self.visual[ROW_PUNCT][i]=(self.apm:get("punct",i)-1)*4
     if self.apm.current==i then
-      self.visual[8][i]=10
+      self.visual[6][i]=10
     elseif self.apm:next_pattern()==i then
-      self.visual[8][i]=5
+      self.visual[6][i]=5
     end
 
   end
-  self.visual[8][self.apm:current_step()]=self.visual[8][self.apm:current_step()]+5
+  self.visual[6][self.apm:current_step()]=self.visual[6][self.apm:current_step()]+5
 
   -- -- illuminate currently pressed button
   -- for k,_ in pairs(self.pressed_buttons) do
