@@ -24,7 +24,7 @@ function APM:init()
     {name="res",eng="res_adjust",min=0.01,max=0.99,default=0.303,div=0.01},
     {name="res accent",eng="res_accent",min=0.01,max=0.99,default=0.303,div=0.01},
     {name="portamento",eng="portamento",min=0,max=2,default=0.1,div=0.01,unit="s"},
-    {name="sustain",eng="sustain",min=0,max=2,default=clock.get_beat_sec(),div=0.01,unit="s"},
+    {name="sustain",eng="sustain",min=0,max=64,default=1,div=0.01,unit="1/16th note",sn=true},
     {name="decay",eng="decay",min=0.01,max=64,default=4,div=0.01,unit="beats",exp=true,beats=true},
     {name="accent decay mult",eng="decayfactor",min=0.01,max=4,default=1,div=0.01,unit="x"},
     {name="saw/square",eng="wave",min=0.0,max=1,default=0.0,div=0.01},
@@ -39,6 +39,9 @@ function APM:init()
     params:set_action("threeohthree_"..p.eng,function(x)
       if p.beats then
         x=x*clock.get_beat_sec()
+      end
+      if p.sn then
+        x=x*clock.get_beat_sec()/4
       end
       engine["threeohthree_"..p.eng]("dc",0,x,0.2)
       params:set("threeohthree_"..p.eng.."modtrig",0)

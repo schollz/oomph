@@ -18,7 +18,27 @@ the additional features include:
 - chainable sequencer with 16 tracks and 16 steps/track for monophonic synth
 
 
-## instructions
+## usage
+
+the main screen allows you to sequence the monophonic synth.
+
+- K2 changes a parameter
+- K3 stops/starts 
+- E1 changes pattern
+- E2/E3 navigate the individual parameters
+
+the parameters are set out in columns, where each column is one of the sixteen steps of the sequence. 
+
+the first row is the note in the C major scale (this scale is transposed in parameters but still displays as the C major scale.
+
+the second row allows you to modify the accidentals of each note (b = flat, and # = sharp).
+
+the third row allows you to change the octave of each note - M for minus octave (-1) and P for plus octave (+1).
+
+the fourth row allows you to add an accent or slide. "O" does an accent (i.e. provides **O**mph) and "H" provides a slide (i.e. **H**olds the note longer during a change).
+
+the fifth row can change the articulation of the sequence. the "@" denotes a gate, the "o" is a rest" and a "-" after a gate provides a legato. the actual strength of a legato is controlled in teh parameters by the "sustain" parameter.
+
 
 ### mono synth sequencer
 
