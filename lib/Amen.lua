@@ -14,7 +14,7 @@ end
 
 function Amen:init()
   local prams={
-    {name="volume",eng="amp",min=0,max=1,default=0.0,div=0.01},
+    {name="volume",eng="amp",min=-96,max=16,default=0.0,div=0.5,unit="dB"},
     {name="rate",eng="rate",min=-1,max=2,default=1,div=0.01},
     {name="vinyl",eng="vinyl",min=0,max=1,default=0,div=0.01},
     {name="bitcrush",eng="bitcrush",min=0,max=1,default=0,div=0.01},

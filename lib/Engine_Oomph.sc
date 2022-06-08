@@ -68,7 +68,7 @@ Engine_Oomph : CroneEngine {
         SynthDef("defPlaits",{
             arg out,ampBus=0.5,panBus,attackBus,decayEnvBus,engineBus,pitchBus,harmBus,morphBus,timbreBus,decayBus,latency=0;
             var snd,env;
-            var amp=DC.kr(In.kr(ampBus));
+            var amp=DC.kr(In.kr(ampBus)).dbamp;
             var attack=DC.kr(In.kr(attackBus));
             var decayEnv=DC.kr(In.kr(decayEnvBus));
             var engine=DC.kr(In.kr(engineBus));
@@ -103,7 +103,7 @@ Engine_Oomph : CroneEngine {
 
             // vars
             var snd,pos,timestretchPos,timestretchWindow;
-            var amp=In.kr(ampBus);//bus2
+            var amp=In.kr(ampBus).dbamp;//bus2
             var rate=In.kr(rateBus);//bus2
             var bitcrush=In.kr(bitcrushBus);//bus2
             var bitcrush_bits=In.kr(bitcrush_bitsBus);//bus2
@@ -192,11 +192,11 @@ Engine_Oomph : CroneEngine {
             env_adjustBus,   env_accentBus, latencyBus;
             var env,waves,filterEnv,filter,snd,res,accentVal,noteVal;
             var pw=In.kr(pwBus);
-            var amp=In.kr(ampBus);
+            var amp=In.kr(ampBus).dbamp;
             var cutoff=In.kr(cutoffBus);
             var detune=In.kr(detuneBus);
             var wave=In.kr(waveBus);
-            var sub=In.kr(subBus);
+            var sub=In.kr(subBus).dbamp;
             var gain=In.kr(gainBus);
             var portamento=In.kr(portamentoBus);
             var sustain=In.kr(sustainBus);
@@ -234,7 +234,7 @@ Engine_Oomph : CroneEngine {
             lpfBus=18000,lpfqrBus=0.6,
             buf;
             var snd=In.ar(in,2);
-            var auxin=In.kr(auxinBus);//bus
+            var auxin=In.kr(auxinBus).dbamp;//bus
             var tape_wet=In.kr(tape_wetBus);//bus
             var tape_bias=In.kr(tape_biasBus);//bus
             var tape_sat=In.kr(tape_satBus);//bus

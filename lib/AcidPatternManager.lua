@@ -16,8 +16,8 @@ end
 
 function APM:init()
   local prams={
-    {name="volume",eng="amp",min=0,max=1,default=0.5,div=0.01},
-    {name="sub volume",eng="sub",min=0,max=2,default=0.0,div=0.01},
+    {name="volume",eng="amp",min=-96,max=16,default=0,div=0.5,unit="dB"},
+    {name="sub volume",eng="sub",min=-96,max=16,default=-96,div=0.5,unit="dB"},
     {name="cutoff",eng="cutoff",min=10,max=10000,default=200.0,div=10,exp=true,unit="Hz"},
     {name="cutoff env",eng="env_adjust",min=10,max=10000,default=500.0,div=10,exp=true,unit="Hz"},
     {name="env accent",eng="env_accent",min=0.0,max=10,default=0,div=0.01},

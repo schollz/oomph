@@ -38,7 +38,7 @@ function init()
 
   -- INPUT level control
   local global_prams={
-    {name="INPUT LEVEL",eng="auxin",min=0,max=1,default=0.5,div=0.01,unit="amp"},
+    {name="INPUT LEVEL",eng="auxin",min=-96,max=16,default=0,div=0.5,unit="dB"},
   }
   for _,p in ipairs(global_prams) do
     params:add_control("tape"..p.eng,p.name,controlspec.new(p.min,p.max,p.exp and 'exp' or 'lin',p.div,p.default,p.unit or "",p.div/(p.max-p.min)))
