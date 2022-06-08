@@ -1,8 +1,8 @@
 # oomph
 
 
-oomph is (in keeping with the [namelessness](https://llllllll.co/t/namelessness)) is simply a monophonic synthesizer with accented filters, a sample loop player with customizable effects, and a sample-based chord sequencer - which is all mixed and processed through a tape emulator.
-
+oomph is combines together a monophonic synthesizer with accented filters, a sample loop player with customizable effects, a sample-based chord sequencer, a [plaits module](TODO), and a tape emulator.
+ 
 you may recognize some of these aspects as they are combinations of scripts I've previously contributed - notably [amen](https://github.com/schollz/amen) (sample looper), [acid-test](https://github.com/schollz/acid-test) (303-style monosynth), [synthy](https://github.com/schollz/synthy) (chord sequencer) and [tapedeck](https://github.com/schollz/tapedeck) (tape emulator). I thought it would be fun to have a single norns script to serve as a
 "groovebox" that would have all these pieces to play with.
 
@@ -81,18 +81,18 @@ dofile("~/dust/code/oomph/lib/update.lua")
 - ~~fix amen cleanup~~
 - ~~add scale changes? root note changes?~~
 - ~~recover sequence on save~~
-- use toggles instead of triggers for lfos: TODO test
-- stutter fx (gated etc): TODO test
+- ~~use toggles instead of triggers for lfos~~
+- ~~stutter fx (gated etc)~~
 - ~~allow pattern to draw itself~~
 - ~~allow multiple patterns~~
 - add more chaotic lfos
 - ~~add start and stop buttons~~
 - ~~add start and stop transport~~
-- allow using other samples for the pad
-- allow 16 tracks
+- ~~allow using other samples for the pad~~
+- ~~allow 16 tracks~~
 - add midi out to things
 
 ## known bugs
 
-- if you goto a "MOD" and toggle one, and you go to the non-MOD page and change the parameter it will automatically turn off the toggle but the toggle won't appeared to be turned off until you exit the menu and come back into the menu.
-- MOD lfos are set according to the current tempo, if you change tempos the MOD lfos will stay with periods from the previous tempo
+- (cosmetic bug) if you goto a "MOD" and toggle one, and you go to the non-MOD page and change the parameter it will automatically turn off the toggle *but the toggle won't appeared to be turned off in the menu* until you exit the menu and come back into the menu.
+- (ux bug) MOD lfos are set according to the current tempo, if you change tempos the MOD lfos will stay with periods from the previous tempo
