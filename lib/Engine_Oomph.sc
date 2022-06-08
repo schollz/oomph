@@ -63,6 +63,22 @@ Engine_Oomph : CroneEngine {
             Out.ar(out,snd*amp*EnvGen.ar(Env.new([0,1],[4])));
         }).add;
 
+        SynthDef("defPlaits",{
+            arg out,amp=0.5,attack,decayEnv,engine,pitch,harm,morph,timbre,decay;
+            var snd,env;
+            env=EnvGen.ar(Env.perc(attack,decayEnv),1,doneAction:2);
+            snd=MiPlaits.ar(
+                pitch:pitch,
+                harm:harm,
+                morph:morph,
+                timbre:timbre,
+                decay:decay,
+                engine:engine,
+                trigger:1,
+            );
+            Out.ar(out,snd*env*amp);
+        }).add;
+
         SynthDef("defAmen",{ 
             arg out=0, bufnum, ampBus, t_trig=0,t_trigtime=0,amp_crossfade=0,loop=1,
             sampleStart=0,sampleEnd=1,samplePos=0, latency=0,
@@ -394,6 +410,25 @@ Engine_Oomph : CroneEngine {
             });
         });
         // </Tape>
+
+        // <Plaits>
+        this.addCommand("plaits","fffffffff", { arg msg;
+            // arg out,amp=0.5,attack,decayEnv,engine,pitch,harm,morph,timbre,decay;
+            Synth.before(synTape,"defPlaits",[
+                \out,busTape,
+                \amp,msg[1],
+                \attack,msg[2],
+                \decayEnv,msg[3],
+                \engine,msg[4],
+                \pitch,msg[5],
+                \harm,msg[6],
+                \morph,msg[7],
+                \timbre,msg[8],
+                \decay,msg[9],
+            ]);
+        });
+
+        // </Plaits>
 
 
 

@@ -24,12 +24,12 @@ function AP:init()
   self.key_step={"0","1","2","3","4","5","6","7","8","9","A","B","C","D","E","F"}
   self.key_notes={"C","D","E","F","G","A","B"}
   self.key_accid={"","b","#"}
-  self.key_octave={"D","","U"}
+  self.key_octave={"M","","P"}
   self.key_accent={"","F","O"}
   self.key_punctuation={"o","-","@"}
   -- do initialize here
   self.note={6,6,3,4,6,1,2,1,1,3,6,3,6,7,3,5}
-  self.accid={2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2}
+  self.accid={1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}
   self.octave={2,1,3,2,2,3,1,3,2,2,3,1,3,2,1,2}
   self.accent={2,2,1,3,1,2,2,1,3,1,2,2,1,3,1,2}
   self.duration={1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}
@@ -119,9 +119,9 @@ function AP:process(beat)
   if self.punct[i]~=PUNCUATION_NOTE then
     do return end
   end
-  local accid=self.accid[i]==2 and 1 or 0
+  local accid=self.accid[i]==3 and 1 or 0
   if accid==0 then
-  	accid=self.accid[i]==1 and -1 or 0
+    accid=self.accid[i]==2 and-1 or 0
   end
   local note=params:get("root_note")+self.note_scale[self.note[i]]+accid+(self.octave[i]-2)*12+12
   -- do something with the note

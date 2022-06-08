@@ -19,6 +19,7 @@ local apm_=include("lib/AcidPatternManager")
 local amen_=include("lib/Amen")
 local ggrid_=include("lib/ggrid")
 local pad_=include("lib/Pad")
+local plaits_=include("lib/Plaits")
 if not string.find(package.cpath,"/home/we/dust/code/oomph/lib/") then
   package.cpath=package.cpath..";/home/we/dust/code/oomph/lib/?.so"
 end
@@ -35,6 +36,7 @@ function init()
   apm=apm_:new()
   amen=amen_:new()
   pad=pad_:new()
+  plaits=plaits_:new()
   ggrid=ggrid_:new{apm=apm}
 
   -- setup tape fx
@@ -116,6 +118,7 @@ function init()
       amen:process(beat_num)
       apm:process(beat_num)
       pad:process(beat_num)
+      plaits:process(beat_num)
     end,
     division=1/16,
   }

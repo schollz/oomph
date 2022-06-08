@@ -17,7 +17,7 @@ function Pad:init()
     print("ERROR ERROR ERROR - PLEASE SEE README TO INSTALL MX.SAMPLES DEFAULT")
   end
   local prams={
-    {name="volume",eng="amp",min=0,max=4,default=0.5,div=0.01,unit="amp"},
+    {name="volume",eng="amp",min=0,max=4,default=0.0,div=0.01,unit="amp"},
     {name="attack",eng="attack",min=0,max=10,default=clock.get_beat_sec()/2,div=0.1,unit="s"},
     {name="decay",eng="decay",min=0,max=10,default=clock.get_beat_sec(),div=0.1,unit="s"},
     {name="sustain",eng="sustain",min=0,max=2,default=1,div=0.1,unit="amp"},
@@ -92,10 +92,10 @@ function Pad:update_chords()
 end
 
 function Pad:process(beat)
-  if (beat-1)%4~=0 then
+  if beat%4~=0 then
     do return end
   end
-  local qn=(beat-1)/4+1
+  local qn=beat/4+1
   local chord_note=(qn-1)%#self.chords+1
   if next(self.chords[chord_note])==nil then
     do return end
