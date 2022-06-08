@@ -1,7 +1,7 @@
--- triped v0.0.1
+-- oomph v0.0.1
 -- :) :) :) ;) :) :0 :)
 --
--- llllllll.co/t/triped
+-- llllllll.co/t/oomph
 --
 --
 --
@@ -13,14 +13,14 @@
 -- K3 stop/start
 --
 
-engine.name="Triped"
+engine.name="Oomph"
 local lattice_=require("lattice")
 local apm_=include("lib/AcidPatternManager")
 local amen_=include("lib/Amen")
 local ggrid_=include("lib/ggrid")
 local pad_=include("lib/Pad")
-if not string.find(package.cpath,"/home/we/dust/code/triped/lib/") then
-  package.cpath=package.cpath..";/home/we/dust/code/triped/lib/?.so"
+if not string.find(package.cpath,"/home/we/dust/code/oomph/lib/") then
+  package.cpath=package.cpath..";/home/we/dust/code/oomph/lib/?.so"
 end
 json=require("cjson")
 local shift=false
@@ -30,7 +30,7 @@ local beat_num=-1
 
 function init()
   -- setup audio folders
-  util.os_capture("mkdir -p /home/we/dust/audio/triped")
+  util.os_capture("mkdir -p /home/we/dust/audio/oomph")
 
   apm=apm_:new()
   amen=amen_:new()
@@ -121,7 +121,7 @@ function init()
   }
 
   -- dev stuff
-  amen:load("/home/we/dust/code/triped/lib/beats16_bpm150_Ultimate_Jack_Loops_014__BPM_150_.wav")
+  amen:load("/home/we/dust/code/oomph/lib/beats16_bpm150_Ultimate_Jack_Loops_014__BPM_150_.wav")
   -- amen:stutter_build()
 
   params.action_write=function(filename,name)

@@ -1,15 +1,15 @@
-Engine_Triped : CroneEngine {
+Engine_Oomph : CroneEngine {
 // All norns engines follow the 'Engine_MySynthName' convention above
     // all
     var fxbus;
     var fxsyn;
 
-    // <Triped>
+    // <Oomph>
 	var synThreeOhThree;
     var busAccent;
     var busTape;
     var valDecayFactor;
-    // </Triped>
+    // </Oomph>
 
     // <Tape>
     var synTape;
@@ -38,7 +38,7 @@ Engine_Triped : CroneEngine {
         fxbus=Dictionary.new();
         fxsyn=Dictionary.new();
         sampleBuffAmen = Buffer.new(context.server);
-        sampleVinyl = Buffer.read(context.server, "/home/we/dust/code/triped/lib/vinyl2.wav"); 
+        sampleVinyl = Buffer.read(context.server, "/home/we/dust/code/oomph/lib/vinyl2.wav"); 
         playerSwap = 0;
         valDecayFactor=1.0;
 

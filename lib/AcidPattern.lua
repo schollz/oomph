@@ -18,7 +18,7 @@ function AP:new(o)
 end
 
 function AP:init()
-  -- https://acidpattern.bandcamp.com/album/july-triped-2014
+  -- https://acidpattern.bandcamp.com/album/july-oomph-2014
   self.current=1
   self.note_scale={0,2,4,5,7,9,11}
   self.key_step={"0","1","2","3","4","5","6","7","8","9","A","B","C","D","E","F"}

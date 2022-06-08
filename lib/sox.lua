@@ -66,7 +66,7 @@ function sox.stutter(data)
   local delay_ms=repeat_length*1000 -- in milliseconds
   local total_time=repeat_length*repeats
   local reverse_string=no_reverse and "" or "reverse "
-  sox_cmd=string.format("/home/we/dust/code/triped/lib/sox %s %s trim %2.6f %2.6f %secho 1.0 1.0",data.fname,fname2,start_pos,seconds,reverse_string)
+  sox_cmd=string.format("/home/we/dust/code/oomph/lib/sox %s %s trim %2.6f %2.6f %secho 1.0 1.0",data.fname,fname2,start_pos,seconds,reverse_string)
   local vol=gain
   for i=1,repeats do
     sox_cmd=sox_cmd..string.format(" %2.6f %2.6f ",delay_ms*i,vol)

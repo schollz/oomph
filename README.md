@@ -1,7 +1,7 @@
-# triped
+# oomph
 
 
-triped is (in keeping with the [namelessness](https://llllllll.co/t/namelessness)) is simply a monophonic synthesizer with accented filters, a sample loop player with customizable effects, and a sample-based chord sequencer - which is all mixed and processed through a tape emulator.
+oomph is (in keeping with the [namelessness](https://llllllll.co/t/namelessness)) is simply a monophonic synthesizer with accented filters, a sample loop player with customizable effects, and a sample-based chord sequencer - which is all mixed and processed through a tape emulator.
 
 you may recognize some of these aspects as they are combinations of scripts I've previously contributed - notably [amen](https://github.com/schollz/amen) (sample looper), [acid-test](https://github.com/schollz/acid-test) (303-style monosynth), [synthy](https://github.com/schollz/synthy) (chord sequencer) and [tapedeck](https://github.com/schollz/tapedeck) (tape emulator). I thought it would be fun to have a single norns script to serve as a
 "groovebox" that would have all these pieces to play with.
@@ -66,10 +66,10 @@ install tapedeck
 os.execute("cd /tmp && wget https://github.com/schollz/tapedeck/releases/download/PortedPlugins/PortedPlugins.tar.gz && tar -xvzf PortedPlugins.tar.gz && rm PortedPlugins.tar.gz && sudo rsync -avrP PortedPlugins /home/we/.local/share/SuperCollider/Extensions/")
 ```
 
-install triped
+install oomph
 
 ```
-;install https://github.com/schollz/triped
+;install https://github.com/schollz/oomph
 ```
 
 
