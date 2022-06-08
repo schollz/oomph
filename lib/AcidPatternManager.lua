@@ -25,7 +25,7 @@ function APM:init()
     {name="res accent",eng="res_accent",min=0.01,max=0.99,default=0.303,div=0.01},
     {name="portamento",eng="portamento",min=0,max=2,default=0.1,div=0.01,unit="s"},
     {name="sustain",eng="sustain",min=0,max=2,default=clock.get_beat_sec(),div=0.01,unit="s"},
-    {name="decay",eng="decay",min=0.01,max=30,default=clock.get_beat_sec()*4,div=0.01,unit="s",exp=true},
+    {name="decay",eng="decay",min=0.01,max=64,default=4,div=0.01,unit="beats",exp=true,beats=true},
     {name="accent decay mult",eng="decayfactor",min=0.01,max=4,default=1,div=0.01,unit="x"},
     {name="saw/square",eng="wave",min=0.0,max=1,default=0.0,div=0.01},
     {name="detune",eng="detune",min=0.0,max=1,default=0.02,div=0.01,'notes'},
@@ -37,8 +37,12 @@ function APM:init()
   for _,p in ipairs(prams) do
     params:add_control("threeohthree_"..p.eng,p.name,controlspec.new(p.min,p.max,p.exp and 'exp' or 'lin',p.div,p.default,p.unit or "",p.div/(p.max-p.min)))
     params:set_action("threeohthree_"..p.eng,function(x)
+      if p.beats then
+        x=x*clock.get_beat_sec()
+      end
       engine["threeohthree_"..p.eng]("dc",0,x,0.2)
       params:set("threeohthree_"..p.eng.."modtrig",0)
+      _menu.rebuild_params()
     end)
   end
 
@@ -63,22 +67,49 @@ function APM:init()
   params:add_group("BASS MOD",#prams*5)
   local mod_ops_ids={"sine","xline","line"}
   local mod_ops_nom={"sine","exp ramp","linear ramp"}
+  local debounce_clock=nil
   for _,p in ipairs(prams) do
     params:add_option("threeohthree_"..p.eng.."modoption",p.name.." form",mod_ops_nom,1)
-    params:add_control("threeohthree_"..p.eng.."modperiod",p.name.." period",controlspec.new(0.1,120,'exp',0.1,2,"s",0.1/119.9))
+    params:add_control("threeohthree_"..p.eng.."modperiod",p.name.." period",controlspec.new(0.1,120,'exp',0.1,math.random(4,32),"beats",0.1/119.9))
     params:add_control("threeohthree_"..p.eng.."modmin",p.name.." min",controlspec.new(p.min,p.max,p.exp and 'exp' or 'lin',p.div,p.min,p.unit or "",p.div/(p.max-p.min)))
     params:add_control("threeohthree_"..p.eng.."modmax",p.name.." max",controlspec.new(p.min,p.max,p.exp and 'exp' or 'lin',p.div,p.max,p.unit or "",p.div/(p.max-p.min)))
+    for _,pp in ipairs({"modoption","modperiod","modmin","modmax"}) do
+      params:set_action("threeohthree_"..p.eng..pp,function(x)
+        if params:get("threeohthree_"..p.eng.."modtrig")==1 then
+          if debounce_clock~=nil then
+            clock.cancel(debounce_clock)
+          end
+          debounce_clock=clock.run(function()
+            clock.sleep(1)
+            params:set("threeohthree_"..p.eng.."modtrig",0)
+            clock.sleep(0.1)
+            params:set("threeohthree_"..p.eng.."modtrig",1)
+            debounce_clock=nil
+          end)
+        end
+      end)
+    end
     params:add_binary("threeohthree_"..p.eng.."modtrig",p.name.." trig","toggle")
     params:set_action("threeohthree_"..p.eng.."modtrig",function(x)
       if x~=1 then
+        clock.run(function()
+          clock.sleep(0.2)
+          if params:get("threeohthree_"..p.eng.."modtrig")==0 then
+            params:delta("threeohthree_"..p.eng,0.0001)
+            params:delta("threeohthree_"..p.eng,-0.0001)
+          end
+        end)
         do return end
       end
-      print(mod_ops_ids[params:get("threeohthree_"..p.eng.."modoption")],params:get("threeohthree_"..p.eng.."modmin"),
-        params:get("threeohthree_"..p.eng.."modmax"),
-      params:get("threeohthree_"..p.eng.."modperiod"))
-      engine["threeohthree_"..p.eng](mod_ops_ids[params:get("threeohthree_"..p.eng.."modoption")],params:get("threeohthree_"..p.eng.."modmin"),
-        params:get("threeohthree_"..p.eng.."modmax"),
-      params:get("threeohthree_"..p.eng.."modperiod"))
+      local min_val=params:get("threeohthree_"..p.eng.."modmin")
+      local max_val=params:get("threeohthree_"..p.eng.."modmax")
+      local period=params:get("threeohthree_"..p.eng.."modperiod")*clock.get_beat_sec()
+      if p.beats then
+        min_val=min_val*clock.get_beat_sec()
+        max_val=max_val*clock.get_beat_sec()
+      end
+      print(p.eng,mod_ops_ids[params:get("threeohthree_"..p.eng.."modoption")],min_val,max_val,period)
+      engine["threeohthree_"..p.eng](mod_ops_ids[params:get("threeohthree_"..p.eng.."modoption")],min_val,max_val,period)
     end)
   end
 

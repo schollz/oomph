@@ -91,3 +91,7 @@ install oomph
 - allow using other samples for the pad
 - allow 16 tracks
 - add midi out to things
+
+## known bugs
+
+- if you goto a "MOD" and toggle one, and you go to the non-MOD page and change the parameter it will automatically turn off the toggle but the toggle won't appeared to be turned off until you exit the menu and come back into the menu.
