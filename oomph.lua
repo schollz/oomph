@@ -181,6 +181,10 @@ function init()
   params:bang()
 
   toggle_start(false)
+  clock.run(function()
+    clock.sleep(0.7)
+    toggle_start(false)
+  end)
 end
 
 function clock.transport.start()
