@@ -95,3 +95,4 @@ install oomph
 ## known bugs
 
 - if you goto a "MOD" and toggle one, and you go to the non-MOD page and change the parameter it will automatically turn off the toggle but the toggle won't appeared to be turned off until you exit the menu and come back into the menu.
+- MOD lfos are set according to the current tempo, if you change tempos the MOD lfos will stay with periods from the previous tempo

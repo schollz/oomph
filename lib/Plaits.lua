@@ -51,24 +51,51 @@ function Plaits:init()
   end
 
   params:add_group("PLAITS MOD",#prams*5)
-  local mod_ops_ids={"sine","drunk","xline","line"}
-  local mod_ops_nom={"sine","drunk","exp ramp","linear ramp"}
+  local mod_ops_ids={"sine","xline","line"}
+  local mod_ops_nom={"sine","exp ramp","linear ramp"}
+  local debounce_clock=nil
   for _,p in ipairs(prams) do
-    params:add_option("plaits_"..p.eng..self.id.."modoption",p.name.." form",mod_ops_nom,1)
-    params:add_control("plaits_"..p.eng..self.id.."modperiod",p.name.." period",controlspec.new(0.1,120,'exp',0.1,2,"s",0.1/119.9))
-    params:add_control("plaits_"..p.eng..self.id.."modmin",p.name.." min",controlspec.new(p.min,p.max,p.exp and 'exp' or 'lin',p.div,p.min,p.unit or "",p.div/(p.max-p.min)))
-    params:add_control("plaits_"..p.eng..self.id.."modmax",p.name.." max",controlspec.new(p.min,p.max,p.exp and 'exp' or 'lin',p.div,p.max,p.unit or "",p.div/(p.max-p.min)))
-    params:add_binary("plaits_"..p.eng..self.id.."modtrig",p.name.." trig","toggle")
-    params:set_action("plaits_"..p.eng..self.id.."modtrig",function(x)
+    params:add_option("plaits_"..p.eng.."modoption",p.name.." form",mod_ops_nom,1)
+    params:add_control("plaits_"..p.eng.."modperiod",p.name.." period",controlspec.new(0.1,120,'exp',0.1,math.random(4,32),"beats",0.1/119.9))
+    params:add_control("plaits_"..p.eng.."modmin",p.name.." min",controlspec.new(p.min,p.max,p.exp and 'exp' or 'lin',p.div,p.min,p.unit or "",p.div/(p.max-p.min)))
+    params:add_control("plaits_"..p.eng.."modmax",p.name.." max",controlspec.new(p.min,p.max,p.exp and 'exp' or 'lin',p.div,p.max,p.unit or "",p.div/(p.max-p.min)))
+    for _,pp in ipairs({"modoption","modperiod","modmin","modmax"}) do
+      params:set_action("plaits_"..p.eng..pp,function(x)
+        if params:get("plaits_"..p.eng.."modtrig")==1 then
+          if debounce_clock~=nil then
+            clock.cancel(debounce_clock)
+          end
+          debounce_clock=clock.run(function()
+            clock.sleep(1)
+            params:set("plaits_"..p.eng.."modtrig",0)
+            clock.sleep(0.1)
+            params:set("plaits_"..p.eng.."modtrig",1)
+            debounce_clock=nil
+          end)
+        end
+      end)
+    end
+    params:add_binary("plaits_"..p.eng.."modtrig",p.name.." trig","toggle")
+    params:set_action("plaits_"..p.eng.."modtrig",function(x)
       if x~=1 then
+        clock.run(function()
+          clock.sleep(0.2)
+          if params:get("plaits_"..p.eng.."modtrig")==0 then
+            params:delta("plaits_"..p.eng,0.0001)
+            params:delta("plaits_"..p.eng,-0.0001)
+          end
+        end)
         do return end
       end
-      print(mod_ops_ids[params:get("plaits_"..p.eng..self.id.."modoption")],params:get("plaits_"..p.eng..self.id.."modmin"),
-        params:get("plaits_"..p.eng..self.id.."modmax"),
-      params:get("plaits_"..p.eng..self.id.."modperiod"))
-      engine["plaits_"..p.eng..self.id](mod_ops_ids[params:get("plaits_"..p.eng..self.id.."modoption")],params:get("plaits_"..p.eng..self.id.."modmin"),
-        params:get("plaits_"..p.eng..self.id.."modmax"),
-      params:get("plaits_"..p.eng..self.id.."modperiod"))
+      local min_val=params:get("plaits_"..p.eng.."modmin")
+      local max_val=params:get("plaits_"..p.eng.."modmax")
+      local period=params:get("plaits_"..p.eng.."modperiod")*clock.get_beat_sec()
+      if p.beats then
+        min_val=min_val*clock.get_beat_sec()
+        max_val=max_val*clock.get_beat_sec()
+      end
+      print(p.eng,mod_ops_ids[params:get("plaits_"..p.eng.."modoption")],min_val,max_val,period)
+      engine["plaits_"..p.eng](mod_ops_ids[params:get("plaits_"..p.eng.."modoption")],min_val,max_val,period)
     end)
   end
 

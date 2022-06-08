@@ -9,6 +9,7 @@ Engine_Oomph : CroneEngine {
     var busAccent;
     var busTape;
     var valDecayFactor;
+    var latencyThreeOhThree;
     // </Oomph>
 
     // <Tape>
@@ -35,6 +36,7 @@ Engine_Oomph : CroneEngine {
 	alloc { 
         
         // <Amen>
+        latencyThreeOhThree=0.0;
         fxbus=Dictionary.new();
         fxsyn=Dictionary.new();
         sampleBuffAmen = Buffer.new(context.server);
@@ -64,7 +66,7 @@ Engine_Oomph : CroneEngine {
         }).add;
 
         SynthDef("defPlaits",{
-            arg out,ampBus=0.5,panBus,attackBus,decayEnvBus,engineBus,pitchBus,harmBus,morphBus,timbreBus,decayBus;
+            arg out,ampBus=0.5,panBus,attackBus,decayEnvBus,engineBus,pitchBus,harmBus,morphBus,timbreBus,decayBus,latency=0;
             var snd,env;
             var amp=DC.kr(In.kr(ampBus));
             var attack=DC.kr(In.kr(attackBus));
@@ -76,7 +78,7 @@ Engine_Oomph : CroneEngine {
             var timbre=DC.kr(In.kr(timbreBus));
             var decay=DC.kr(In.kr(decayBus));
             var pan=DC.kr(In.kr(panBus));
-            env=EnvGen.ar(Env.perc(attack,decayEnv),1,doneAction:2);
+            env=EnvGen.ar(Env.perc(attack,decayEnv),TDelay.kr(Impulse.kr(0),latency),doneAction:2);
             snd=MiPlaits.ar(
                 pitch:pitch,
                 harm:harm,
@@ -84,7 +86,7 @@ Engine_Oomph : CroneEngine {
                 timbre:timbre,
                 decay:decay,
                 engine:engine,
-                trigger:1,
+                trigger:TDelay.kr(Impulse.kr(0),latency),
             );
             snd=snd*env*amp;
             Out.ar(out,Balance2.ar(snd[0],snd[1],pan));
@@ -122,21 +124,21 @@ Engine_Oomph : CroneEngine {
             // scratch effect
             rate = SelectX.kr(scratch,[rate,LFTri.kr(bpm_target/60*scratchrate)],wrap:0);
             pos = Phasor.ar(
-                trig:t_trig,
+                trig:TDelay.kr(t_trig,latency),
                 rate:BufRateScale.kr(bufnum)*rate,
                 start:((sampleStart*(rate>0))+(sampleEnd*(rate<0)))*BufFrames.kr(bufnum),
                 end:((sampleEnd*(rate>0))+(sampleStart*(rate<0)))*BufFrames.kr(bufnum),
                 resetPos:samplePos*BufFrames.kr(bufnum)
             );
             timestretchPos = Phasor.ar(
-                trig:t_trigtime,
+                trig:TDelay.kr(t_trigtime,latency),
                 rate:BufRateScale.kr(bufnum)*rate/timestretch_slow,
                 start:((sampleStart*(rate>0))+(sampleEnd*(rate<0)))*BufFrames.kr(bufnum),
                 end:((sampleEnd*(rate>0))+(sampleStart*(rate<0)))*BufFrames.kr(bufnum),
                 resetPos:pos
             );
             timestretchWindow = Phasor.ar(
-                trig:t_trig,
+                trig:TDelay.kr(t_trig,latency),
                 rate:BufRateScale.kr(bufnum)*rate,
                 start:timestretchPos,
                 end:timestretchPos+((60/bpm_target/timestretch_beats)/BufDur.kr(bufnum)*BufFrames.kr(bufnum)),
@@ -174,7 +176,7 @@ Engine_Oomph : CroneEngine {
                 level:amp*Lag.kr(amp_crossfade,0.2)
             );
 
-            Out.ar(out,DelayN.ar(snd,delaytime:latency)*EnvGen.ar(Env.new([0,1],[4])));
+            Out.ar(out,snd*EnvGen.ar(Env.new([0,1],[4])));
         }).add; 
         // </Amen>
 
@@ -206,13 +208,13 @@ Engine_Oomph : CroneEngine {
             noteVal=Lag.kr(note,portamento*slide);
             accentVal=In.kr(busAccent);
             res = Clip.kr(res_adjust+(res_accent*accentVal),0.001,2);
-            env = EnvGen.ar(Env.new([10e-3,1,1,10e-9],[0.03,sustain*duration,decay],'exp'),t_trig)+(env_accent*accentVal);
+            env = EnvGen.ar(Env.new([10e-3,1,1,10e-9],[0.03,sustain*duration,decay],'exp'),TDelay.kr(t_trig,latency))+(env_accent*accentVal);
             waves = [Saw.ar([noteVal-detune,noteVal+detune].midicps, mul: env), Pulse.ar([note-detune,note+detune].midicps, 0.5, mul: env)];
-            filterEnv =  EnvGen.ar( Env.new([10e-9, 1, 10e-9], [0.01, decay],  'exp'), t_trig);
+            filterEnv =  EnvGen.ar( Env.new([10e-9, 1, 10e-9], [0.01, decay],  'exp'), TDelay.kr(t_trig,latency));
             filter = RLPFD.ar(SelectX.ar(wave, waves, wrap:0), cutoff +(filterEnv*env_adjust), res,gain);
             snd=(filter*amp).tanh;
             snd=snd+SinOsc.ar([noteVal-12-detune,noteVal-12+detune].midicps,mul:sub*env/10.0);
-            Out.ar(out, DelayN.ar(snd,delaytime:latency)*EnvGen.ar(Env.new([0,1],[4])));
+            Out.ar(out, snd*EnvGen.ar(Env.new([0,1],[4])));
         }).add;
         
         SynthDef("defThreeOhThreeAccent",{
@@ -259,7 +261,7 @@ Engine_Oomph : CroneEngine {
         // <pad>
         bufCheby = Buffer.alloc(context.server, 512, 1, { |buf| buf.chebyMsg([1,0,1,1,0,1])});
         SynthDef("defPad",{
-            arg outDry, outWet, amp=0.5, wet=1.0, buf=0,note=53,attack=1,decay=1,sustain=0.5,release=2,notelpf=80;
+            arg outDry, outWet, latency=0.0,amp=0.5, wet=1.0, buf=0,note=53,attack=1,decay=1,sustain=0.5,release=2,notelpf=80;
             var snd,env;
             snd=Shaper.ar(buf,Saw.ar(note.midicps,SinOsc.kr(rrand(1/30,1/5)).range(0.1,1.0)));
             snd=Pan2.ar(snd,rrand(-0.25,0.25));
@@ -268,6 +270,7 @@ Engine_Oomph : CroneEngine {
             env=EnvGen.ar(Env.new([0.00001,1.0,sustain,0.00001],[attack,decay,release],curve:[\welch,\sine,\exp]),doneAction:2);
             snd=snd*env*amp*EnvGen.ar(Env.new([0,1],[0.1]));
             snd=snd.tanh;
+            snd=DelayN.ar(snd,delaytime:latency);
             Out.ar(outDry,snd*(1-wet));
             Out.ar(outWet,snd*wet);
         }).add;
@@ -378,6 +381,7 @@ Engine_Oomph : CroneEngine {
         });
         [\latency].do({ arg key;
             this.addCommand("threeohthree_"++key, "f", { arg msg;
+                latencyThreeOhThree=msg[1].asFloat;
                 synThreeOhThree.set(key,msg[1]);
             });
         });
@@ -447,6 +451,7 @@ Engine_Oomph : CroneEngine {
         this.addCommand("plaits","", { arg msg;
             Synth.before(synTape,"defPlaits",[
                 \out,busTape,
+                \latency,latencyThreeOhThree,
                 \ampBus,fxbus.at("plaits_amp"),
                 \attackBus,fxbus.at("plaits_attack"),
                 \decayEnvBus,fxbus.at("plaits_decayEnv"),

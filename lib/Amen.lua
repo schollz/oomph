@@ -32,7 +32,7 @@ function Amen:init()
     {name="hpf",eng="hpf",min=20,max=500,default=20,div=10,exp=true,unit='Hz'},
   }
   local fxs={"stutter1","jump1","reverse1"}
-  params:add_group("SAMPLE LOOP",#prams+#fxs+1)
+  params:add_group("SAMPLE LOOP",#prams+#fxs+2)
   os.execute("mkdir -p ".._path.audio.."oomph/")
   os.execute("cp ".._path.code.."oomph/lib/*.wav ".._path.audio.."oomph/")
   params:add_file("amen_file","load file",_path.audio.."oomph/amenbreak_bpm136.wav")
@@ -46,6 +46,18 @@ function Amen:init()
       params:set("amen_"..p.eng.."modtrig",0)
     end)
   end
+  params:add_control("drumlatency","sample latency",controlspec.new(-1,1,'lin',0.01,0,"beats",0.01/2))
+  params:set_action("drumlatency",function(x)
+    x=x*clock.get_beat_sec()
+    if x>0.2 then
+      x=0.2
+    elseif x<-0.2 then
+      x=-0.2
+    end
+    print(x)
+    engine.amen_latency(x>0 and x or 0)
+    engine.threeohthree_latency(x<0 and math.abs(x) or 0)
+  end)
   for _,fxname in ipairs(fxs) do
     params:add{type="binary",name=fxname,id="amen_"..fxname,behavior="trigger",action=function(x)
       print(fxname)
@@ -56,22 +68,45 @@ function Amen:init()
   params:add_group("SAMPLE LOOP MOD",#prams*5)
   local mod_ops_ids={"sine","drunk","xline","line"}
   local mod_ops_nom={"sine","drunk","exp ramp","linear ramp"}
+  local debounce_clock=nil
   for _,p in ipairs(prams) do
     params:add_option("amen_"..p.eng.."modoption",p.name.." form",mod_ops_nom,1)
-    params:add_control("amen_"..p.eng.."modperiod",p.name.." period",controlspec.new(0.1,120,'exp',0.1,2,"s",0.1/119.9))
+    params:add_control("amen_"..p.eng.."modperiod",p.name.." period",controlspec.new(0.1,120,'exp',0.1,math.random(4,32),"beats",0.1/119.9))
     params:add_control("amen_"..p.eng.."modmin",p.name.." min",controlspec.new(p.min,p.max,p.exp and 'exp' or 'lin',p.div,p.min,p.unit or "",p.div/(p.max-p.min)))
     params:add_control("amen_"..p.eng.."modmax",p.name.." max",controlspec.new(p.min,p.max,p.exp and 'exp' or 'lin',p.div,p.max,p.unit or "",p.div/(p.max-p.min)))
+    for _,pp in ipairs({"modoption","modperiod","modmin","modmax"}) do
+      params:set_action("amen_"..p.eng..pp,function(x)
+        if params:get("amen_"..p.eng.."modtrig")==1 then
+          if debounce_clock~=nil then
+            clock.cancel(debounce_clock)
+          end
+          debounce_clock=clock.run(function()
+            clock.sleep(1)
+            params:set("amen_"..p.eng.."modtrig",0)
+            clock.sleep(0.1)
+            params:set("amen_"..p.eng.."modtrig",1)
+            debounce_clock=nil
+          end)
+        end
+      end)
+    end
     params:add_binary("amen_"..p.eng.."modtrig",p.name.." trig","toggle")
     params:set_action("amen_"..p.eng.."modtrig",function(x)
       if x~=1 then
+        clock.run(function()
+          clock.sleep(0.2)
+          if params:get("amen_"..p.eng.."modtrig")==0 then
+            params:delta("amen_"..p.eng,0.0001)
+            params:delta("amen_"..p.eng,-0.0001)
+          end
+        end)
         do return end
       end
-      print(mod_ops_ids[params:get("amen_"..p.eng.."modoption")],params:get("amen_"..p.eng.."modmin"),
-        params:get("amen_"..p.eng.."modmax"),
-      params:get("amen_"..p.eng.."modperiod"))
-      engine["amen_"..p.eng](mod_ops_ids[params:get("amen_"..p.eng.."modoption")],params:get("amen_"..p.eng.."modmin"),
-        params:get("amen_"..p.eng.."modmax"),
-      params:get("amen_"..p.eng.."modperiod"))
+      local min_val=params:get("amen_"..p.eng.."modmin")
+      local max_val=params:get("amen_"..p.eng.."modmax")
+      local period=params:get("amen_"..p.eng.."modperiod")*clock.get_beat_sec()
+      print(p.eng,mod_ops_ids[params:get("amen_"..p.eng.."modoption")],min_val,max_val,period)
+      engine["amen_"..p.eng](mod_ops_ids[params:get("amen_"..p.eng.."modoption")],min_val,max_val,period)
     end)
   end
 

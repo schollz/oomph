@@ -67,40 +67,53 @@ function init()
     end)
   end
   params:add_group("FX MOD",#tape_prams*5)
-  local mod_ops_ids={"sine","drunk","xline","line"}
-  local mod_ops_nom={"sine","drunk","exp ramp","linear ramp"}
+  local mod_ops_ids={"sine","xline","line"}
+  local mod_ops_nom={"sine","exp ramp","linear ramp"}
+  local debounce_clock=nil
   for _,p in ipairs(tape_prams) do
     params:add_option("tape"..p.eng.."modoption",p.name.." form",mod_ops_nom,1)
-    params:add_control("tape"..p.eng.."modperiod",p.name.." period",controlspec.new(0.1,120,'exp',0.1,2,"s",0.1/119.9))
+    params:add_control("tape"..p.eng.."modperiod",p.name.." period",controlspec.new(0.1,120,'exp',0.1,math.random(4,32),"beats",0.1/119.9))
     params:add_control("tape"..p.eng.."modmin",p.name.." min",controlspec.new(p.min,p.max,p.exp and 'exp' or 'lin',p.div,p.min,p.unit or "",p.div/(p.max-p.min)))
     params:add_control("tape"..p.eng.."modmax",p.name.." max",controlspec.new(p.min,p.max,p.exp and 'exp' or 'lin',p.div,p.max,p.unit or "",p.div/(p.max-p.min)))
+    for _,pp in ipairs({"modoption","modperiod","modmin","modmax"}) do
+      params:set_action("tape"..p.eng..pp,function(x)
+        if params:get("tape"..p.eng.."modtrig")==1 then
+          if debounce_clock~=nil then
+            clock.cancel(debounce_clock)
+          end
+          debounce_clock=clock.run(function()
+            clock.sleep(1)
+            params:set("tape"..p.eng.."modtrig",0)
+            clock.sleep(0.1)
+            params:set("tape"..p.eng.."modtrig",1)
+            debounce_clock=nil
+          end)
+        end
+      end)
+    end
     params:add_binary("tape"..p.eng.."modtrig",p.name.." trig","toggle")
     params:set_action("tape"..p.eng.."modtrig",function(x)
-      print(p.eng,x)
-      if x==1 then
-        print(mod_ops_ids[params:get("tape"..p.eng.."modoption")],params:get("tape"..p.eng.."modmin"),
-          params:get("tape"..p.eng.."modmax"),
-        params:get("tape"..p.eng.."modperiod"))
-        engine["tape_"..p.eng](mod_ops_ids[params:get("tape"..p.eng.."modoption")],params:get("tape"..p.eng.."modmin"),
-          params:get("tape"..p.eng.."modmax"),
-        params:get("tape"..p.eng.."modperiod"))
+      if x~=1 then
+        clock.run(function()
+          clock.sleep(0.2)
+          if params:get("tape"..p.eng.."modtrig")==0 then
+            params:delta("tape"..p.eng,0.0001)
+            params:delta("tape"..p.eng,-0.0001)
+          end
+        end)
+        do return end
       end
+      local min_val=params:get("tape"..p.eng.."modmin")
+      local max_val=params:get("tape"..p.eng.."modmax")
+      local period=params:get("tape"..p.eng.."modperiod")*clock.get_beat_sec()
+      if p.beats then
+        min_val=min_val*clock.get_beat_sec()
+        max_val=max_val*clock.get_beat_sec()
+      end
+      print(p.eng,mod_ops_ids[params:get("tape"..p.eng.."modoption")],min_val,max_val,period)
+      engine["tape_"..p.eng](mod_ops_ids[params:get("tape"..p.eng.."modoption")],min_val,max_val,period)
     end)
   end
-
-  -- setup global parameters
-  params:add_control("drumlatency","drum latency",controlspec.new(-1,1,'lin',0.01,0,"beats",0.01/2))
-  params:set_action("drumlatency",function(x)
-    x=x*clock.get_beat_sec()
-    if x>0.2 then
-      x=0.2
-    elseif x<-0.2 then
-      x=-0.2
-    end
-    print(x)
-    engine.amen_latency(x>0 and x or 0)
-    engine.threeohthree_latency(x<0 and math.abs(x) or 0)
-  end)
 
   -- initialize metro for updating screen
   timer=metro.init()
