@@ -1,22 +1,27 @@
--- acid pattern v0.0.1
--- ?
+-- oomph v0.0.1
+-- :) :) :) ;) :) :0 :)
 --
--- llllllll.co/t/?
+-- llllllll.co/t/oomph
 --
 --
 --
 --    ▼ instructions below ▼
 --
--- ?
+-- E1 selects pattern
+-- E2/E3 select parameter
+-- K2 change parameter
+-- K3 stop/start
+--
 
-engine.name="Emu303"
+engine.name="Oomph"
 local lattice_=require("lattice")
 local apm_=include("lib/AcidPatternManager")
 local amen_=include("lib/Amen")
 local ggrid_=include("lib/ggrid")
 local pad_=include("lib/Pad")
-if not string.find(package.cpath,"/home/we/dust/code/acid-pattern/lib/") then
-  package.cpath=package.cpath..";/home/we/dust/code/acid-pattern/lib/?.so"
+local plaits_=include("lib/Plaits")
+if not string.find(package.cpath,"/home/we/dust/code/oomph/lib/") then
+  package.cpath=package.cpath..";/home/we/dust/code/oomph/lib/?.so"
 end
 json=require("cjson")
 local shift=false
@@ -26,28 +31,33 @@ local beat_num=-1
 
 function init()
   -- setup audio folders
-  util.os_capture("mkdir -p /home/we/dust/audio/acid-pattern")
+  util.os_capture("mkdir -p /home/we/dust/audio/oomph")
 
   apm=apm_:new()
   amen=amen_:new()
   pad=pad_:new()
+  plaits=plaits_:new()
   ggrid=ggrid_:new{apm=apm}
 
   -- setup tape fx
 
   local tape_prams={
     {name="aux",eng="auxin",min=0,max=1,default=0.5,div=0.01,unit="wet/dry"},
+    {name="lpf",eng="lpf",min=100,max=20000,default=20000,div=100,exp=true,units="Hz"},
+    {name="lpf rq",eng="lpfqr",min=0,max=1,default=0.707,div=0.01},
+    {name="hpf",eng="hpf",min=10,max=5000,default=30,div=10,exp=true,units="Hz"},
+    {name="hpf rq",eng="hpfqr",min=0,max=1,default=0.707,div=0.01},
     {name="tape",eng="tape_wet",min=0,max=1,default=0.5,div=0.01,unit="wet/dry"},
-    {name="bias",eng="tape_bias",min=0,max=1,default=0.8,div=0.01},
-    {name="saturate",eng="tape_sat",min=0,max=1,default=0.8,div=0.01},
-    {name="drive",eng="tape_drive",min=0,max=1,default=0.8,div=0.01},
-    {name="distortion",eng="dist_wet",min=0,max=1,default=0.1,div=0.01,unit="wet/dry"},
-    {name="gain",eng="dist_drive",min=0,max=1,default=0.1,div=0.01},
-    {name="low gain",eng="dist_low",min=0,max=1,default=0.1,div=0.01},
-    {name="high gain",eng="dist_high",min=0,max=1,default=0.1,div=0.01},
-    {name="shelf",eng="dist_shelf",min=10,max=1000,default=600,div=10,exp=true},
+    {name="tape bias",eng="tape_bias",min=0,max=1,default=0.8,div=0.01},
+    {name="tape saturate",eng="tape_sat",min=0,max=2,default=0.8,div=0.01},
+    {name="tape drive",eng="tape_drive",min=0,max=2,default=0.8,div=0.01},
+    -- {name="distortion",eng="dist_wet",min=0,max=1,default=0.1,div=0.01,unit="wet/dry"},
+    -- {name="gain",eng="dist_drive",min=0,max=1,default=0.1,div=0.01},
+    -- {name="low gain",eng="dist_low",min=0,max=1,default=0.1,div=0.01},
+    -- {name="high gain",eng="dist_high",min=0,max=1,default=0.1,div=0.01},
+    -- {name="shelf",eng="dist_shelf",min=10,max=1000,default=600,div=10,exp=true},
   }
-  params:add_group("TAPE FX",#tape_prams)
+  params:add_group("FX",#tape_prams)
   for _,p in ipairs(tape_prams) do
     params:add_control("tape"..p.eng,p.name,controlspec.new(p.min,p.max,p.exp and 'exp' or 'lin',p.div,p.default,p.unit or "",p.div/(p.max-p.min)))
     params:set_action("tape"..p.eng,function(x)
@@ -56,41 +66,54 @@ function init()
       params:set("tape"..p.eng.."modtrig",0)
     end)
   end
-  params:add_group("TAPE FX MOD",#tape_prams*5)
-  local mod_ops_ids={"sine","drunk","xline","line"}
-  local mod_ops_nom={"sine","drunk","exp ramp","linear ramp"}
+  params:add_group("FX MOD",#tape_prams*5)
+  local mod_ops_ids={"sine","xline","line"}
+  local mod_ops_nom={"sine","exp ramp","linear ramp"}
+  local debounce_clock=nil
   for _,p in ipairs(tape_prams) do
     params:add_option("tape"..p.eng.."modoption",p.name.." form",mod_ops_nom,1)
-    params:add_control("tape"..p.eng.."modperiod",p.name.." period",controlspec.new(0.1,120,'exp',0.1,2,"s",0.1/119.9))
+    params:add_control("tape"..p.eng.."modperiod",p.name.." period",controlspec.new(0.1,120,'exp',0.1,math.random(4,32),"beats",0.1/119.9))
     params:add_control("tape"..p.eng.."modmin",p.name.." min",controlspec.new(p.min,p.max,p.exp and 'exp' or 'lin',p.div,p.min,p.unit or "",p.div/(p.max-p.min)))
     params:add_control("tape"..p.eng.."modmax",p.name.." max",controlspec.new(p.min,p.max,p.exp and 'exp' or 'lin',p.div,p.max,p.unit or "",p.div/(p.max-p.min)))
+    for _,pp in ipairs({"modoption","modperiod","modmin","modmax"}) do
+      params:set_action("tape"..p.eng..pp,function(x)
+        if params:get("tape"..p.eng.."modtrig")==1 then
+          if debounce_clock~=nil then
+            clock.cancel(debounce_clock)
+          end
+          debounce_clock=clock.run(function()
+            clock.sleep(1)
+            params:set("tape"..p.eng.."modtrig",0)
+            clock.sleep(0.1)
+            params:set("tape"..p.eng.."modtrig",1)
+            debounce_clock=nil
+          end)
+        end
+      end)
+    end
     params:add_binary("tape"..p.eng.."modtrig",p.name.." trig","toggle")
     params:set_action("tape"..p.eng.."modtrig",function(x)
-      print(p.eng,x)
-      if x==1 then
-        print(mod_ops_ids[params:get("tape"..p.eng.."modoption")],params:get("tape"..p.eng.."modmin"),
-          params:get("tape"..p.eng.."modmax"),
-        params:get("tape"..p.eng.."modperiod"))
-        engine["tape_"..p.eng](mod_ops_ids[params:get("tape"..p.eng.."modoption")],params:get("tape"..p.eng.."modmin"),
-          params:get("tape"..p.eng.."modmax"),
-        params:get("tape"..p.eng.."modperiod"))
+      if x~=1 then
+        clock.run(function()
+          clock.sleep(0.2)
+          if params:get("tape"..p.eng.."modtrig")==0 then
+            params:delta("tape"..p.eng,0.0001)
+            params:delta("tape"..p.eng,-0.0001)
+          end
+        end)
+        do return end
       end
+      local min_val=params:get("tape"..p.eng.."modmin")
+      local max_val=params:get("tape"..p.eng.."modmax")
+      local period=params:get("tape"..p.eng.."modperiod")*clock.get_beat_sec()
+      if p.beats then
+        min_val=min_val*clock.get_beat_sec()
+        max_val=max_val*clock.get_beat_sec()
+      end
+      print(p.eng,mod_ops_ids[params:get("tape"..p.eng.."modoption")],min_val,max_val,period)
+      engine["tape_"..p.eng](mod_ops_ids[params:get("tape"..p.eng.."modoption")],min_val,max_val,period)
     end)
   end
-
-  -- setup global parameters
-  params:add_control("drumlatency","drum latency",controlspec.new(-1,1,'lin',0.01,0,"beats",0.01/2))
-  params:set_action("drumlatency",function(x)
-    x=x*clock.get_beat_sec()
-    if x>0.2 then
-      x=0.2
-    elseif x<-0.2 then
-      x=-0.2
-    end
-    print(x)
-    engine.amen_latency(x>0 and x or 0)
-    engine.threeohthree_latency(x<0 and math.abs(x) or 0)
-  end)
 
   -- initialize metro for updating screen
   timer=metro.init()
@@ -108,12 +131,13 @@ function init()
       amen:process(beat_num)
       apm:process(beat_num)
       pad:process(beat_num)
+      plaits:process(beat_num)
     end,
     division=1/16,
   }
 
   -- dev stuff
-  amen:load("/home/we/dust/code/acid-pattern/lib/beats16_bpm150_Ultimate_Jack_Loops_014__BPM_150_.wav")
+  amen:load("/home/we/dust/code/oomph/lib/beats16_bpm150_Ultimate_Jack_Loops_014__BPM_150_.wav")
   -- amen:stutter_build()
 
   params.action_write=function(filename,name)
@@ -156,7 +180,11 @@ function init()
   params:default()
   params:bang()
 
-  toggle_start(true)
+  toggle_start(false)
+  clock.run(function()
+    clock.sleep(0.7)
+    toggle_start(false)
+  end)
 end
 
 function clock.transport.start()
@@ -202,6 +230,7 @@ function toggle_start(start)
     lattice:stop()
   end
   amen:toggle_start(start)
+  ggrid:toggle_start(start)
   playing=start
 end
 
@@ -217,10 +246,15 @@ function key(k,z)
     end
   else
     if k==1 then
-    elseif k>1 and z==1 then
-      local d=k*2-5
-      apm:set(pos[1],pos[2],d)
+    elseif k==2 and z==1 then
+      apm:set(pos[1],pos[2],1)
+    elseif k==3 and z==1 then
+      toggle_start()
     end
+    -- elseif k>1 and z==1 then
+    --   local d=k*2-5
+    --   apm:set(pos[1],pos[2],d)
+    -- end
   end
 end
 
@@ -255,10 +289,11 @@ end
 function redraw()
   screen.clear()
   local x=2.5
-  local y=10
+  local y=7
   local sh=9
   local sw=8
   apm:redraw(x,y,sh,sw)
+  screen.level(10)
   screen.blend_mode(1)
   screen.rect(x+sw*(pos[2]-1)-4,y+sh*(pos[1]-1)+2,10,9)
   screen.fill()

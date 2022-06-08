@@ -1,15 +1,16 @@
-Engine_Emu303 : CroneEngine {
+Engine_Oomph : CroneEngine {
 // All norns engines follow the 'Engine_MySynthName' convention above
     // all
     var fxbus;
     var fxsyn;
 
-    // <Emu303>
+    // <Oomph>
 	var synThreeOhThree;
     var busAccent;
     var busTape;
     var valDecayFactor;
-    // </Emu303>
+    var latencyThreeOhThree;
+    // </Oomph>
 
     // <Tape>
     var synTape;
@@ -35,15 +36,16 @@ Engine_Emu303 : CroneEngine {
 	alloc { 
         
         // <Amen>
+        latencyThreeOhThree=0.0;
         fxbus=Dictionary.new();
         fxsyn=Dictionary.new();
         sampleBuffAmen = Buffer.new(context.server);
-        sampleVinyl = Buffer.read(context.server, "/home/we/dust/code/acid-pattern/lib/vinyl2.wav"); 
+        sampleVinyl = Buffer.read(context.server, "/home/we/dust/code/oomph/lib/vinyl2.wav"); 
         playerSwap = 0;
         valDecayFactor=1.0;
 
         SynthDef("defVinyl",{
-            | bufnum = 0,amp=0,hpf=800,lpf=4000,rate=1,rateslew=4,scratch=0,bpm_target=120,t_trig=1|
+            | out=0,bufnum = 0,amp=0,hpf=800,lpf=4000,rate=1,rateslew=4,scratch=0,bpm_target=120,t_trig=1|
             var snd,pos;
             amp = Lag.kr(amp,2);
             amp = amp * VarLag.kr(LFNoise0.kr(1).range(0.1,1),2,warp:\sine);
@@ -60,7 +62,34 @@ Engine_Emu303 : CroneEngine {
             );
             snd = HPF.ar(snd,hpf);
             snd = LPF.ar(snd,lpf);
-            Out.ar(0,snd*amp*EnvGen.ar(Env.new([0,1],[4])));
+            Out.ar(out,snd*amp*EnvGen.ar(Env.new([0,1],[4])));
+        }).add;
+
+        SynthDef("defPlaits",{
+            arg out,ampBus=0.5,panBus,attackBus,decayEnvBus,engineBus,pitchBus,harmBus,morphBus,timbreBus,decayBus,latency=0;
+            var snd,env;
+            var amp=DC.kr(In.kr(ampBus));
+            var attack=DC.kr(In.kr(attackBus));
+            var decayEnv=DC.kr(In.kr(decayEnvBus));
+            var engine=DC.kr(In.kr(engineBus));
+            var pitch=DC.kr(In.kr(pitchBus));
+            var harm=DC.kr(In.kr(harmBus));
+            var morph=DC.kr(In.kr(morphBus));
+            var timbre=DC.kr(In.kr(timbreBus));
+            var decay=DC.kr(In.kr(decayBus));
+            var pan=DC.kr(In.kr(panBus));
+            env=EnvGen.ar(Env.perc(attack,decayEnv),TDelay.kr(Impulse.kr(0),latency),doneAction:2);
+            snd=MiPlaits.ar(
+                pitch:pitch,
+                harm:harm,
+                morph:morph,
+                timbre:timbre,
+                decay:decay,
+                engine:engine,
+                trigger:TDelay.kr(Impulse.kr(0),latency),
+            );
+            snd=snd*env*amp;
+            Out.ar(out,Balance2.ar(snd[0],snd[1],pan));
         }).add;
 
         SynthDef("defAmen",{ 
@@ -93,23 +122,23 @@ Engine_Emu303 : CroneEngine {
 
             rate = rate * bpm_target / bpm_sample;
             // scratch effect
-            rate = SelectX.kr(scratch,[rate,LFTri.kr(bpm_target/60*scratchrate)]);
+            rate = SelectX.kr(scratch,[rate,LFTri.kr(bpm_target/60*scratchrate)],wrap:0);
             pos = Phasor.ar(
-                trig:t_trig,
+                trig:TDelay.kr(t_trig,latency),
                 rate:BufRateScale.kr(bufnum)*rate,
                 start:((sampleStart*(rate>0))+(sampleEnd*(rate<0)))*BufFrames.kr(bufnum),
                 end:((sampleEnd*(rate>0))+(sampleStart*(rate<0)))*BufFrames.kr(bufnum),
                 resetPos:samplePos*BufFrames.kr(bufnum)
             );
             timestretchPos = Phasor.ar(
-                trig:t_trigtime,
+                trig:TDelay.kr(t_trigtime,latency),
                 rate:BufRateScale.kr(bufnum)*rate/timestretch_slow,
                 start:((sampleStart*(rate>0))+(sampleEnd*(rate<0)))*BufFrames.kr(bufnum),
                 end:((sampleEnd*(rate>0))+(sampleStart*(rate<0)))*BufFrames.kr(bufnum),
                 resetPos:pos
             );
             timestretchWindow = Phasor.ar(
-                trig:t_trig,
+                trig:TDelay.kr(t_trig,latency),
                 rate:BufRateScale.kr(bufnum)*rate,
                 start:timestretchPos,
                 end:timestretchPos+((60/bpm_target/timestretch_beats)/BufDur.kr(bufnum)*BufFrames.kr(bufnum)),
@@ -147,7 +176,7 @@ Engine_Emu303 : CroneEngine {
                 level:amp*Lag.kr(amp_crossfade,0.2)
             );
 
-            Out.ar(out,DelayN.ar(snd,delaytime:latency)*EnvGen.ar(Env.new([0,1],[4])));
+            Out.ar(out,snd*EnvGen.ar(Env.new([0,1],[4])));
         }).add; 
         // </Amen>
 
@@ -179,13 +208,13 @@ Engine_Emu303 : CroneEngine {
             noteVal=Lag.kr(note,portamento*slide);
             accentVal=In.kr(busAccent);
             res = Clip.kr(res_adjust+(res_accent*accentVal),0.001,2);
-            env = EnvGen.ar(Env.new([10e-3,1,1,10e-9],[0.03,sustain*duration,decay],'exp'),t_trig)+(env_accent*accentVal);
+            env = EnvGen.ar(Env.new([10e-3,1,1,10e-9],[0.03,sustain*duration,decay],'exp'),TDelay.kr(t_trig,latency))+(env_accent*accentVal);
             waves = [Saw.ar([noteVal-detune,noteVal+detune].midicps, mul: env), Pulse.ar([note-detune,note+detune].midicps, 0.5, mul: env)];
-            filterEnv =  EnvGen.ar( Env.new([10e-9, 1, 10e-9], [0.01, decay],  'exp'), t_trig);
-            filter = RLPFD.ar(SelectX.ar(wave, waves), cutoff +(filterEnv*env_adjust), res,gain);
+            filterEnv =  EnvGen.ar( Env.new([10e-9, 1, 10e-9], [0.01, decay],  'exp'), TDelay.kr(t_trig,latency));
+            filter = RLPFD.ar(SelectX.ar(wave, waves, wrap:0), cutoff +(filterEnv*env_adjust), res,gain);
             snd=(filter*amp).tanh;
             snd=snd+SinOsc.ar([noteVal-12-detune,noteVal-12+detune].midicps,mul:sub*env/10.0);
-            Out.ar(out, DelayN.ar(snd,delaytime:latency)*EnvGen.ar(Env.new([0,1],[4])));
+            Out.ar(out, snd*EnvGen.ar(Env.new([0,1],[4])));
         }).add;
         
         SynthDef("defThreeOhThreeAccent",{
@@ -198,11 +227,11 @@ Engine_Emu303 : CroneEngine {
             arg in, auxinBus,tape_wetBus,tape_biasBus,tape_satBus,tape_driveBus,
             tape_oversample=1,mode=0,
             dist_wetBus,dist_driveBus,dist_biasBus,dist_lowBus,dist_highBus,
-            dist_shelfBus,dist_oversample=2,
+            dist_shelfBus,dist_oversample=0,
             wowflu=1.0,
             wobble_rpm=33, wobble_amp=0.05, flutter_amp=0.03, flutter_fixedfreq=6, flutter_variationfreq=2,
-            hpf=60,hpfqr=0.6,
-            lpf=18000,lpfqr=0.6,
+            hpfBus=60,hpfqrBus=0.6,
+            lpfBus=18000,lpfqrBus=0.6,
             buf;
             var snd=In.ar(in,2);
             var auxin=In.kr(auxinBus);//bus
@@ -216,9 +245,13 @@ Engine_Emu303 : CroneEngine {
             var dist_low=In.kr(dist_lowBus);//bus
             var dist_high=In.kr(dist_highBus);//bus
             var dist_shelf=In.kr(dist_shelfBus);//bus
+            var hpf=In.kr(hpfBus);//bus
+            var hpfqr=In.kr(hpfqrBus);//bus
+            var lpf=In.kr(lpfBus);//bus
+            var lpfqr=In.kr(lpfqrBus);//bus
             snd=snd+(auxin*SoundIn.ar([0,1]));
-            snd=SelectX.ar(Lag.kr(tape_wet,1),[snd,AnalogTape.ar(snd,tape_bias,tape_sat,tape_drive,tape_oversample,mode)]);
-            snd=SelectX.ar(Lag.kr(dist_wet,1),[snd,AnalogVintageDistortion.ar(snd,dist_drive,dist_bias,dist_low,dist_high,dist_shelf,dist_oversample)]);          
+            snd=SelectX.ar(Lag.kr(tape_wet,1),[snd,AnalogTape.ar(snd,tape_bias,tape_sat,tape_drive,tape_oversample,mode)],wrap:0);
+            // snd=SelectX.ar(Lag.kr(dist_wet,1),[snd,AnalogVintageDistortion.ar(snd,dist_drive,dist_bias,dist_low,dist_high,dist_shelf,dist_oversample)],wrap:0);          
             snd=RHPF.ar(snd,hpf,hpfqr);
             snd=RLPF.ar(snd,lpf,lpfqr);
             Out.ar(0,snd*EnvGen.ar(Env.new([0,1],[4])));
@@ -228,15 +261,16 @@ Engine_Emu303 : CroneEngine {
         // <pad>
         bufCheby = Buffer.alloc(context.server, 512, 1, { |buf| buf.chebyMsg([1,0,1,1,0,1])});
         SynthDef("defPad",{
-            arg outDry, outWet, amp=0.5, wet=1.0, buf=0,note=53,attack=1,decay=1,sustain=0.5,release=2,notelpf=80;
+            arg outDry, outWet, latency=0.0,amp=0.5, wet=1.0, buf=0,note=53,attack=1,decay=1,sustain=0.5,release=2,notelpf=80;
             var snd,env;
             snd=Shaper.ar(buf,Saw.ar(note.midicps,SinOsc.kr(rrand(1/30,1/5)).range(0.1,1.0)));
             snd=Pan2.ar(snd,rrand(-0.25,0.25));
             snd=RLPF.ar(snd,notelpf.midicps,0.707);
-            snd=SelectX.ar(VarLag.kr(LFNoise0.kr(1/10),10,warp:\sine).range(0.1,0.7),[snd,snd*LFPar.ar(VarLag.kr(LFNoise0.kr(1/10),10,warp:\sine).range(1,6))]); 
+            snd=SelectX.ar(VarLag.kr(LFNoise0.kr(1/10),10,warp:\sine).range(0.1,0.7),[snd,snd*LFPar.ar(VarLag.kr(LFNoise0.kr(1/10),10,warp:\sine).range(1,6))],wrap:0); 
             env=EnvGen.ar(Env.new([0.00001,1.0,sustain,0.00001],[attack,decay,release],curve:[\welch,\sine,\exp]),doneAction:2);
             snd=snd*env*amp*EnvGen.ar(Env.new([0,1],[0.1]));
             snd=snd.tanh;
+            snd=DelayN.ar(snd,delaytime:latency);
             Out.ar(outDry,snd*(1-wet));
             Out.ar(outWet,snd*wet);
         }).add;
@@ -293,9 +327,9 @@ Engine_Emu303 : CroneEngine {
         synTape=Synth.new("defTape",[\in,busTape]);
         context.server.sync;        
         // define always-on synths
-        synThreeOhThree=Synth.before(synTape,"defThreeOhThree",[\busAccent,busAccent,\out,busTape]); // TODO: switch back to busTape
-        synReverb=Synth.before(synTape,"defReverb",[\in,busReverb,\out,busTape]); // TODO: switch back to busTape
-        //TODO add back playerVinyl = Synth("defVinyl",[\bufnum,sampleVinyl,\amp,0],target:context.xg);
+        synThreeOhThree=Synth.before(synTape,"defThreeOhThree",[\busAccent,busAccent,\out,busTape]);
+        synReverb=Synth.before(synTape,"defReverb",[\in,busReverb,\out,busTape]); 
+        playerVinyl = Synth("defVinyl",[\bufnum,sampleVinyl,\amp,0,\out,busTape],target:context.xg);
         synAmen = Array.fill(2,{arg i;
             Synth.before(synTape,"defAmen",[\out,busTape])
         });
@@ -347,6 +381,7 @@ Engine_Emu303 : CroneEngine {
         });
         [\latency].do({ arg key;
             this.addCommand("threeohthree_"++key, "f", { arg msg;
+                latencyThreeOhThree=msg[1].asFloat;
                 synThreeOhThree.set(key,msg[1]);
             });
         });
@@ -360,14 +395,14 @@ Engine_Emu303 : CroneEngine {
                 });
             });
         });
-        this.addCommand("threeohthree_decayfactor", "f", { arg msg;
-            valDecayFactor=msg[1].asFloat;
+        this.addCommand("threeohthree_decayfactor", "sfff", { arg msg;
+            valDecayFactor=msg[3].asFloat;
         });
         // </303>
 
 
         // <Tape>
-        [\auxin,\tape_wet,\tape_bias,\tape_sat,\tape_drive,\dist_wet,\dist_drive,\dist_bias,\dist_low,\dist_high,\dist_shelf].do({ arg fx;
+        [\auxin,\tape_wet,\tape_bias,\tape_sat,\tape_drive,\dist_wet,\dist_drive,\dist_bias,\dist_low,\dist_high,\dist_shelf,\lpf,\lpfqr,\hpf,\hpfqr].do({ arg fx;
             var domain="tape";
             var key=domain++"_"++fx;
             fxbus.put(key,Bus.control(context.server,1));
@@ -390,6 +425,47 @@ Engine_Emu303 : CroneEngine {
             });
         });
         // </Tape>
+
+        // <Plaits>
+        [\amp,\attack,\decayEnv,\engine,\pitch,\harm,\morph,\timbre,\decay,\pan].do({ arg fx;
+            var domain="plaits";
+            var key=domain++"_"++fx;
+            fxbus.put(key,Bus.control(context.server,1));
+            fxbus.at(key).value=1.0;
+            this.addCommand(key, "sfff", { arg msg;
+                if (key=="lag",{
+                    if (fxsyn.at(key).isNil,{
+                        fxsyn.put(key,Synth.new("defMod_"++msg[1].asString,[\out,fxbus.at(key),\msg1,msg[2],\msg2,msg[3],\msg3,msg[4]]));
+                    },{
+                        fxsyn.at(key).set(\msg1,msg[2],\msg2,msg[3],\msg3,msg[4]);
+                    });
+                },{
+                    if (fxsyn.at(key).notNil,{
+                        fxsyn.at(key).free;
+                    });
+                    fxsyn.put(key,Synth.new("defMod_"++msg[1].asString,[\out,fxbus.at(key),\msg1,msg[2],\msg2,msg[3],\msg3,msg[4]]));
+                })
+            });
+        });
+
+        this.addCommand("plaits","", { arg msg;
+            Synth.before(synTape,"defPlaits",[
+                \out,busTape,
+                \latency,latencyThreeOhThree,
+                \ampBus,fxbus.at("plaits_amp"),
+                \attackBus,fxbus.at("plaits_attack"),
+                \decayEnvBus,fxbus.at("plaits_decayEnv"),
+                \engineBus,fxbus.at("plaits_engine"),
+                \pitchBus,fxbus.at("plaits_pitch"),
+                \harmBus,fxbus.at("plaits_harm"),
+                \morphBus,fxbus.at("plaits_morph"),
+                \timbreBus,fxbus.at("plaits_timbre"),
+                \decayBus,fxbus.at("plaits_decay"),
+                \panBus,fxbus.at("plaits_pan"),
+            ]);
+        });
+
+        // </Plaits>
 
 
 

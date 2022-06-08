@@ -1,6 +1,20 @@
-# acid-pattern
+# oomph
+
+
+oomph is (in keeping with the [namelessness](https://llllllll.co/t/namelessness)) is simply a monophonic synthesizer with accented filters, a sample loop player with customizable effects, and a sample-based chord sequencer - which is all mixed and processed through a tape emulator.
+
+you may recognize some of these aspects as they are combinations of scripts I've previously contributed - notably [amen](https://github.com/schollz/amen) (sample looper), [acid-test](https://github.com/schollz/acid-test) (303-style monosynth), [synthy](https://github.com/schollz/synthy) (chord sequencer) and [tapedeck](https://github.com/schollz/tapedeck) (tape emulator). I thought it would be fun to have a single norns script to serve as a
+"groovebox" that would have all these pieces to play with.
+
+
+## instructions
+
+### grid
+
+the first five rows edit the parameters of the monophonic synth. the last row can be used to control the patterns by holding down one button and clicking another to register changing patterns.
 
 ## about
+
 
 I wanted to make a 303-esque thing and at the heart its very simple - a resonant filter with a saw/square wave. the tricky bit is having the right "accent", the accent envelope circuit affects the amplitude and the filter opening. apparently its not a typical envelope generator - it has a capacitor that doesn't completely discharge allowing you to get "higher" as you add more accents. its well described [in this classic article](https://www.firstpr.com.au/rwi/dfish/303-unique.html):
 
@@ -54,10 +68,10 @@ install tapedeck
 os.execute("cd /tmp && wget https://github.com/schollz/tapedeck/releases/download/PortedPlugins/PortedPlugins.tar.gz && tar -xvzf PortedPlugins.tar.gz && rm PortedPlugins.tar.gz && sudo rsync -avrP PortedPlugins /home/we/.local/share/SuperCollider/Extensions/")
 ```
 
-install acid-pattern
+install oomph
 
 ```
-;install https://github.com/schollz/acid-pattern
+;install https://github.com/schollz/oomph
 ```
 
 
@@ -78,3 +92,11 @@ install acid-pattern
 - ~~add start and stop transport~~
 - allow using other samples for the pad
 - allow 16 tracks
+
+- add midi out to things
+
+## known bugs
+
+- if you goto a "MOD" and toggle one, and you go to the non-MOD page and change the parameter it will automatically turn off the toggle but the toggle won't appeared to be turned off until you exit the menu and come back into the menu.
+- MOD lfos are set according to the current tempo, if you change tempos the MOD lfos will stay with periods from the previous tempo
+

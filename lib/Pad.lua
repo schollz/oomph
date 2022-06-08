@@ -12,8 +12,12 @@ function Pad:new(o)
 end
 
 function Pad:init()
+  self.mx_samples="/home/we/dust/audio/mx.samples/ultra_synth/"
+  if not util.file_exists(self.mx_samples) then
+    print("ERROR ERROR ERROR - PLEASE SEE README TO INSTALL MX.SAMPLES DEFAULT")
+  end
   local prams={
-    {name="volume",eng="amp",min=0,max=4,default=0.5,div=0.01,unit="amp"},
+    {name="volume",eng="amp",min=0,max=4,default=0.0,div=0.01,unit="amp"},
     {name="attack",eng="attack",min=0,max=10,default=clock.get_beat_sec()/2,div=0.1,unit="s"},
     {name="decay",eng="decay",min=0,max=10,default=clock.get_beat_sec(),div=0.1,unit="s"},
     {name="sustain",eng="sustain",min=0,max=2,default=1,div=0.1,unit="amp"},
@@ -21,11 +25,27 @@ function Pad:init()
     {name="pan",eng="pan",min=-1,max=1,default=0,div=0.01},
     {name="lpf",eng="lpf",min=50,max=20000,default=20000,div=100,exp=true,unit='Hz'},
   }
-  params:add_group("PAD",#prams+27)
+  params:add_group("CHORDS",#prams+28)
+  params:add_file("mx_samples","load mx.samples",_path.audio.."mx.samples/")
+  params:set_action("mx_samples",function(x)
+    if x==nil then
+      do return end
+    end
+    pathname,filename,ext=string.match(x,"(.-)([^\\/]-%.?([^%.\\/]*))$")
+    if string.find(pathname,"mx.samples/") then
+      local suffix="mx.samples/"
+      if pathname:sub(-string.len(suffix))==suffix then
+        do return end
+      end
+      print("loading "..pathname)
+      self.mx_samples=pathname
+    end
+  end)
   for _,p in ipairs(prams) do
     params:add_control("pad_"..p.eng,p.name,controlspec.new(p.min,p.max,p.exp and 'exp' or 'lin',p.div,p.default,p.unit or "",p.div/(p.max-p.min)))
     params:set_action("pad_"..p.eng,function(x)
-      engine["pad_"..p.eng]("/home/we/dust/audio/mx.samples/ultra_synth/",x)
+      -- TODO: make the ultra_synth a parameter
+      engine["pad_"..p.eng](self.mx_samples,x)
     end)
   end
 
@@ -72,16 +92,16 @@ function Pad:update_chords()
 end
 
 function Pad:process(beat)
-  if (beat-1)%4~=0 then
+  if beat%4~=0 then
     do return end
   end
-  local qn=(beat-1)/4+1
+  local qn=beat/4+1
   local chord_note=(qn-1)%#self.chords+1
   if next(self.chords[chord_note])==nil then
     do return end
   end
   local chord=self.chords[chord_note]
-  print(chord.chord,chord.beats)
+  -- print(chord.chord,chord.beats)
   local notes=MusicUtil.generate_chord_roman(params:get("pad_root_note"),params:get("pad_scale"),chord.chord)
   if params:get("transpose"..chord.chord_num)>0 then
     for i=1,params:get("transpose"..chord.chord_num) do
@@ -98,7 +118,7 @@ function Pad:process(beat)
   end
 
   for _,note in ipairs(notes) do
-    engine.pad_note("/home/we/dust/audio/mx.samples/ultra_synth/",note,math.random(80,110),duration)
+    engine.pad_note(self.mx_samples,note,math.random(80,110),duration)
     -- engine.pad(
     --   params:get("pad_volume")/5,
     --   params:get("pad_reverb"),
@@ -107,7 +127,7 @@ function Pad:process(beat)
     --   duration*params:get("pad_decay")/100,
     --   params:get("pad_attack")/100,
     --   duration*params:get("pad_release")/100,
-    --   highestnote+12*params:get("pad_lpf mult") -- TODO change this to the top note
+    --   highestnote+12*params:get("pad_lpf mult")
     -- )
   end
 end

@@ -18,47 +18,43 @@ function AP:new(o)
 end
 
 function AP:init()
-  -- https://acidpattern.bandcamp.com/album/july-acid-pattern-2014
+  -- https://acidpattern.bandcamp.com/album/july-oomph-2014
   self.current=1
   self.note_scale={0,2,4,5,7,9,11}
   self.key_step={"0","1","2","3","4","5","6","7","8","9","A","B","C","D","E","F"}
   self.key_notes={"C","D","E","F","G","A","B"}
-  self.key_accid={"b","","#"}
-  self.key_octave={"D","","U"}
-  self.key_accent={"","O","F"}
+  self.key_accid={"","b","#"}
+  self.key_octave={"M","","P"}
+  self.key_accent={"","F","O"}
   self.key_punctuation={"o","-","@"}
   -- do initialize here
   self.note={6,6,3,4,6,1,2,1,1,3,6,3,6,7,3,5}
-  self.accid={2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2}
-  self.octave={2,1,3,2,2,3,1,3,2,2,3,1,3,2,1,2}
-  self.accent={2,2,1,3,1,2,2,1,3,1,2,2,1,3,1,2}
+  self.note={6,6,3,4,6,1,2,1,1,3,6,3,6,7,3,5}
+  self.accid={1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}
+  self.octave={2,2,1,3,2,2,2,2,1,3,2,2,2,1,3,2}
+  self.accent={3,3,1,1,2,1,3,3,1,1,2,1,3,1,1,2}
   self.duration={1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}
-  self.punct={3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3}
+  self.punct={3,3,3,3,3,1,3,3,3,3,3,2,3,3,3,3}
   self.step={1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16}
 end
 
-function AP:save(filename)
-  filename=filename.."_"..self.id..".json"
+function AP:dumps()
   local to_save={"note","accid","octave","accent","duration","punct","step"}
   local data={}
   for _,key in ipairs(to_save) do
     data[key]=self[key]
   end
-  local file=io.open(filename,"w+")
-  io.output(file)
-  io.write(json.encode(data))
-  io.close(file)
+  return json.encode(data)
 end
 
-function AP:open(filename)
-  filename=filename.."_"..self.id..".json"
-  if not util.file_exists(filename) then
+function AP:loads(s)
+  if s==nil then
     do return end
   end
-  local f=io.open(filename,"rb")
-  local content=f:read("*all")
-  f:close()
-  local data=json.decode(content)
+  local data=json.decode(s)
+  if data==nil then
+    do return end
+  end
   for k,v in pairs(data) do
     self[k]=v
   end
@@ -74,7 +70,7 @@ function AP:set(ind,pos,d)
     self[setters[ind]][pos]=self[setters[ind]][pos]-maxes[ind]
   end
   if setters[ind]=="punct" then
-    -- TODO: figure out the durations of all the notes
+    -- figure out the durations of all the notes
     local punct={}
     local durations={}
     for i=1,2 do
@@ -95,7 +91,6 @@ function AP:set(ind,pos,d)
     for i=1,#self.duration do
       self.duration[i]=durations[i]
     end
-    tab.print(self.duration)
   end
 end
 
@@ -125,7 +120,11 @@ function AP:process(beat)
   if self.punct[i]~=PUNCUATION_NOTE then
     do return end
   end
-  local note=params:get("root_note")+self.note_scale[self.note[i]]+(self.accid[i]-2)+(self.octave[i]-2)*12+12
+  local accid=self.accid[i]==3 and 1 or 0
+  if accid==0 then
+    accid=self.accid[i]==2 and-1 or 0
+  end
+  local note=params:get("root_note")+self.note_scale[self.note[i]]+accid+(self.octave[i]-2)*12+12
   -- do something with the note
   local accent=self.accent[i]==3 and 1 or 0
   local slide=self.accent[i]==2 and 1 or 0
@@ -136,8 +135,8 @@ function AP:redraw(x,y,sh,sw)
   screen.level(15)
   screen.blend_mode(0)
   for i=1,16 do
-    screen.move(x+sw*(i-1),y)
-    screen.text_center(self.key_step[self.step[i]])
+    -- screen.move(x+sw*(i-1),y)
+    -- screen.text_center(self.key_step[self.step[i]])
     screen.move(x+sw*(i-1),y+sh*1)
     screen.text_center(self.key_notes[self.note[i]])
     screen.move(x+sw*(i-1),y+sh*2)
@@ -149,7 +148,7 @@ function AP:redraw(x,y,sh,sw)
     screen.move(x+sw*(i-1),y+sh*5)
     screen.text_center(self.key_punctuation[self.punct[i]])
   end
-  screen.move(x+sw*(self.current-1),y-5)
+  screen.move(x+sw*(self.current-1),y+4)
   screen.text_center("^")
 end
 
