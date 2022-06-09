@@ -102,9 +102,10 @@ Engine_Oomph : CroneEngine {
             panBus,lpfBus,hpfBus;
 
             // vars
+            var rate;
             var snd,pos,timestretchPos,timestretchWindow;
             var amp=In.kr(ampBus).dbamp;//bus2
-            var rate=In.kr(rateBus);//bus2
+            var rateIn=In.kr(rateBus,1);//bus2
             var bitcrush=In.kr(bitcrushBus);//bus2
             var bitcrush_bits=In.kr(bitcrush_bitsBus);//bus2
             var bitcrush_rate=In.kr(bitcrush_rateBus);//bus2
@@ -120,26 +121,28 @@ Engine_Oomph : CroneEngine {
             var lpf=In.kr(lpfBus);//bus2
             var hpf=In.kr(hpfBus);//bus2
 
-            rate = rate * bpm_target / bpm_sample;
+
+            rate = BufRateScale.kr(bufnum) * bpm_target / bpm_sample;
+            rate = rate*LinSelectX.kr(EnvGen.kr(Env.new([0,1,1,0],[0.2,2,1]),gate:Changed.kr(rateIn)),[1,rateIn]);
             // scratch effect
             rate = SelectX.kr(scratch,[rate,LFTri.kr(bpm_target/60*scratchrate)],wrap:0);
             pos = Phasor.ar(
                 trig:t_trig,
-                rate:BufRateScale.kr(bufnum)*rate,
+                rate:rate,
                 start:((sampleStart*(rate>0))+(sampleEnd*(rate<0)))*BufFrames.kr(bufnum),
                 end:((sampleEnd*(rate>0))+(sampleStart*(rate<0)))*BufFrames.kr(bufnum),
                 resetPos:samplePos*BufFrames.kr(bufnum)
             );
             timestretchPos = Phasor.ar(
                 trig:t_trigtime,
-                rate:BufRateScale.kr(bufnum)*rate/timestretch_slow,
+                rate:rate/timestretch_slow,
                 start:((sampleStart*(rate>0))+(sampleEnd*(rate<0)))*BufFrames.kr(bufnum),
                 end:((sampleEnd*(rate>0))+(sampleStart*(rate<0)))*BufFrames.kr(bufnum),
                 resetPos:pos
             );
             timestretchWindow = Phasor.ar(
                 trig:t_trig,
-                rate:BufRateScale.kr(bufnum)*rate,
+                rate:rate,
                 start:timestretchPos,
                 end:timestretchPos+((60/bpm_target/timestretch_beats)/BufDur.kr(bufnum)*BufFrames.kr(bufnum)),
                 resetPos:timestretchPos,
@@ -172,9 +175,9 @@ Engine_Oomph : CroneEngine {
 
             // manual panning
             snd = Balance2.ar(snd[0],snd[1],
-                pan+SinOsc.kr(60/bpm_target*stroberate,mul:strobe*0.5),
-                level:amp*Lag.kr(amp_crossfade,0.2)
+                pan+SinOsc.kr(60/bpm_target*stroberate,mul:strobe*0.5)
             );
+            snd=snd*amp*Lag.kr(amp_crossfade,0.2);
 
             snd=DelayN.ar(snd,delaytime:Lag.kr(latency));
             Out.ar(out,snd*EnvGen.ar(Env.new([0,1],[4])));
