@@ -102,6 +102,10 @@ function Pad:process(beat)
   if beat%4~=0 then
     do return end
   end
+  if params:get("pad_volume")<-48 then 
+	  -- print("save cpu if not in use")
+	  do return end
+  end
   local qn=beat/4+1
   local chord_note=(qn-1)%#self.chords+1
   if next(self.chords[chord_note])==nil then

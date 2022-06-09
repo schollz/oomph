@@ -256,7 +256,8 @@ Engine_Oomph : CroneEngine {
             var lpfqr=In.kr(lpfqrBus);//bus
             snd=snd+(auxin*SoundIn.ar([0,1]));
             snd=SelectX.ar(Lag.kr(tape_wet,1),[snd,AnalogTape.ar(snd,tape_bias,tape_sat,tape_drive,tape_oversample,mode)],wrap:0);
-            // snd=SelectX.ar(Lag.kr(dist_wet,1),[snd,AnalogVintageDistortion.ar(snd,dist_drive,dist_bias,dist_low,dist_high,dist_shelf,dist_oversample)],wrap:0);          
+	    // TODO: add different type of distortion?
+            //snd=SelectX.ar(Lag.kr(dist_wet/10,1),[snd,AnalogVintageDistortion.ar(snd,dist_drive,dist_bias,dist_low,dist_high,dist_shelf,dist_oversample)],wrap:0);          
             snd=RHPF.ar(snd,hpf,hpfqr);
             snd=RLPF.ar(snd,lpf,lpfqr);
             Out.ar(0,snd*EnvGen.ar(Env.new([0,1],[4])));

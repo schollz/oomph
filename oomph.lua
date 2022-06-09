@@ -65,10 +65,10 @@ function init()
     {name="tape bias",eng="tape_bias",min=0,max=1,default=0.8,div=0.01},
     {name="tape saturate",eng="tape_sat",min=0,max=2,default=0.8,div=0.01},
     {name="tape drive",eng="tape_drive",min=0,max=2,default=0.8,div=0.01},
-    -- {name="distortion",eng="dist_wet",min=0,max=1,default=0.1,div=0.01,unit="wet/dry"},
-    -- {name="gain",eng="dist_drive",min=0,max=1,default=0.1,div=0.01},
-    -- {name="low gain",eng="dist_low",min=0,max=1,default=0.1,div=0.01},
-    -- {name="high gain",eng="dist_high",min=0,max=1,default=0.1,div=0.01},
+    --{name="distortion",eng="dist_wet",min=0,max=1,default=0.1,div=0.01,unit="wet/dry"},
+    --{name="gain",eng="dist_drive",min=0,max=1,default=0.1,div=0.01},
+    --{name="low gain",eng="dist_low",min=0,max=1,default=0.1,div=0.01},
+    --{name="high gain",eng="dist_high",min=0,max=1,default=0.1,div=0.01},
     -- {name="shelf",eng="dist_shelf",min=10,max=1000,default=600,div=10,exp=true},
   }
   params:add_group("FX",#tape_prams)
