@@ -16,17 +16,17 @@ end
 
 function APM:init()
   local prams={
-    {name="volume",eng="amp",min=-96,max=16,default=0,div=0.5,unit="dB"},
-    {name="sub volume",eng="sub",min=-96,max=16,default=-96,div=0.5,unit="dB"},
+    {name="volume",eng="amp",min=-64,max=32,default=0,div=0.5,unit="dB"},
+    {name="sub volume",eng="sub",min=-64,max=32,default=-64,div=0.5,unit="dB"},
     {name="cutoff",eng="cutoff",min=10,max=10000,default=200.0,div=10,exp=true,unit="Hz"},
     {name="cutoff env",eng="env_adjust",min=10,max=10000,default=500.0,div=10,exp=true,unit="Hz"},
     {name="env accent",eng="env_accent",min=0.0,max=10,default=0,div=0.01},
     {name="res",eng="res_adjust",min=0.01,max=0.99,default=0.303,div=0.01},
     {name="res accent",eng="res_accent",min=0.01,max=0.99,default=0.303,div=0.01},
     {name="portamento",eng="portamento",min=0,max=2,default=0.1,div=0.01,unit="s"},
-    {name="sustain",eng="sustain",min=0,max=64,default=1,div=0.01,unit="1/16th note",sn=true},
-    {name="decay",eng="decay",min=0.01,max=64,default=4,div=0.01,unit="beats",exp=true,beats=true},
-    {name="accent decay mult",eng="decayfactor",min=0.01,max=4,default=1,div=0.01,unit="x"},
+    {name="sustain",eng="sustain",min=0,max=16,default=1,div=0.01,unit="1/16th note",sn=true},
+    {name="decay",eng="decay",min=0.01,max=4,default=4,div=0.01,unit="beats",exp=true,beats=true},
+    {name="accent decay mult",eng="decayfactor",min=0.01,max=2,default=1,div=0.01,unit="x"},
     {name="saw/square",eng="wave",min=0.0,max=1,default=0.0,div=0.01},
     {name="detune",eng="detune",min=0.0,max=1,default=0.02,div=0.01,'notes'},
   }

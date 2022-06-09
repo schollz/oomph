@@ -104,7 +104,7 @@ Engine_Oomph : CroneEngine {
             // vars
             var rate;
             var snd,pos,timestretchPos,timestretchWindow;
-            var amp=In.kr(ampBus).dbamp;//bus2
+            var amp=(In.kr(ampBus)-10).dbamp;//bus2
             var rateIn=In.kr(rateBus,1);//bus2
             var bitcrush=In.kr(bitcrushBus);//bus2
             var bitcrush_bits=In.kr(bitcrush_bitsBus);//bus2
@@ -196,7 +196,7 @@ Engine_Oomph : CroneEngine {
             env_adjustBus,   env_accentBus, latencyBus;
             var env,waves,filterEnv,filter,snd,res,accentVal,noteVal;
             var pw=In.kr(pwBus);
-            var amp=In.kr(ampBus).dbamp;
+            var amp=(In.kr(ampBus)-10).dbamp;
             var cutoff=In.kr(cutoffBus);
             var detune=In.kr(detuneBus);
             var wave=In.kr(waveBus);

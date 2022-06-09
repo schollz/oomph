@@ -15,7 +15,7 @@ end
 function Amen:init()
 
   local prams={
-    {name="volume",eng="amp",min=-72,max=16,default=-72,div=0.5,unit="dB"},
+    {name="volume",eng="amp",min=-64,max=32,default=-64,div=0.5,unit="dB"},
     {name="rate",eng="rate",min=-1,max=2,default=1,div=0.01},
     {name="vinyl",eng="vinyl",min=0,max=1,default=0,div=0.01},
     {name="bitcrush",eng="bitcrush",min=0,max=1,default=0,div=0.01},
@@ -26,8 +26,8 @@ function Amen:init()
     {name="strobe",eng="strobe",min=0,max=1,default=0,div=0.01},
     {name="strobe rate",eng="stroberate",min=0.1,max=60,default=1/(clock.get_beat_sec()/8),div=0.1,unit='Hz'},
     {name="timestretch",eng="timestretch",min=0,max=1,default=0,div=0.01},
-    {name="timestretch slow",eng="timestretch_slow",min=1,max=20,default=6,div=0.1},
-    {name="timestretch beats",eng="timestretch_beats",min=1,max=20,default=6,div=0.1},
+    {name="timestretch slow",eng="timestretch_slow",min=1,max=10,default=6,div=0.1},
+    {name="timestretch beats",eng="timestretch_beats",min=1,max=10,default=6,div=0.1},
     {name="pan",eng="pan",min=-1,max=1,default=0,div=0.01},
     {name="lpf",eng="lpf",min=50,max=20000,default=20000,div=100,exp=true,unit='Hz'},
     {name="hpf",eng="hpf",min=20,max=500,default=20,div=10,exp=true,unit='Hz'},

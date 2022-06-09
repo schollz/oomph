@@ -311,6 +311,7 @@ function redraw()
   screen.blend_mode(1)
   screen.rect(x+sw*(pos[2]-1)-4,y+sh*(pos[1]-1)+2,10,9)
   screen.fill()
+  ggrid:redraw()
   screen.update()
 end
 

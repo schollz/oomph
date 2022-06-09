@@ -15,7 +15,7 @@ end
 
 function Plaits:init()
   local prams={
-    {name="volume",eng="amp",min=-72,max=16,default=-72,div=0.5,unit="dB"},
+    {name="volume",eng="amp",min=-64,max=32,default=-64,div=0.5,unit="dB"},
     {name="pan",eng="pan",min=-1,max=1,default=-0.5,div=0.01},
     {name="attack env",eng="attack",min=0,max=10,default=0.01,div=0.01,unit="s"},
     {name="decay env",eng="decayEnv",min=0,max=10,default=clock.get_beat_sec(),div=0.01,unit="s"},

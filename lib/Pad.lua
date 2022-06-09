@@ -17,7 +17,7 @@ function Pad:init()
     print("ERROR ERROR ERROR - PLEASE SEE README TO INSTALL MX.SAMPLES DEFAULT")
   end
   local prams={
-    {name="volume",eng="amp",min=-72,max=16,default=-72,div=0.5,unit="dB",db=true},
+    {name="volume",eng="amp",min=-64,max=32,default=-64,div=0.5,unit="dB",db=true},
     {name="attack",eng="attack",min=0,max=64,default=0.25,div=0.01,unit="beats",beat=true},
     {name="decay",eng="decay",min=0,max=64,default=1,div=0.1,unit="beats",beat=true},
     {name="sustain",eng="sustain",min=0,max=2,default=1,div=0.1,unit="amp"},
