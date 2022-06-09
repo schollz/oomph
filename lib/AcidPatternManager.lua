@@ -43,7 +43,7 @@ function APM:init()
       if p.sn then
         x=x*clock.get_beat_sec()/4
       end
-      engine["threeohthree_"..p.eng]("dc",0,x,0.2)
+      engine["threeohthree_"..p.eng]("lag",0,x,0.2)
       params:set("threeohthree_"..p.eng.."modtrig",0)
       _menu.rebuild_params()
     end)

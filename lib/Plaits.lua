@@ -15,7 +15,7 @@ end
 
 function Plaits:init()
   local prams={
-    {name="volume",eng="amp",min=0,max=4,default=0.5,div=0.01,unit="amp"},
+    {name="volume",eng="amp",min=-72,max=16,default=-72,div=0.5,unit="dB"},
     {name="pan",eng="pan",min=-1,max=1,default=-0.5,div=0.01},
     {name="attack env",eng="attack",min=0,max=10,default=0.01,div=0.01,unit="s"},
     {name="decay env",eng="decayEnv",min=0,max=10,default=clock.get_beat_sec(),div=0.01,unit="s"},
@@ -33,19 +33,19 @@ function Plaits:init()
   params:add_group("PLAITS"..self.id,#prams+1+#prams_extra)
   params:add{type="number",id="plaits_pitch"..self.id,name="note",min=0,max=127,default=36,formatter=function(param) return MusicUtil.note_num_to_name(param:get(),true) end}
   params:set_action("plaits_pitch"..self.id,function(x)
-    engine["plaits_pitch"..self.id]("dc",0,x,0)
+    engine["plaits_pitch"..self.id]("lag",0,x,0.2)
   end)
   for _,p in ipairs(prams) do
     params:add_control("plaits_"..p.eng..self.id,p.name,controlspec.new(p.min,p.max,p.exp and 'exp' or 'lin',p.div,p.default,p.unit or "",p.div/(p.max-p.min)))
     params:set_action("plaits_"..p.eng..self.id,function(x)
-      engine["plaits_"..p.eng..self.id]("dc",0,x,0)
+      engine["plaits_"..p.eng..self.id]("lag",0,x,0.2)
       params:set("plaits_"..p.eng..self.id.."modtrig",0)
     end)
   end
   for _,p in ipairs(prams_extra) do
     params:add_control("plaits_"..p.eng..self.id,p.name,controlspec.new(p.min,p.max,p.exp and 'exp' or 'lin',p.div,p.default,p.unit or "",p.div/(p.max-p.min)))
     params:set_action("plaits_"..p.eng..self.id,function(x)
-      engine["plaits_"..p.eng..self.id]("dc",0,x,0)
+      engine["plaits_"..p.eng..self.id]("lag",0,x,0.2)
       params:set("plaits_"..p.eng..self.id.."modtrig",0)
     end)
   end

@@ -30,6 +30,9 @@ local playing=false
 local beat_num=-1
 
 function init()
+  -- turn off monitoring
+  params:set('monitor_level',-math.huge)
+
   -- setup audio folders
   if not util.file_exists("/home/we/dust/audio/oomph") then
     os.execute("mkdir -p /home/we/dust/audio/oomph")
@@ -46,7 +49,6 @@ function init()
       engine["tape_"..p.eng]("lag",0,x,0)
     end)
   end
-
 
   apm=apm_:new()
   amen=amen_:new()
@@ -74,7 +76,7 @@ function init()
     params:add_control("tape"..p.eng,p.name,controlspec.new(p.min,p.max,p.exp and 'exp' or 'lin',p.div,p.default,p.unit or "",p.div/(p.max-p.min)))
     params:set_action("tape"..p.eng,function(x)
       print(p.eng,x)
-      engine["tape_"..p.eng]("lag",0,x,0)
+      engine["tape_"..p.eng]("lag",0,x,0.2)
       params:set("tape"..p.eng.."modtrig",0)
     end)
   end
@@ -314,4 +316,8 @@ end
 
 function rerun()
   norns.script.load(norns.state.script)
+end
+
+function cleanup()
+  params:set('monitor_level',0)
 end

@@ -124,21 +124,21 @@ Engine_Oomph : CroneEngine {
             // scratch effect
             rate = SelectX.kr(scratch,[rate,LFTri.kr(bpm_target/60*scratchrate)],wrap:0);
             pos = Phasor.ar(
-                trig:TDelay.kr(t_trig,latency),
+                trig:t_trig,
                 rate:BufRateScale.kr(bufnum)*rate,
                 start:((sampleStart*(rate>0))+(sampleEnd*(rate<0)))*BufFrames.kr(bufnum),
                 end:((sampleEnd*(rate>0))+(sampleStart*(rate<0)))*BufFrames.kr(bufnum),
                 resetPos:samplePos*BufFrames.kr(bufnum)
             );
             timestretchPos = Phasor.ar(
-                trig:TDelay.kr(t_trigtime,latency),
+                trig:t_trigtime,
                 rate:BufRateScale.kr(bufnum)*rate/timestretch_slow,
                 start:((sampleStart*(rate>0))+(sampleEnd*(rate<0)))*BufFrames.kr(bufnum),
                 end:((sampleEnd*(rate>0))+(sampleStart*(rate<0)))*BufFrames.kr(bufnum),
                 resetPos:pos
             );
             timestretchWindow = Phasor.ar(
-                trig:TDelay.kr(t_trig,latency),
+                trig:t_trig,
                 rate:BufRateScale.kr(bufnum)*rate,
                 start:timestretchPos,
                 end:timestretchPos+((60/bpm_target/timestretch_beats)/BufDur.kr(bufnum)*BufFrames.kr(bufnum)),
@@ -176,6 +176,7 @@ Engine_Oomph : CroneEngine {
                 level:amp*Lag.kr(amp_crossfade,0.2)
             );
 
+            snd=DelayN.ar(snd,delaytime:Lag.kr(latency));
             Out.ar(out,snd*EnvGen.ar(Env.new([0,1],[4])));
         }).add; 
         // </Amen>
@@ -208,12 +209,13 @@ Engine_Oomph : CroneEngine {
             noteVal=Lag.kr(note,portamento*slide);
             accentVal=In.kr(busAccent);
             res = Clip.kr(res_adjust+(res_accent*accentVal),0.001,2);
-            env = EnvGen.ar(Env.new([10e-3,1,1,10e-9],[0.03,sustain*duration,decay],'exp'),TDelay.kr(t_trig,latency))+(env_accent*accentVal);
+            env = EnvGen.ar(Env.new([10e-3,1,1,10e-9],[0.03,sustain*duration,decay],'exp'),t_trig)+(env_accent*accentVal);
             waves = [Saw.ar([noteVal-detune,noteVal+detune].midicps, mul: env), Pulse.ar([note-detune,note+detune].midicps, 0.5, mul: env)];
-            filterEnv =  EnvGen.ar( Env.new([10e-9, 1, 10e-9], [0.01, decay],  'exp'), TDelay.kr(t_trig,latency));
+            filterEnv =  EnvGen.ar( Env.new([10e-9, 1, 10e-9], [0.01, decay],  'exp'), t_trig);
             filter = RLPFD.ar(SelectX.ar(wave, waves, wrap:0), cutoff +(filterEnv*env_adjust), res,gain);
             snd=(filter*amp).tanh;
             snd=snd+SinOsc.ar([noteVal-12-detune,noteVal-12+detune].midicps,mul:sub*env/10.0);
+            snd=DelayN.ar(snd,delaytime:Lag.kr(latency));
             Out.ar(out, snd*EnvGen.ar(Env.new([0,1],[4])));
         }).add;
         
@@ -270,7 +272,6 @@ Engine_Oomph : CroneEngine {
             env=EnvGen.ar(Env.new([0.00001,1.0,sustain,0.00001],[attack,decay,release],curve:[\welch,\sine,\exp]),doneAction:2);
             snd=snd*env*amp*EnvGen.ar(Env.new([0,1],[0.1]));
             snd=snd.tanh;
-            snd=DelayN.ar(snd,delaytime:latency);
             Out.ar(outDry,snd*(1-wet));
             Out.ar(outWet,snd*wet);
         }).add;
@@ -365,18 +366,32 @@ Engine_Oomph : CroneEngine {
             fxbus.at(key).value=1.0;
             synThreeOhThree.set(fx++"Bus",fxbus.at(key).index);
             this.addCommand(key, "sfff", { arg msg;
-                if (key=="lag",{
+                var makeSynth=false;
+                var freeSynth=false;
+                //[msg[1],key,fxsyn.at(key),fxsyn.at(key).isNil].postln;
+                if (msg[1].asString=="lag",{
                     if (fxsyn.at(key).isNil,{
-                        fxsyn.put(key,Synth.new("defMod_"++msg[1].asString,[\out,fxbus.at(key),\msg1,msg[2],\msg2,msg[3],\msg3,msg[4]]));
+                        makeSynth=true;
                     },{
-                        fxsyn.at(key).set(\msg1,msg[2],\msg2,msg[3],\msg3,msg[4]);
+                        if (fxsyn.at(key).isRunning,{
+                            //["setting",key].postln;
+                            fxsyn.at(key).set(\msg1,msg[2],\msg2,msg[3],\msg3,msg[4]);
+                        },{
+                            freeSynth=true;
+                            makeSynth=true;
+                        });
                     });
                 },{
-                    if (fxsyn.at(key).notNil,{
-                        fxsyn.at(key).free;
-                    });
-                    fxsyn.put(key,Synth.new("defMod_"++msg[1].asString,[\out,fxbus.at(key),\msg1,msg[2],\msg2,msg[3],\msg3,msg[4]]));
-                })
+                    makeSynth=true;
+                    freeSynth=fxsyn.at(key).notNil;
+                });
+                if (freeSynth==true,{
+                    //["freeing",key].postln; 
+					fxsyn.at(key).free;
+                });
+                if (makeSynth==true,{
+                    fxsyn.put(key,Synth.new("defMod_"++msg[1].asString,[\out,fxbus.at(key),\msg1,msg[2],\msg2,msg[3],\msg3,msg[4]]));NodeWatcher.register(fxsyn.at(key));
+                });
             });
         });
         [\latency].do({ arg key;
@@ -410,18 +425,32 @@ Engine_Oomph : CroneEngine {
             // MAKE SURE TO CHANGE THE SYNTH
             synTape.set(fx++"Bus",fxbus.at(key).index);
             this.addCommand(key, "sfff", { arg msg;
-                if (key=="lag",{
+                var makeSynth=false;
+                var freeSynth=false;
+                //[msg[1],key,fxsyn.at(key),fxsyn.at(key).isNil].postln;
+                if (msg[1].asString=="lag",{
                     if (fxsyn.at(key).isNil,{
-                        fxsyn.put(key,Synth.new("defMod_"++msg[1].asString,[\out,fxbus.at(key),\msg1,msg[2],\msg2,msg[3],\msg3,msg[4]]));
+                        makeSynth=true;
                     },{
-                        fxsyn.at(key).set(\msg1,msg[2],\msg2,msg[3],\msg3,msg[4]);
+                        if (fxsyn.at(key).isRunning,{
+                            //["setting",key].postln;
+                            fxsyn.at(key).set(\msg1,msg[2],\msg2,msg[3],\msg3,msg[4]);
+                        },{
+                            freeSynth=true;
+                            makeSynth=true;
+                        });
                     });
                 },{
-                    if (fxsyn.at(key).notNil,{
-                        fxsyn.at(key).free;
-                    });
-                    fxsyn.put(key,Synth.new("defMod_"++msg[1].asString,[\out,fxbus.at(key),\msg1,msg[2],\msg2,msg[3],\msg3,msg[4]]));
-                })
+                    makeSynth=true;
+                    freeSynth=fxsyn.at(key).notNil;
+                });
+                if (freeSynth==true,{
+                    //["freeing",key].postln; 
+					fxsyn.at(key).free;
+                });
+                if (makeSynth==true,{
+                    fxsyn.put(key,Synth.new("defMod_"++msg[1].asString,[\out,fxbus.at(key),\msg1,msg[2],\msg2,msg[3],\msg3,msg[4]]));NodeWatcher.register(fxsyn.at(key));
+                });
             });
         });
         // </Tape>
@@ -433,18 +462,32 @@ Engine_Oomph : CroneEngine {
             fxbus.put(key,Bus.control(context.server,1));
             fxbus.at(key).value=1.0;
             this.addCommand(key, "sfff", { arg msg;
-                if (key=="lag",{
+                var makeSynth=false;
+                var freeSynth=false;
+                //[msg[1],key,fxsyn.at(key),fxsyn.at(key).isNil].postln;
+                if (msg[1].asString=="lag",{
                     if (fxsyn.at(key).isNil,{
-                        fxsyn.put(key,Synth.new("defMod_"++msg[1].asString,[\out,fxbus.at(key),\msg1,msg[2],\msg2,msg[3],\msg3,msg[4]]));
+                        makeSynth=true;
                     },{
-                        fxsyn.at(key).set(\msg1,msg[2],\msg2,msg[3],\msg3,msg[4]);
+                        if (fxsyn.at(key).isRunning,{
+                            //["setting",key].postln;
+                            fxsyn.at(key).set(\msg1,msg[2],\msg2,msg[3],\msg3,msg[4]);
+                        },{
+                            freeSynth=true;
+                            makeSynth=true;
+                        });
                     });
                 },{
-                    if (fxsyn.at(key).notNil,{
-                        fxsyn.at(key).free;
-                    });
-                    fxsyn.put(key,Synth.new("defMod_"++msg[1].asString,[\out,fxbus.at(key),\msg1,msg[2],\msg2,msg[3],\msg3,msg[4]]));
-                })
+                    makeSynth=true;
+                    freeSynth=fxsyn.at(key).notNil;
+                });
+                if (freeSynth==true,{
+                    //["freeing",key].postln; 
+					fxsyn.at(key).free;
+                });
+                if (makeSynth==true,{
+                    fxsyn.put(key,Synth.new("defMod_"++msg[1].asString,[\out,fxbus.at(key),\msg1,msg[2],\msg2,msg[3],\msg3,msg[4]]));NodeWatcher.register(fxsyn.at(key));
+                });
             });
         });
 
@@ -482,17 +525,31 @@ Engine_Oomph : CroneEngine {
                 item.set(fx++"Bus",fxbus.at(key).index);
             });  
             this.addCommand(key, "sfff", { arg msg;
-                if (key=="lag",{
+                var makeSynth=false;
+                var freeSynth=false;
+                //[msg[1],key,fxsyn.at(key),fxsyn.at(key).isNil].postln;
+                if (msg[1].asString=="lag",{
                     if (fxsyn.at(key).isNil,{
-                        fxsyn.put(key,Synth.new("defMod_"++msg[1].asString,[\out,fxbus.at(key),\msg1,msg[2],\msg2,msg[3],\msg3,msg[4]]));
+                        makeSynth=true;
                     },{
-                        fxsyn.at(key).set(\msg1,msg[2],\msg2,msg[3],\msg3,msg[4]);
+                        if (fxsyn.at(key).isRunning,{
+                            //["setting",key].postln;
+                            fxsyn.at(key).set(\msg1,msg[2],\msg2,msg[3],\msg3,msg[4]);
+                        },{
+                            freeSynth=true;
+                            makeSynth=true;
+                        });
                     });
                 },{
-                    if (fxsyn.at(key).notNil,{
-                        fxsyn.at(key).free;
-                    });
-                    fxsyn.put(key,Synth.new("defMod_"++msg[1].asString,[\out,fxbus.at(key),\msg1,msg[2],\msg2,msg[3],\msg3,msg[4]]));
+                    makeSynth=true;
+                    freeSynth=fxsyn.at(key).notNil;
+                });
+                if (freeSynth==true,{
+                    //["freeing",key].postln; 
+					fxsyn.at(key).free;
+                });
+                if (makeSynth==true,{
+                    fxsyn.put(key,Synth.new("defMod_"++msg[1].asString,[\out,fxbus.at(key),\msg1,msg[2],\msg2,msg[3],\msg3,msg[4]]));NodeWatcher.register(fxsyn.at(key));
                 })
             });
         });

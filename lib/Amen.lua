@@ -15,7 +15,7 @@ end
 function Amen:init()
 
   local prams={
-    {name="volume",eng="amp",min=-96,max=16,default=0.0,div=0.5,unit="dB"},
+    {name="volume",eng="amp",min=-72,max=16,default=-72,div=0.5,unit="dB"},
     {name="rate",eng="rate",min=-1,max=2,default=1,div=0.01},
     {name="vinyl",eng="vinyl",min=0,max=1,default=0,div=0.01},
     {name="bitcrush",eng="bitcrush",min=0,max=1,default=0,div=0.01},
@@ -33,7 +33,7 @@ function Amen:init()
     {name="hpf",eng="hpf",min=20,max=500,default=20,div=10,exp=true,unit='Hz'},
   }
   local fxs={"stutter1","jump1","reverse1"}
-  params:add_group("SAMPLE LOOP",#prams+#fxs+2)
+  params:add_group("SAMPLE LOOP",#prams+#fxs+3)
   params:add_file("amen_file","load file",_path.audio.."oomph/amenbreak_bpm136.wav")
   params:set_action("amen_file",function(x)
     self:load(x)
@@ -43,7 +43,7 @@ function Amen:init()
   for _,p in ipairs(prams) do
     params:add_control("amen_"..p.eng,p.name,controlspec.new(p.min,p.max,p.exp and 'exp' or 'lin',p.div,p.default,p.unit or "",p.div/(p.max-p.min)))
     params:set_action("amen_"..p.eng,function(x)
-      engine["amen_"..p.eng]("dc",0,x,0)
+      engine["amen_"..p.eng]("lag",0,x,0.1)
       params:set("amen_"..p.eng.."modtrig",0)
     end)
   end
@@ -170,9 +170,9 @@ function Amen:toggle_start(start)
   if self.playing then
     engine.amen_bpm_target(clock.get_tempo())
     engine.amen_jump(0.0,0.0,1.0)
-    engine.amen_amp("dc",0,params:get("amen_amp"),0)
+    engine.amen_amp("lag",0,params:get("amen_amp"),0.2)
   else
-    engine.amen_amp("dc",0,0,0)
+    engine.amen_amp("lag",0,-72,0.2)
   end
 end
 

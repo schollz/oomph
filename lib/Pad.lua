@@ -17,11 +17,11 @@ function Pad:init()
     print("ERROR ERROR ERROR - PLEASE SEE README TO INSTALL MX.SAMPLES DEFAULT")
   end
   local prams={
-    {name="volume",eng="amp",min=0,max=4,default=0.0,div=0.01,unit="amp"},
-    {name="attack",eng="attack",min=0,max=10,default=clock.get_beat_sec()/2,div=0.1,unit="s"},
-    {name="decay",eng="decay",min=0,max=10,default=clock.get_beat_sec(),div=0.1,unit="s"},
+    {name="volume",eng="amp",min=-72,max=16,default=-72,div=0.5,unit="dB",db=true},
+    {name="attack",eng="attack",min=0,max=64,default=0.25,div=0.01,unit="beats",beat=true},
+    {name="decay",eng="decay",min=0,max=64,default=1,div=0.1,unit="beats",beat=true},
     {name="sustain",eng="sustain",min=0,max=2,default=1,div=0.1,unit="amp"},
-    {name="release",eng="release",min=0,max=10,default=clock.get_beat_sec()*2,div=0.1,unit="s"},
+    {name="release",eng="release",min=0,max=64,default=4,div=0.1,unit="beats",beat=true},
     {name="pan",eng="pan",min=-1,max=1,default=0,div=0.01},
     {name="lpf",eng="lpf",min=50,max=20000,default=20000,div=100,exp=true,unit='Hz'},
   }
@@ -45,6 +45,13 @@ function Pad:init()
     params:add_control("pad_"..p.eng,p.name,controlspec.new(p.min,p.max,p.exp and 'exp' or 'lin',p.div,p.default,p.unit or "",p.div/(p.max-p.min)))
     params:set_action("pad_"..p.eng,function(x)
       -- TODO: make the ultra_synth a parameter
+      if p.beat then
+        x=x*clock.get_beat_sec()
+      end
+      if p.db then
+        x=util.dbamp(x)
+      end
+      print("pad",p.eng,x)
       engine["pad_"..p.eng](self.mx_samples,x)
     end)
   end
