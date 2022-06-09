@@ -107,7 +107,7 @@ there are three steps to install.
 **secondly**, keep maiden open and run the following line to make sure everything is copasetic:
 
 ```lua
-dofile("~/dust/code/oomph/lib/update.lua")
+dofile("/home/we/dust/code/oomph/lib/update.lua")
 ```
 
 **thirdly**, you need to restart your norns. now you can run `oomph` without issues.
