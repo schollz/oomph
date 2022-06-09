@@ -86,6 +86,7 @@ the first five rows edit the parameters of the monophonic synth. the sixth row c
 - ~~allow 16 tracks~~
 - add more chaotic lfos
 - add midi out to things
+- filters should be in terms of notes
 
 ## known bugs
 

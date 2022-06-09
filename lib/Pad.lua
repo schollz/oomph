@@ -20,7 +20,7 @@ function Pad:init()
     {name="volume",eng="amp",min=-64,max=32,default=-64,div=0.5,unit="dB",db=true},
     {name="attack",eng="attack",min=0,max=64,default=0.25,div=0.01,unit="beats",beat=true},
     {name="decay",eng="decay",min=0,max=64,default=1,div=0.1,unit="beats",beat=true},
-    {name="sustain",eng="sustain",min=0,max=2,default=1,div=0.1,unit="amp"},
+    {name="sustain",eng="sustain",min=0,max=2,default=1,div=0.01,unit="amp"},
     {name="release",eng="release",min=0,max=64,default=4,div=0.1,unit="beats",beat=true},
     {name="pan",eng="pan",min=-1,max=1,default=0,div=0.01},
     {name="lpf",eng="lpf",min=50,max=20000,default=20000,div=100,exp=true,unit='Hz'},
