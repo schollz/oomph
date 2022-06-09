@@ -9,7 +9,7 @@ this script combines some previously contributed projects with additions. it cur
 
 - a monophonic synthesizer w/ 16-step sequencer (from [acid-test](https://github.com/schollz/acid-test) w/ better accenting dynamics)
 - a sample loop player with customizable effects (from [amen](https://github.com/schollz/amen))
-- a sample-based chord sequencer (from [synthy](https://github.com/schollz/synthy) and the unreleased [mx.samples2](https://github.com/schollz/mx.samples2"))
+- a sample-based chord sequencer (from [synthy](https://github.com/schollz/synthy) and the unreleased [mx.samples2](https://github.com/schollz/mx.samples2))
 - a [plaits module](https://mutable-instruments.net/modules/plaits/) (from [mi-ugens](https://github.com/v7b1/mi-UGens))
 - a tape emulator (from [portedplugins]()/[tapedeck](https://github.com/schollz/tapedeck))
 
