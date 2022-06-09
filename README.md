@@ -44,7 +44,7 @@ the second row allows you to modify the accidentals of each note (b = flat, and 
 
 the third row allows you to change the octave of each note - M for minus octave (-1) and P for plus octave (+1).
 
-the fourth row allows you to add an accent or slide. "O" does an accent (i.e. provides **O**mph) and "H" provides a slide (i.e. **H**olds the note longer during a change).
+the fourth row allows you to add an accent or slide. "O" does an accent (i.e. provides **O**mph) and "F" provides a slide (i.e. the note **F**loats...).
 
 the fifth row can change the articulation of the sequence. the "@" denotes a gate, the "o" is a rest" and a "-" after a gate provides a legato. the actual strength of a legato is controlled in teh parameters by the "sustain" parameter.
 
@@ -86,7 +86,12 @@ the first five rows edit the parameters of the monophonic synth. the sixth row c
 - ~~allow 16 tracks~~
 - add more chaotic lfos
 - add midi out to things
-- filters should be in terms of notes
+- filters should be in terms of notes (maybe)
+- rpi3 has clicks and pops intermittently ~~disable sample pad when not in use~~
+- light-up keys for the grid parameters
+- remember grid setting and recall on a double-tap
+- add parameter for the slew rate of parameter changes (one for each section?)
+
 
 ## known bugs
 
