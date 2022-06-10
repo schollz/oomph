@@ -84,13 +84,13 @@ the first five rows edit the parameters of the monophonic synth. the sixth row c
 - ~~add start and stop transport~~
 - ~~allow using other samples for the pad~~
 - ~~allow 16 tracks~~
+- ~~add parameter for the slew rate of parameter changes (one for each section?)~~
 - add more chaotic lfos
 - add midi out to things
 - filters should be in terms of notes (maybe)
 - rpi3 has clicks and pops intermittently ~~disable sample pad when not in use~~
 - light-up keys for the grid parameters
 - remember grid setting and recall on a double-tap
-- add parameter for the slew rate of parameter changes (one for each section?)
 
 
 ## known bugs
