@@ -16,24 +16,23 @@ end
 
 function APM:init()
   local prams={
-    {name="volume",eng="amp",min=-64,max=32,default=0,div=0.5,unit="dB"},
-    {name="sub volume",eng="sub",min=-64,max=32,default=-64,div=0.5,unit="dB"},
-    {name="cutoff",eng="cutoff",min=10,max=10000,default=200.0,div=10,exp=true,unit="Hz"},
-    {name="cutoff env",eng="env_adjust",min=10,max=10000,default=500.0,div=10,exp=true,unit="Hz"},
-    {name="env accent",eng="env_accent",min=0.0,max=2,default=0.5,div=0.01},
-    {name="res",eng="res_adjust",min=0.01,max=0.99,default=0.303,div=0.01},
-    {name="res accent",eng="res_accent",min=0.01,max=0.99,default=0.303,div=0.01},
-    {name="portamento",eng="portamento",min=0,max=2,default=0.1,div=0.01,unit="s"},
-    {name="sustain",eng="sustain",min=0,max=16,default=1,div=0.01,unit="1/16th note",sn=true},
-    {name="decay",eng="decay",min=0.01,max=16,default=1,div=0.01,unit="beats",exp=true,beats=true},
-    {name="accent decay mult",eng="decayfactor",min=0.01,max=2,default=1,div=0.01,unit="x"},
-    {name="saw/square",eng="wave",min=0.0,max=1,default=0.0,div=0.01},
-    {name="detune",eng="detune",min=0.0,max=1,default=0.02,div=0.01,'notes'},
+    {name="volume",eng="amp",min=-64,max=32,default=0,div=0.5,unit="dB",mod={-32,0}},
+    {name="sub volume",eng="sub",min=-64,max=32,default=-64,div=0.5,unit="dB",mod={-32,0}},
+    {name="cutoff",eng="cutoff",min=10,max=10000,default=200.0,div=10,exp=true,unit="Hz",mod={100,600}},
+    {name="cutoff env",eng="env_adjust",min=10,max=10000,default=500.0,div=10,exp=true,unit="Hz",mod={100,800}},
+    {name="env accent",eng="env_accent",min=0.0,max=2,default=0.5,div=0.01,mod={0.2,1.2}},
+    {name="res",eng="res_adjust",min=0.01,max=0.99,default=0.303,div=0.01,mod={0.1,0.5}},
+    {name="res accent",eng="res_accent",min=0.01,max=0.99,default=0.303,div=0.01,mod={0.1,0.5}},
+    {name="portamento",eng="portamento",min=0,max=2,default=0.1,div=0.01,unit="s",mod={0.01,1}},
+    {name="sustain",eng="sustain",min=0,max=16,default=1,div=0.01,unit="1/16th note",sn=true,mod={0.5,2}},
+    {name="decay",eng="decay",min=0.01,max=16,default=1,div=0.01,unit="beats",exp=true,beats=true,mod={0.5,2}},
+    {name="accent decay mult",eng="decayfactor",min=0.01,max=2,default=1,div=0.01,unit="x",mod={0.5,2}},
+    {name="saw/square",eng="wave",min=0.0,max=1,default=0.0,div=0.01,mod={0,1}},
+    {name="detune",eng="detune",min=0.0,max=1,default=0.02,div=0.01,'notes',mod={0,0.1}},
   }
-  params:add_group("BASS",#prams+1)
+  params:add_group("BASS",#prams+2)
   params:add{type="number",id="root_note",name="root note",
   min=0,max=127,default=36,formatter=function(param) return MusicUtil.note_num_to_name(param:get(),true) end}
-
   for _,p in ipairs(prams) do
     params:add_control("threeohthree_"..p.eng,p.name,controlspec.new(p.min,p.max,p.exp and 'exp' or 'lin',p.div,p.default,p.unit or "",p.div/(p.max-p.min)))
     params:set_action("threeohthree_"..p.eng,function(x)
@@ -43,11 +42,12 @@ function APM:init()
       if p.sn then
         x=x*clock.get_beat_sec()/4
       end
-      engine["threeohthree_"..p.eng]("lag",0,x,0.2)
+      engine["threeohthree_"..p.eng]("lag",0,x,params:get("threeohthree_slew"))
       params:set("threeohthree_"..p.eng.."modtrig",0)
       _menu.rebuild_params()
     end)
   end
+  params:add_control("threeohthree_slew","param slew time",controlspec.new(0.01,30,'exp',0.05,0.2,"s",0.05/30))
 
   params:add_group("BASS SEQUENCER",self.pattern_num+1+3+1)
   params:add_binary("sequencer_on","sequencer on","toggle")
@@ -74,8 +74,8 @@ function APM:init()
   for _,p in ipairs(prams) do
     params:add_option("threeohthree_"..p.eng.."modoption",p.name.." form",mod_ops_nom,1)
     params:add_control("threeohthree_"..p.eng.."modperiod",p.name.." period",controlspec.new(0.1,120,'exp',0.1,math.random(4,32),"beats",0.1/119.9))
-    params:add_control("threeohthree_"..p.eng.."modmin",p.name.." min",controlspec.new(p.min,p.max,p.exp and 'exp' or 'lin',p.div,p.min,p.unit or "",p.div/(p.max-p.min)))
-    params:add_control("threeohthree_"..p.eng.."modmax",p.name.." max",controlspec.new(p.min,p.max,p.exp and 'exp' or 'lin',p.div,p.max,p.unit or "",p.div/(p.max-p.min)))
+    params:add_control("threeohthree_"..p.eng.."modmin",p.name.." min",controlspec.new(p.min,p.max,p.exp and 'exp' or 'lin',p.div,p.mod[1],p.unit or "",p.div/(p.max-p.min)))
+    params:add_control("threeohthree_"..p.eng.."modmax",p.name.." max",controlspec.new(p.min,p.max,p.exp and 'exp' or 'lin',p.div,p.mod[2],p.unit or "",p.div/(p.max-p.min)))
     for _,pp in ipairs({"modoption","modperiod","modmin","modmax"}) do
       params:set_action("threeohthree_"..p.eng..pp,function(x)
         if params:get("threeohthree_"..p.eng.."modtrig")==1 then

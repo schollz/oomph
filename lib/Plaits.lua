@@ -109,7 +109,7 @@ end
 
 function Plaits:process(beat)
   local beat=beat%params:get("plaits_n"..self.id)+1
-  if self.euclid[beat] then
+  if self.euclid[beat] and params:get("plaits_amp")>-60 then
     engine.plaits()
   end
 end

@@ -17,7 +17,7 @@ function Amen:init()
   local prams={
     {name="volume",eng="amp",min=-64,max=32,default=-64,div=0.5,unit="dB"},
     {name="rate",eng="rate",min=-1,max=2,default=1,div=0.01},
-    {name="vinyl",eng="vinyl",min=0,max=1,default=0,div=0.01},
+    -- {name="vinyl",eng="vinyl",min=0,max=1,default=0,div=0.01},
     {name="bitcrush",eng="bitcrush",min=0,max=1,default=0,div=0.01},
     {name="bitcrush bits",eng="bitcrush_bits",min=4,max=32,default=8,div=0.1,unit='bits'},
     {name="bitcrush rate",eng="bitcrush_rate",min=100,max=44100,default=4000,div=100,exp=true,unit='Hz'},
@@ -33,17 +33,18 @@ function Amen:init()
     {name="hpf",eng="hpf",min=20,max=500,default=20,div=10,exp=true,unit='Hz'},
   }
   local fxs={"stutter1","jump1","reverse1"}
-  params:add_group("SAMPLE LOOP",#prams+#fxs+3)
+  params:add_group("SAMPLE LOOP",#prams+#fxs+4)
   params:add_file("amen_file","load file",_path.audio.."oomph/amenbreak_bpm136.wav")
   params:set_action("amen_file",function(x)
     self:load(x)
   end)
   params:add_control("amen_sync","sync probability",controlspec.new(0,100,'lin',1,75,"%"))
+  params:add_control("amen_slew","param slew time",controlspec.new(0.01,30,'exp',0.05,0.2,"s",0.05/30))
 
   for _,p in ipairs(prams) do
     params:add_control("amen_"..p.eng,p.name,controlspec.new(p.min,p.max,p.exp and 'exp' or 'lin',p.div,p.default,p.unit or "",p.div/(p.max-p.min)))
     params:set_action("amen_"..p.eng,function(x)
-      engine["amen_"..p.eng]("lag",0,x,0.1)
+      engine["amen_"..p.eng]("lag",0,x,params:get("amen_slew"))
       params:set("amen_"..p.eng.."modtrig",0)
     end)
   end
@@ -73,8 +74,8 @@ function Amen:init()
   for _,p in ipairs(prams) do
     params:add_option("amen_"..p.eng.."modoption",p.name.." form",mod_ops_nom,1)
     params:add_control("amen_"..p.eng.."modperiod",p.name.." period",controlspec.new(0.1,120,'exp',0.1,math.random(4,32),"beats",0.1/119.9))
-    params:add_control("amen_"..p.eng.."modmin",p.name.." min",controlspec.new(p.min,p.max,p.exp and 'exp' or 'lin',p.div,p.min,p.unit or "",p.div/(p.max-p.min)))
-    params:add_control("amen_"..p.eng.."modmax",p.name.." max",controlspec.new(p.min,p.max,p.exp and 'exp' or 'lin',p.div,p.max,p.unit or "",p.div/(p.max-p.min)))
+    params:add_control("amen_"..p.eng.."modmin",p.name.." min",controlspec.new(p.min,p.max,p.exp and 'exp' or 'lin',p.div,p.min+(p.max-p.min)/3,p.unit or "",p.div/(p.max-p.min)))
+    params:add_control("amen_"..p.eng.."modmax",p.name.." max",controlspec.new(p.min,p.max,p.exp and 'exp' or 'lin',p.div,p.min+(p.max-p.min)*2/3,p.unit or "",p.div/(p.max-p.min)))
     for _,pp in ipairs({"modoption","modperiod","modmin","modmax"}) do
       params:set_action("amen_"..p.eng..pp,function(x)
         if params:get("amen_"..p.eng.."modtrig")==1 then

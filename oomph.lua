@@ -32,6 +32,7 @@ local beat_num=-1
 function init()
   -- turn off monitoring
   params:set('monitor_level',-math.huge)
+  params:add_separator("OOMPH")
 
   -- setup audio folders
   if not util.file_exists("/home/we/dust/audio/oomph") then

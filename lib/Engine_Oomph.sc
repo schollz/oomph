@@ -3,6 +3,7 @@ Engine_Oomph : CroneEngine {
     // all
     var fxbus;
     var fxsyn;
+    var fxlfo;
 
     // <Oomph>
 	var synThreeOhThree;
@@ -39,6 +40,7 @@ Engine_Oomph : CroneEngine {
         latencyThreeOhThree=0.0;
         fxbus=Dictionary.new();
         fxsyn=Dictionary.new();
+        fxlfo=Dictionary.new();
         sampleBuffAmen = Buffer.new(context.server);
         sampleVinyl = Buffer.read(context.server, "/home/we/dust/code/oomph/lib/vinyl2.wav"); 
         playerSwap = 0;
@@ -166,12 +168,11 @@ Engine_Oomph : CroneEngine {
             snd = ((strobe<1)*snd)+((strobe>0)*snd*LFPulse.ar(60/bpm_target*stroberate));
 
             // bitcrush
-            bitcrush = VarLag.kr(bitcrush,0.2,warp:\cubed);
-            snd = (snd*(1-bitcrush))+(bitcrush*Decimator.ar(snd,VarLag.kr(bitcrush_rate,0.2,warp:\cubed),VarLag.kr(bitcrush_bits,0.2,warp:\cubed)));
+            snd = (snd*(1-bitcrush))+(bitcrush*Decimator.ar(snd,bitcrush_rate,bitcrush_bits));
 
-            // vinyl wow + compressor
-            snd=(vinyl<1*snd)+(vinyl>0* Limiter.ar(Compander.ar(snd,snd,0.5,1.0,0.1,0.1,1,2),dur:0.0008));
-            snd =(vinyl<1*snd)+(vinyl>0* DelayC.ar(snd,0.01,VarLag.kr(LFNoise0.kr(1),1,warp:\sine).range(0,0.01)));                
+            // // vinyl wow + compressor
+            // snd=(vinyl<1*snd)+(vinyl>0* Limiter.ar(Compander.ar(snd,snd,0.5,1.0,0.1,0.1,1,2),dur:0.0008));
+            // snd =(vinyl<1*snd)+(vinyl>0* DelayC.ar(snd,0.01,VarLag.kr(LFNoise0.kr(1),1,warp:\sine).range(0,0.01)));                
 
             // manual panning
             snd = Balance2.ar(snd[0],snd[1],
@@ -334,7 +335,7 @@ Engine_Oomph : CroneEngine {
         // define always-on synths
         synThreeOhThree=Synth.before(synTape,"defThreeOhThree",[\busAccent,busAccent,\out,busTape]);
         synReverb=Synth.before(synTape,"defReverb",[\in,busReverb,\out,busTape]); 
-        playerVinyl = Synth("defVinyl",[\bufnum,sampleVinyl,\amp,0,\out,busTape],target:context.xg);
+        //playerVinyl = Synth("defVinyl",[\bufnum,sampleVinyl,\amp,0,\out,busTape],target:context.xg);
         synAmen = Array.fill(2,{arg i;
             Synth.before(synTape,"defAmen",[\out,busTape])
         });
@@ -378,8 +379,14 @@ Engine_Oomph : CroneEngine {
                         makeSynth=true;
                     },{
                         if (fxsyn.at(key).isRunning,{
-                            //["setting",key].postln;
-                            fxsyn.at(key).set(\msg1,msg[2],\msg2,msg[3],\msg3,msg[4]);
+                            if (fxlfo.at(key).notNil,{
+                                freeSynth=true;
+                                makeSynth=true;
+                                fxlfo.removeAt(key);
+                            },{
+                                //["setting",key].postln;
+                                fxsyn.at(key).set(\msg1,msg[2],\msg2,msg[3],\msg3,msg[4]);
+                            });
                         },{
                             freeSynth=true;
                             makeSynth=true;
@@ -388,9 +395,10 @@ Engine_Oomph : CroneEngine {
                 },{
                     makeSynth=true;
                     freeSynth=fxsyn.at(key).notNil;
+                    fxlfo.put(key,1);
                 });
                 if (freeSynth==true,{
-                    //["freeing",key].postln; 
+                    ["freeing",key].postln; 
 					fxsyn.at(key).free;
                 });
                 if (makeSynth==true,{
@@ -437,8 +445,14 @@ Engine_Oomph : CroneEngine {
                         makeSynth=true;
                     },{
                         if (fxsyn.at(key).isRunning,{
-                            //["setting",key].postln;
-                            fxsyn.at(key).set(\msg1,msg[2],\msg2,msg[3],\msg3,msg[4]);
+                            if (fxlfo.at(key).notNil,{
+                                freeSynth=true;
+                                makeSynth=true;
+                                fxlfo.removeAt(key);
+                            },{
+                                //["setting",key].postln;
+                                fxsyn.at(key).set(\msg1,msg[2],\msg2,msg[3],\msg3,msg[4]);
+                            });
                         },{
                             freeSynth=true;
                             makeSynth=true;
@@ -447,6 +461,7 @@ Engine_Oomph : CroneEngine {
                 },{
                     makeSynth=true;
                     freeSynth=fxsyn.at(key).notNil;
+                    fxlfo.put(key,1);
                 });
                 if (freeSynth==true,{
                     //["freeing",key].postln; 
@@ -474,8 +489,14 @@ Engine_Oomph : CroneEngine {
                         makeSynth=true;
                     },{
                         if (fxsyn.at(key).isRunning,{
-                            //["setting",key].postln;
-                            fxsyn.at(key).set(\msg1,msg[2],\msg2,msg[3],\msg3,msg[4]);
+                            if (fxlfo.at(key).notNil,{
+                                freeSynth=true;
+                                makeSynth=true;
+                                fxlfo.removeAt(key);
+                            },{
+                                //["setting",key].postln;
+                                fxsyn.at(key).set(\msg1,msg[2],\msg2,msg[3],\msg3,msg[4]);
+                            });
                         },{
                             freeSynth=true;
                             makeSynth=true;
@@ -484,6 +505,7 @@ Engine_Oomph : CroneEngine {
                 },{
                     makeSynth=true;
                     freeSynth=fxsyn.at(key).notNil;
+                    fxlfo.put(key,1);
                 });
                 if (freeSynth==true,{
                     //["freeing",key].postln; 
@@ -537,8 +559,14 @@ Engine_Oomph : CroneEngine {
                         makeSynth=true;
                     },{
                         if (fxsyn.at(key).isRunning,{
-                            //["setting",key].postln;
-                            fxsyn.at(key).set(\msg1,msg[2],\msg2,msg[3],\msg3,msg[4]);
+                            if (fxlfo.at(key).notNil,{
+                                freeSynth=true;
+                                makeSynth=true;
+                                fxlfo.removeAt(key);
+                            },{
+                                //["setting",key].postln;
+                                fxsyn.at(key).set(\msg1,msg[2],\msg2,msg[3],\msg3,msg[4]);
+                            });
                         },{
                             freeSynth=true;
                             makeSynth=true;
@@ -547,9 +575,10 @@ Engine_Oomph : CroneEngine {
                 },{
                     makeSynth=true;
                     freeSynth=fxsyn.at(key).notNil;
+                    fxlfo.put(key,1);
                 });
                 if (freeSynth==true,{
-                    //["freeing",key].postln; 
+                    ["freeing",key].postln; 
 					fxsyn.at(key).free;
                 });
                 if (makeSynth==true,{
