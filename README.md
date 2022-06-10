@@ -28,9 +28,9 @@ following guidance from @sixolet I worked out a way to make almost every paramet
 
 most of the usage can be found in the parameters - you can directly edit parameters or use a midi controller to map devices for easy manipulation. there are also LFOs for nearly every parameter accessible through the "MOD" menus. 
 
-## monophonic sequencer
+## monophonic synth 
 
-the main screen allows you to sequence the monophonic synth.
+the main screen allows you to sequence the monophonic synth. the sequencer ui is based off the [TB-303 pattern chart](https://www.peff.com/synthesizers/) ([pdf](https://www.peff.com/synthesizers/roland/tb303/Tb303Chart2.pdf)).
 
 - K2 changes a parameter
 - K3 stops/starts 
