@@ -78,6 +78,7 @@ the first five rows edit the parameters of the monophonic synth. the sixth row c
 - grid: light-up special parameters
 - grid: recall patterns on double tap
 - grid: clear sequenced patterns
+- sound: distortion fx
 
 ## known bugs
 
