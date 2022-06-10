@@ -26,9 +26,9 @@ function Plaits:init()
     {name="decay",eng="decay",min=0,max=1,default=0.9,div=0.01,mod={0.5,1}},
   }
   local prams_extra={
-    {name="euclid n",eng="n",min=0,max=64,default=16,div=1},
-    {name="euclid k",eng="k",min=0,max=64,default=4,div=1},
-    {name="euclid shift",eng="w",min=0,max=64,default=0,div=1},
+    {name="euclid n",eng="n",min=0,max=64,default=16,div=1,mod={12,24}},
+    {name="euclid k",eng="k",min=0,max=64,default=4,div=1,mod={3,6}},
+    {name="euclid shift",eng="w",min=0,max=64,default=0,div=1,mod={0,4}},
   }
   params:add_group("PLAITS"..self.id,#prams+1+#prams_extra)
   params:add{type="number",id="plaits_pitch"..self.id,name="note",min=0,max=127,default=36,formatter=function(param) return MusicUtil.note_num_to_name(param:get(),true) end}
@@ -44,13 +44,10 @@ function Plaits:init()
   end
   for _,p in ipairs(prams_extra) do
     params:add_control("plaits_"..p.eng..self.id,p.name,controlspec.new(p.min,p.max,p.exp and 'exp' or 'lin',p.div,p.default,p.unit or "",p.div/(p.max-p.min)))
-    params:set_action("plaits_"..p.eng..self.id,function(x)
-      engine["plaits_"..p.eng..self.id]("lag",0,x,0.2)
-      params:set("plaits_"..p.eng..self.id.."modtrig",0)
-    end)
+
   end
 
-  params:add_group("PLAITS MOD",#prams*5)
+  params:add_group("PLAITS MOD",#prams*5+#prams_extra*4)
   local mod_ops_ids={"sine","xline","line"}
   local mod_ops_nom={"sine","exp ramp","linear ramp"}
   local debounce_clock=nil
@@ -99,9 +96,19 @@ function Plaits:init()
     end)
   end
 
+  for _,p in ipairs(prams_extra) do
+    params:add_control("plaits_"..p.eng.."modperiod",p.name.." period",controlspec.new(0.1,120,'exp',0.1,math.random(4,32),"beats",0.1/119.9))
+    params:add_control("plaits_"..p.eng.."modmin",p.name.." min",controlspec.new(p.min,p.max,p.exp and 'exp' or 'lin',p.div,p.mod[1],p.unit or "",p.div/(p.max-p.min)))
+    params:add_control("plaits_"..p.eng.."modmax",p.name.." max",controlspec.new(p.min,p.max,p.exp and 'exp' or 'lin',p.div,p.mod[2],p.unit or "",p.div/(p.max-p.min)))
+    params:add_binary("plaits_"..p.eng.."modtrig",p.name.." trig","toggle")
+  end
+
   for _,nn in ipairs({"n","k","w"}) do
     params:set_action("plaits_"..nn..self.id,function(x)
       self.euclid=er.gen(params:get("plaits_k"..self.id),params:get("plaits_n"..self.id),params:get("plaits_w"..self.id))
+      if self.leavemod==nil then
+        params:set("plaits_"..nn.."modtrig",0)
+      end
     end)
   end
   self.euclid=er.gen(4,16,0)
@@ -109,6 +116,16 @@ end
 
 function Plaits:process(beat)
   local beat=beat%params:get("plaits_n"..self.id)+1
+  for _,n in ipairs({"n","k","w"}) do
+    if params:get("plaits_"..n.."modtrig")==1 then
+      local val=util.linlin(
+        -1,1,params:get("plaits_"..n.."modmin"),params:get("plaits_"..n.."modmax"),
+      math.sin(2*math.pi*clock.get_beats()/params:get("plaits_"..n.."modperiod")))
+      self.leavemod=true
+      params:set("plaits_"..n..self.id,val)
+      self.leavemod=nil
+    end
+  end
   if self.euclid[beat] and params:get("plaits_amp")>-60 then
     engine.plaits()
   end
