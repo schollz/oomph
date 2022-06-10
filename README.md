@@ -71,34 +71,19 @@ the first five rows edit the parameters of the monophonic synth. the sixth row c
 
 ## todos
 
-- ~~lfos for each parameter (depth and period)~~
-- ~~clamps on all the variables in SuperCollider~~
-- ~~duration working~~
-- ~~fix amen cleanup~~
-- ~~add scale changes? root note changes?~~
-- ~~recover sequence on save~~
-- ~~use toggles instead of triggers for lfos~~
-- ~~stutter fx (gated etc)~~
-- ~~allow pattern to draw itself~~
-- ~~allow multiple patterns~~
-- ~~add start and stop buttons~~
-- ~~add start and stop transport~~
-- ~~allow using other samples for the pad~~
-- ~~allow 16 tracks~~
-- ~~add parameter for the slew rate of parameter changes (one for each section?)~~
-- add more chaotic lfos
-- add midi out to things
-- filters should be in terms of notes (maybe)
-- rpi3 has clicks and pops intermittently ~~disable sample pad when not in use~~
-- light-up keys for the grid parameters
-- remember grid setting and recall on a double-tap
-
+- lfos: make more chaotic
+- midi: give tracks midi out
+- midi: allow midi in (for plaits)
+- rpi3: possible cpu spikes?
+- grid: light-up special parameters
+- grid: recall patterns on double tap
+- grid: clear sequenced patterns
 
 ## known bugs
 
 - (cosmetic bug) if you goto a "MOD" and toggle one, and you go to the non-MOD page and change the parameter it will automatically turn off the toggle *but the toggle won't appeared to be turned off in the menu* until you exit the menu and come back into the menu.
 - (ux bug) MOD lfos are set according to the current tempo, if you change tempos the MOD lfos will stay with periods from the previous tempo
-- the sample looper may not work fully with mono sound files
+- (ux bug) the sample looper may not work fully with mono sound files, try to use stereo files
 
 
 ## install
@@ -126,5 +111,5 @@ dofile("/home/we/dust/code/oomph/lib/update.lua")
 to update the script just run the following in maiden:
 
 ```lua
-dofile("~/dust/code/oomph/lib/update.lua")
+dofile("/home/we/dust/code/oomph/lib/update.lua")
 ```
