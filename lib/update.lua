@@ -39,7 +39,7 @@ function update()
   end
 
   -- install ultra synth patch
-  if not file_exists("/home/we/dust/audio/mx.samples/ultra_synth") then
+  if not file_exists("/home/we/dust/audio/mx.samples/ultra_synth/24.1.1.1.0.wav") then
     print("oomph: installing synth samples...")
     os.execute("mkdir -p /home/we/dust/audio/mx.samples/ultra_synth")
     os.execute("wget --quiet https://github.com/schollz/mx.samples/releases/download/samples/ultra_synth.zip -P /tmp/")
@@ -52,7 +52,7 @@ function update()
     print("oomph: installing PortedPlugins...")
     os.execute("wget --quiet https://github.com/schollz/tapedeck/releases/download/PortedPlugins/PortedPlugins.tar.gz -P /tmp/")
     os.execute("tar -xvzf /tmp/PortedPlugins.tar.gz -C /home/we/.local/share/SuperCollider/Extensions/")
-    os.execute("rm PortedPlugins.tar.gz")
+    os.execute("rm /tmp/PortedPlugins.tar.gz")
   end
 
   -- install miugens if not already
