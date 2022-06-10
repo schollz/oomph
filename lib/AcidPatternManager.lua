@@ -49,24 +49,6 @@ function APM:init()
   end
   params:add_control("threeohthree_slew","param slew time",controlspec.new(0.01,30,'exp',0.05,0.2,"s",0.05/30))
 
-  params:add_group("BASS SEQUENCER",self.pattern_num+1+3+1)
-  params:add_binary("sequencer_on","sequencer on","toggle")
-  params:add{type="number",id="copy_from",name="copy from",min=1,max=self.pattern_num,default=1}
-  params:add{type="number",id="copy_to",name="copy to",min=1,max=self.pattern_num,default=1}
-  params:add_trigger("do_copy","make copy")
-  params:set_action("do_copy",function(x)
-    if params:get("copy_to")~=params:get("copy_from") then
-      print("copied "..params:get("copy_from").." to "..params:get("copy_to"))
-      self.ap[params:get("copy_to")]:loads(self.ap[params:get("copy_from")]:dumps())
-    end
-  end)
-  params:add_separator("pattern chaining")
-  for i=1,self.pattern_num do
-    local s=" ----------------"
-    s=s..(i>9 and ">" or "->")
-    params:add{type="number",id="pattern"..i,name="pattern "..i..s,min=1,max=self.pattern_num,default=i}
-  end
-
   params:add_group("BASS MOD",#prams*5)
   local mod_ops_ids={"sine","xline","line"}
   local mod_ops_nom={"sine","exp ramp","linear ramp"}
@@ -114,6 +96,24 @@ function APM:init()
       print(p.eng,mod_ops_ids[params:get("threeohthree_"..p.eng.."modoption")],min_val,max_val,period)
       engine["threeohthree_"..p.eng](mod_ops_ids[params:get("threeohthree_"..p.eng.."modoption")],min_val,max_val,period)
     end)
+  end
+
+  params:add_group("BASS SEQUENCER",self.pattern_num+1+3+1)
+  params:add_binary("sequencer_on","sequencer on","toggle")
+  params:add{type="number",id="copy_from",name="copy from",min=1,max=self.pattern_num,default=1}
+  params:add{type="number",id="copy_to",name="copy to",min=1,max=self.pattern_num,default=1}
+  params:add_trigger("do_copy","make copy")
+  params:set_action("do_copy",function(x)
+    if params:get("copy_to")~=params:get("copy_from") then
+      print("copied "..params:get("copy_from").." to "..params:get("copy_to"))
+      self.ap[params:get("copy_to")]:loads(self.ap[params:get("copy_from")]:dumps())
+    end
+  end)
+  params:add_separator("pattern chaining")
+  for i=1,self.pattern_num do
+    local s=" ----------------"
+    s=s..(i>9 and ">" or "->")
+    params:add{type="number",id="pattern"..i,name="pattern "..i..s,min=1,max=self.pattern_num,default=i}
   end
 
   self.ap={}

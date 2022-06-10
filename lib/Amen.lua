@@ -15,31 +15,29 @@ end
 function Amen:init()
 
   local prams={
-    {name="volume",eng="amp",min=-64,max=32,default=-64,div=0.5,unit="dB"},
-    {name="rate",eng="rate",min=-1,max=2,default=1,div=0.01},
+    {name="volume",eng="amp",min=-64,max=32,default=-64,div=0.5,unit="dB",mod={-32,0}},
+    {name="rate",eng="rate",min=-1,max=2,default=1,div=0.01,mod={-1,1}},
     -- {name="vinyl",eng="vinyl",min=0,max=1,default=0,div=0.01},
-    {name="bitcrush",eng="bitcrush",min=0,max=1,default=0,div=0.01},
-    {name="bitcrush bits",eng="bitcrush_bits",min=4,max=32,default=8,div=0.1,unit='bits'},
-    {name="bitcrush rate",eng="bitcrush_rate",min=100,max=44100,default=4000,div=100,exp=true,unit='Hz'},
-    {name="scratch",eng="scratch",min=0,max=1,default=0,div=0.01},
-    {name="scratch rate",eng="scratchrate",min=0.1,max=20,default=1.2,div=0.1,unit='Hz'},
-    {name="strobe",eng="strobe",min=0,max=1,default=0,div=0.01},
-    {name="strobe rate",eng="stroberate",min=0.1,max=60,default=1/(clock.get_beat_sec()/8),div=0.1,unit='Hz'},
-    {name="timestretch",eng="timestretch",min=0,max=1,default=0,div=0.01},
-    {name="timestretch slow",eng="timestretch_slow",min=1,max=10,default=6,div=0.1},
-    {name="timestretch beats",eng="timestretch_beats",min=1,max=10,default=6,div=0.1},
-    {name="pan",eng="pan",min=-1,max=1,default=0,div=0.01},
-    {name="lpf",eng="lpf",min=50,max=20000,default=20000,div=100,exp=true,unit='Hz'},
-    {name="hpf",eng="hpf",min=20,max=500,default=20,div=10,exp=true,unit='Hz'},
+    {name="bitcrush",eng="bitcrush",min=0,max=1,default=0,div=0.01,mod={0,1}},
+    {name="bitcrush bits",eng="bitcrush_bits",min=4,max=32,default=8,div=0.1,unit='bits',mod={8,16}},
+    {name="bitcrush rate",eng="bitcrush_rate",min=100,max=44100,default=4000,div=100,exp=true,unit='Hz',mod={4000,16000}},
+    {name="scratch",eng="scratch",min=0,max=1,default=0,div=0.01,mod={0,1}},
+    {name="scratch rate",eng="scratchrate",min=0.1,max=20,default=1.2,div=0.1,unit='Hz',mod={0.5,2}},
+    {name="strobe",eng="strobe",min=0,max=1,default=0,div=0.01,mod={0,1}},
+    {name="strobe rate",eng="stroberate",min=0.1,max=60,default=1/(clock.get_beat_sec()/8),div=0.1,unit='Hz',mod={1,10}},
+    {name="timestretch",eng="timestretch",min=0,max=1,default=0,div=0.01,mod={0,1}},
+    {name="timestretch slow",eng="timestretch_slow",min=1,max=20,default=6,div=0.1,mod={2,10}},
+    {name="timestretch beats",eng="timestretch_beats",min=1,max=20,default=6,div=0.1,mod={2,10}},
+    {name="pan",eng="pan",min=-1,max=1,default=0,div=0.01,mod={-1,1}},
+    {name="lpf",eng="lpf",min=50,max=20000,default=20000,div=100,exp=true,unit='Hz',mod={1000,15000}},
+    {name="hpf",eng="hpf",min=20,max=500,default=20,div=10,exp=true,unit='Hz',mod={20,1000}},
   }
   local fxs={"stutter1","jump1","reverse1"}
-  params:add_group("SAMPLE LOOP",#prams+#fxs+4)
+  params:add_group("LOOP",#prams+#fxs+4)
   params:add_file("amen_file","load file",_path.audio.."oomph/amenbreak_bpm136.wav")
   params:set_action("amen_file",function(x)
     self:load(x)
   end)
-  params:add_control("amen_sync","sync probability",controlspec.new(0,100,'lin',1,75,"%"))
-  params:add_control("amen_slew","param slew time",controlspec.new(0.01,30,'exp',0.05,0.2,"s",0.05/30))
 
   for _,p in ipairs(prams) do
     params:add_control("amen_"..p.eng,p.name,controlspec.new(p.min,p.max,p.exp and 'exp' or 'lin',p.div,p.default,p.unit or "",p.div/(p.max-p.min)))
@@ -48,6 +46,8 @@ function Amen:init()
       params:set("amen_"..p.eng.."modtrig",0)
     end)
   end
+  params:add_control("amen_sync","sync probability",controlspec.new(0,100,'lin',1,75,"%"))
+  params:add_control("amen_slew","param slew time",controlspec.new(0.01,30,'exp',0.05,0.2,"s",0.05/30))
   params:add_control("drumlatency","sample latency",controlspec.new(-1,1,'lin',0.01,0,"beats",0.01/2))
   params:set_action("drumlatency",function(x)
     x=x*clock.get_beat_sec()
@@ -67,15 +67,15 @@ function Amen:init()
     end}
   end
 
-  params:add_group("SAMPLE LOOP MOD",#prams*5)
+  params:add_group("LOOP MOD",#prams*5)
   local mod_ops_ids={"sine","drunk","xline","line"}
   local mod_ops_nom={"sine","drunk","exp ramp","linear ramp"}
   local debounce_clock=nil
   for _,p in ipairs(prams) do
     params:add_option("amen_"..p.eng.."modoption",p.name.." form",mod_ops_nom,1)
     params:add_control("amen_"..p.eng.."modperiod",p.name.." period",controlspec.new(0.1,120,'exp',0.1,math.random(4,32),"beats",0.1/119.9))
-    params:add_control("amen_"..p.eng.."modmin",p.name.." min",controlspec.new(p.min,p.max,p.exp and 'exp' or 'lin',p.div,p.min+(p.max-p.min)/3,p.unit or "",p.div/(p.max-p.min)))
-    params:add_control("amen_"..p.eng.."modmax",p.name.." max",controlspec.new(p.min,p.max,p.exp and 'exp' or 'lin',p.div,p.min+(p.max-p.min)*2/3,p.unit or "",p.div/(p.max-p.min)))
+    params:add_control("amen_"..p.eng.."modmin",p.name.." min",controlspec.new(p.min,p.max,p.exp and 'exp' or 'lin',p.div,p.mod[1],p.unit or "",p.div/(p.max-p.min)))
+    params:add_control("amen_"..p.eng.."modmax",p.name.." max",controlspec.new(p.min,p.max,p.exp and 'exp' or 'lin',p.div,p.mod[2],p.unit or "",p.div/(p.max-p.min)))
     for _,pp in ipairs({"modoption","modperiod","modmin","modmax"}) do
       params:set_action("amen_"..p.eng..pp,function(x)
         if params:get("amen_"..p.eng.."modtrig")==1 then
