@@ -25,7 +25,7 @@ function AP:init()
   self.key_notes={"C","D","E","F","G","A","B"}
   self.key_accid={"","b","#"}
   self.key_octave={"M","","P"}
-  self.key_accent={"","F","O"}
+  self.key_accent={"","H","O"}
   self.key_punctuation={"o","-","@"}
   -- do initialize here
   self.note={6,6,3,4,6,1,2,1,1,3,6,3,6,7,3,5}

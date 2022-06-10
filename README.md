@@ -45,7 +45,7 @@ the second row allows you to modify the accidentals of each note (b = flat, and 
 
 the third row allows you to change the octave of each note - M for minus octave (-1) and P for plus octave (+1).
 
-the fourth row allows you to add an accent or slide. "O" does an accent (i.e. provides **O**mph) and "F" provides a slide (i.e. the note **F**loats...).
+the fourth row allows you to add an accent or slide. "O" does an accent (i.e. provides **O**mph) and "H" provides a slide (i.e. the note **H**olds longer).
 
 the fifth row can change the articulation of the sequence. the "@" denotes a gate, the "o" is a rest" and a "-" after a gate provides a legato. the actual strength of a legato is controlled in teh parameters by the "sustain" parameter.
 
