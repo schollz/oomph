@@ -63,6 +63,9 @@ function update()
       has_mi=true
     end
   end
+  if not has_mi then 
+    has_mi=file_exists("/home/we/.local/share/SuperCollider/Extensions/MiPlaits/MiPlaits.sc")
+  end
   if not has_mi then
     print("oomph: installing mi-UGens")
     os.execute("wget --quiet https://github.com/schollz/oomph/releases/download/prereqs/mi-UGens.762548fd3d1fcf30e61a3176c1b764ec1cc82020.tar.gz -P /tmp/")
