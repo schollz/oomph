@@ -87,6 +87,9 @@ function check()
       has_port=true
     end
   end
+  if not has_mi then 
+    has_mi=file_exists("/home/we/.local/share/SuperCollider/Extensions/MiPlaits/MiPlaits.sc")
+  end
   print(has_mi and "mi-UGens installed." or "mi-UGens not found!!!")
   print(has_port and "PortedPlugins installed." or "PortedPlugins not found!!!")
   if file_exists("/home/we/dust/code/mx.samples2") then
