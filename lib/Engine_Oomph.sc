@@ -621,7 +621,7 @@ Engine_Oomph : CroneEngine {
             });
         });
 
-        [\bpm_target,\latency].do({ arg key;
+        [\bpm_target,\latency,\bpm_sample].do({ arg key;
             this.addCommand("amen_"++key, "f", { arg msg;
                 synAmen.do({ arg item,i;
                     item.set(key,msg[1]);

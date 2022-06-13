@@ -33,7 +33,7 @@ function Amen:init()
     {name="hpf",eng="hpf",min=20,max=500,default=20,div=10,exp=true,unit='Hz',mod={20,1000}},
   }
   local fxs={"stutter1","jump1","reverse1"}
-  params:add_group("LOOP",#prams+#fxs+4)
+  params:add_group("LOOP",#prams+#fxs+5)
   params:add_file("amen_file","load file",_path.audio.."oomph/amenbreak_bpm136.wav")
   params:set_action("amen_file",function(x)
     self:load(x)
@@ -48,6 +48,8 @@ function Amen:init()
   end
   params:add_control("amen_sync","sync probability",controlspec.new(0,100,'lin',1,75,"%"))
   params:add_control("amen_slew","param slew time",controlspec.new(0.01,30,'exp',0.05,0.2,"s",0.05/30))
+  params:add_control("amen_bpm_sample","loop tempo",controlspec.new(40,240,'lin',1,120,"bpm",1/200))
+  params:set_action("amen_bpm_sample",function(x) engine.amen_bpm_sample(x) end)
   params:add_control("drumlatency","sample latency",controlspec.new(-1,1,'lin',0.01,0,"beats",0.01/2))
   params:set_action("drumlatency",function(x)
     x=x*clock.get_beat_sec()
@@ -139,8 +141,8 @@ function Amen:load(fname)
     for bpm=100,200 do
       local measures=duration/((60/bpm)*4)
       if util.round(measures)%2==0 then
-        local dif=math.abs(math.round(measures)-measures)
-        dif=dif-math.round(measures)/60
+        local dif=math.abs(util.round(measures)-measures)
+        dif=dif-util.round(measures)/60
         if dif<closet_bpm[2] then
           closet_bpm[2]=dif
           closet_bpm[1]=bpm
@@ -159,6 +161,7 @@ function Amen:load(fname)
   self.beat=self.beats_eigth_notes
   self.playing=false
 
+  params:set("amen_bpm_sample",self.bpm)
   engine.amen_load(fname,self.bpm)
   engine.amen_bpm_target(clock.get_tempo())
 end
