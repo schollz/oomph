@@ -87,7 +87,7 @@ Engine_Oomph : CroneEngine {
                 morph:morph,
                 timbre:timbre,
                 decay:decay,
-                engine:engine.asInteger,
+                engine:engine.floor,
                 trigger:TDelay.kr(Impulse.kr(0),latency),
             );
             snd=snd*env*amp;
