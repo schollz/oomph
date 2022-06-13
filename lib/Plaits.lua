@@ -26,7 +26,7 @@ function Plaits:init()
     {name="decay",eng="decay",min=0,max=1,default=0.9,div=0.01,mod={0.5,1}},
   }
   local prams_extra={
-    {name="euclid n",eng="n",min=0,max=64,default=16,div=1,mod={12,24}},
+    {name="euclid n",eng="n",min=1,max=64,default=16,div=1,mod={12,24}},
     {name="euclid k",eng="k",min=0,max=64,default=4,div=1,mod={3,6}},
     {name="euclid shift",eng="w",min=0,max=64,default=0,div=1,mod={0,4}},
   }
