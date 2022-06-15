@@ -193,8 +193,11 @@ function init()
               enc(2,1)
             end
           end
-          engine.threeohthree_oneshot(msg.note,msg.vel/127)
+          if params:get("midi_to_plaits")>1 and midi_device_list[params:get("midi_to_plaits")]==name then
+            engine.plaits_oneshot(msg.note,msg.vel/127)
+          end
           if params:get("midi_to_bass")>1 and midi_device_list[params:get("midi_to_bass")]==name then
+            engine.threeohthree_oneshot(msg.note,msg.vel/127)
           end
         end
       end

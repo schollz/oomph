@@ -69,11 +69,14 @@ grid is simply an alternative interface for the main norns screen - it is totall
 the first five rows edit the parameters of the monophonic synth. the sixth row can be used to change patterns. the sixth row also allows chaining patterns by holding down one pattern key and pressing another *while playing*. the sixth row also allows copying patterns by holding down one pattern key and pressing another *while not playing*.
 
 
+### midi
+
+
 ## todos
 
 - lfos: make more chaotic
 - midi: give tracks midi out
-- midi: allow midi in (for plaits)
+- ~~midi: allow midi in (for plaits, 303)~~
 - rpi3: possible cpu spikes?
 - grid: light-up special parameters
 - grid: recall patterns on double tap

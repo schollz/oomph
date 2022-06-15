@@ -70,13 +70,13 @@ Engine_Oomph : CroneEngine {
         }).add;
 
         SynthDef("defPlaits",{
-            arg out,ampBus=0.5,panBus,attackBus,decayEnvBus,engineBus,pitchBus,harmBus,morphBus,timbreBus,decayBus,latency=0;
+            arg out,ampBus=0.5,ampVal=1,panBus,attackBus,decayEnvBus,engineBus,pitchBus,pitchVal=0,harmBus,morphBus,timbreBus,decayBus,latency=0;
             var snd,env;
             var amp=DC.kr(In.kr(ampBus)).dbamp;
             var attack=DC.kr(In.kr(attackBus));
             var decayEnv=DC.kr(In.kr(decayEnvBus));
             var engine=DC.kr(In.kr(engineBus));
-            var pitch=DC.kr(In.kr(pitchBus));
+            var pitch=Select.kr(pitchVal>0,[DC.kr(In.kr(pitchBus)),pitchVal]);
             var harm=DC.kr(In.kr(harmBus));
             var morph=DC.kr(In.kr(morphBus));
             var timbre=DC.kr(In.kr(timbreBus));
@@ -92,7 +92,7 @@ Engine_Oomph : CroneEngine {
                 engine:engine.floor,
                 trigger:TDelay.kr(Impulse.kr(0),latency),
             );
-            snd=snd*env*amp;
+            snd=snd*env*amp*ampVal;
             Out.ar(out,Balance2.ar(snd[0],snd[1],pan));
         }).add;
 
@@ -542,6 +542,25 @@ Engine_Oomph : CroneEngine {
                     fxsyn.put(key,Synth.new("defMod_"++msg[1].asString,[\out,fxbus.at(key),\msg1,msg[2],\msg2,msg[3],\msg3,msg[4]]));NodeWatcher.register(fxsyn.at(key));
                 });
             });
+        });
+
+        this.addCommand("plaits_oneshot","ff", { arg msg;
+            Synth.before(synTape,"defPlaits",[
+                \out,busTape,
+		\pitchVal,msg[1],
+		\ampVal,msg[2],
+                \latency,latencyThreeOhThree,
+                \ampBus,fxbus.at("plaits_amp"),
+                \attackBus,fxbus.at("plaits_attack"),
+                \decayEnvBus,fxbus.at("plaits_decayEnv"),
+                \engineBus,fxbus.at("plaits_engine"),
+                \pitchBus,fxbus.at("plaits_pitch"),
+                \harmBus,fxbus.at("plaits_harm"),
+                \morphBus,fxbus.at("plaits_morph"),
+                \timbreBus,fxbus.at("plaits_timbre"),
+                \decayBus,fxbus.at("plaits_decay"),
+                \panBus,fxbus.at("plaits_pan"),
+            ]);
         });
 
         this.addCommand("plaits","", { arg msg;
