@@ -194,7 +194,7 @@ Engine_Oomph : CroneEngine {
             arg out, busAccent, 
             t_trig=1, note=33, latency=0.0, oneShot=0, ampMod=1, pwBus, detuneBus, waveBus, ampBus, subBus,
             cutoffBus, gainBus, portamentoBus, slide,
-            duration, sustainBus, decayBus,
+            duration=1, sustainBus, decayBus,
             res_adjustBus, res_accentBus,
             env_adjustBus,   env_accentBus, latencyBus;
             var env,waves,filterEnv,filter,snd,res,accentVal,noteVal;
