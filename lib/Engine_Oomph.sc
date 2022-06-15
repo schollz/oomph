@@ -11,6 +11,8 @@ Engine_Oomph : CroneEngine {
     var busTape;
     var valDecayFactor;
     var latencyThreeOhThree;
+    var lastSlide=0;
+    var lastAccent=0;
     // </Oomph>
 
     // <Tape>
@@ -190,7 +192,7 @@ Engine_Oomph : CroneEngine {
 
         SynthDef("defThreeOhThree", {
             arg out, busAccent, 
-            t_trig=1, note=33, latency=0.0,pwBus, detuneBus, waveBus, ampBus, subBus,
+            t_trig=1, note=33, latency=0.0, oneShot=0, ampMod=1, pwBus, detuneBus, waveBus, ampBus, subBus,
             cutoffBus, gainBus, portamentoBus, slide,
             duration, sustainBus, decayBus,
             res_adjustBus, res_accentBus,
@@ -213,14 +215,16 @@ Engine_Oomph : CroneEngine {
             noteVal=Lag.kr(note,portamento*slide);
             accentVal=In.kr(busAccent);
             res = Clip.kr(res_adjust+(res_accent*accentVal),0.001,2);
-            env = EnvGen.ar(Env.new([10e-3,1,1,10e-9],[0.03,sustain*duration,decay],'exp'),t_trig)+(env_accent*accentVal);
+            env = EnvGen.ar(Env.new([10e-3,1,1,10e-9],[0.03,sustain*duration,decay],'exp'),t_trig,doneAction:oneShot*2)+(env_accent*accentVal);
             waves = [Saw.ar([noteVal-detune,noteVal+detune].midicps, mul: env), Pulse.ar([note-detune,note+detune].midicps, 0.5, mul: env)];
             filterEnv =  EnvGen.ar( Env.new([10e-9, 1, 10e-9], [0.01, decay],  'exp'), t_trig);
             filter = RLPFD.ar(SelectX.ar(wave, waves, wrap:0), cutoff +(filterEnv*env_adjust), res,gain);
             snd=(filter*amp).tanh;
             snd=snd+SinOsc.ar([noteVal-12-detune,noteVal-12+detune].midicps,mul:sub*env/10.0);
             snd=DelayN.ar(snd,delaytime:Lag.kr(latency));
-            Out.ar(out, snd*EnvGen.ar(Env.new([0,1],[4])));
+            snd=snd*ampMod*EnvGen.ar(Env.new([oneShot,1],[4]));
+            DetectSilence.ar(snd,0.001,doneAction:oneShot*2);
+            Out.ar(out, snd);
         }).add;
         
         SynthDef("defThreeOhThreeAccent",{
@@ -364,6 +368,26 @@ Engine_Oomph : CroneEngine {
         // </pad>
 
         // <303>
+        this.addCommand("threeohthree_oneshot", "ff", { arg msg;
+            Synth.before(synTape,"defThreeOhThree",[\busAccent,busAccent,\out,busTape,
+                \t_trig,1,\note,msg[1],\ampMod,msg[2],\oneShot,1,
+                \ampBus,fxbus.at("threeohthree_amp").index,
+                \pwBus,fxbus.at("threeohthree_pw").index,
+                \detuneBus,fxbus.at("threeohthree_detune").index,
+                \waveBus,fxbus.at("threeohthree_wave").index,
+                \subBus,fxbus.at("threeohthree_sub").index,
+                \cutoffBus,fxbus.at("threeohthree_cutoff").index,
+                \gainBus,fxbus.at("threeohthree_gain").index,
+                \sustainBus,fxbus.at("threeohthree_sustain").index,
+                \decayBus,fxbus.at("threeohthree_decay").index,
+                \res_adjustBus,fxbus.at("threeohthree_res_adjust").index,
+                \res_accentBus,fxbus.at("threeohthree_res_accent").index,
+                \env_adjustBus,fxbus.at("threeohthree_env_adjust").index,
+                \env_accentBus,fxbus.at("threeohthree_env_accent").index,
+                \portamentoBus,fxbus.at("threeohthree_portamento").index,
+            ]);
+        });
+
         [\amp,\pw,\detune,\wave,\sub,\cutoff,\gain,\sustain,\decay,\res_adjust,\res_accent,\env_adjust,\env_accent,\portamento].do({ arg fx;
             var domain="threeohthree";
             var key=domain++"_"++fx;
@@ -414,6 +438,7 @@ Engine_Oomph : CroneEngine {
         });
 
         this.addCommand("threeohthree_trig", "ffff", { arg msg;
+            lastSlide=msg[3];
             synThreeOhThree.set(\t_trig,1,\note,msg[1],\duration,msg[2],\slide,msg[3]);
             if (msg[4].asFloat>0.0,{
                 // trigger accent
@@ -422,6 +447,8 @@ Engine_Oomph : CroneEngine {
                 });
             });
         });
+
+
         this.addCommand("threeohthree_decayfactor", "sfff", { arg msg;
             valDecayFactor=msg[3].asFloat;
         });
@@ -597,7 +624,7 @@ Engine_Oomph : CroneEngine {
                 postln("loaded "++msg[1]++"into buf "++buf.bufnum);
                 sampleBuffAmen=buf;
                 synAmen.do({ arg item,i;
-                    item.set(\bufnum,buf,\bpm_sample,msg[2],
+                    item.set(\bufnum,sampleBuffAmen,\bpm_sample,msg[2],
                         \amp_crossfade,playerSwap==i,
                         \samplePos,0,
                         \sampleStart,0,

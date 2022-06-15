@@ -165,31 +165,48 @@ function init()
   end
 
   -- setup midi transports
-  local device={}
-  local device_list={}
+  midi_device={}
+  midi_device_list={"disabled"}
   for i,dev in pairs(midi.devices) do
     if dev.port~=nil then
       local name=string.lower(dev.name).." "..i
-      table.insert(device_list,name)
+      table.insert(midi_device_list,name)
       print("adding "..name.." to port "..dev.port)
-      device[name]={
+      midi_device[name]={
         name=name,
         port=dev.port,
         midi=midi.connect(dev.port),
       }
-      device[name].midi.event=function(data)
+      midi_device[name].midi.event=function(data)
         local msg=midi.to_msg(data)
         if msg.type=="clock" then do return end end
--- OP-1 fix for transport
+        -- OP-1 fix for transport
         if msg.type=='start' or msg.type=='continue' then
           toggle_start(true)
         elseif msg.type=="stop" then
           toggle_start(false)
+        elseif msg.type=="note_on" then
+          tab.print(msg)
+          if params:get("midi_to_set")>1 and midi_device_list[params:get("midi_to_set")]==name then
+            apm:set_note(pos[2],msg.note)
+            if params:get("midi_to_set_in_place")==2 then 
+              enc(2,1)
+            end
+          end
+            engine.threeohthree_oneshot(msg.note,msg.vel/127)
+          if params:get("midi_to_bass")>1 and midi_device_list[params:get("midi_to_bass")]==name then
+          end
         end
       end
     end
   end
   ignore_transport=false
+  params:add_group("MIDI",4)
+  params:add_option("midi_to_bass","midi -> bass",midi_device_list)
+  params:add_option("midi_to_plaits","midi -> plaits",midi_device_list)
+  params:add_option("midi_to_set","midi -> sequencer",midi_device_list)
+  params:add_option("midi_to_set_in_place","midi sequencing",{"in-place","moving"},2)
+
 
   -- load in the default parameters
   params:default()

@@ -154,6 +154,10 @@ function APM:open(filename)
   end
 end
 
+function APM:set_note(i,midi_val)
+  self.ap[self.current]:set_note(i,midi_val)
+end
+
 function APM:set(ind,pos,d)
   self.ap[self.current]:set(ind,pos,d)
 end
