@@ -41,18 +41,18 @@ end
 function AP:set_note(i,midi_val)
   midi_val=midi_val%12+1
   local midi_transfer={
-    {1,1}, --"C"
-    {2,2}, --"Db"
-    {2,1}, --"D"
-    {3,2}, --"Eb"
-    {3,1}, --"E"
-    {4,1}, --"F"
-    {5,2}, --"Gb"
-    {5,1}, --"G"
-    {6,2}, --"Ab"
-    {6,1}, --"A"
-    {7,2}, --"Bb"
-    {7,1}, --"B"
+    {1,1},--"C"
+    {2,2},--"Db"
+    {2,1},--"D"
+    {3,2},--"Eb"
+    {3,1},--"E"
+    {4,1},--"F"
+    {5,2},--"Gb"
+    {5,1},--"G"
+    {6,2},--"Ab"
+    {6,1},--"A"
+    {7,2},--"Bb"
+    {7,1},--"B"
   }
   self.note[i]=midi_transfer[midi_val][1]
   self.accid[i]=midi_transfer[midi_val][2]

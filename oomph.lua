@@ -180,7 +180,7 @@ function init()
       midi_device[name].midi.event=function(data)
         local msg=midi.to_msg(data)
         if msg.type=="clock" then do return end end
-        -- OP-1 fix for transport
+-- OP-1 fix for transport
         if msg.type=='start' or msg.type=='continue' then
           toggle_start(true)
         elseif msg.type=="stop" then
@@ -189,11 +189,11 @@ function init()
           tab.print(msg)
           if params:get("midi_to_set")>1 and midi_device_list[params:get("midi_to_set")]==name then
             apm:set_note(pos[2],msg.note)
-            if params:get("midi_to_set_in_place")==2 then 
+            if params:get("midi_to_set_in_place")==2 then
               enc(2,1)
             end
           end
-            engine.threeohthree_oneshot(msg.note,msg.vel/127)
+          engine.threeohthree_oneshot(msg.note,msg.vel/127)
           if params:get("midi_to_bass")>1 and midi_device_list[params:get("midi_to_bass")]==name then
           end
         end
