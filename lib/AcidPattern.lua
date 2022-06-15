@@ -149,6 +149,7 @@ function AP:process(beat)
   local accent=self.accent[i]==3 and 1 or 0
   local slide=self.accent[i]==2 and 1 or 0
   engine.threeohthree_trig(note,self.duration[i],slide,accent)
+  return note,accent,slide
 end
 
 function AP:redraw(x,y,sh,sw)
