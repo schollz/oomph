@@ -62,6 +62,8 @@ there are some hard coded triggerable effects in the parameters menu and its pos
 
 if you need a script to create quantized loops - checkout [amen](https://llllllll.co/t/amen).
 
+_note:_ depending on how your loop is created, its possible that it doesn't sound exactly in step with the rest of the sequences. to combat this there is a parameter at the bottom of the "LOOP" parameters called "latency" that lets you modulate how much the loop plays in front of or behind the beat.
+
 ### grid
 
 grid is simply an alternative interface for the main norns screen - it is totally optional.
@@ -71,11 +73,12 @@ the first five rows edit the parameters of the monophonic synth. the sixth row c
 
 ### midi
 
+In the PARAM menu there is a MIDI menu that lets you select a midi device that can be used to input into the "BASS" engine or into the "PLAITS" engine. You can also route output from the "BASS" into an external MIDI device - there is an option to set the portamento CC of your device which will also be sent according to the sequencing. this menu also has options to input sequences using a MIDI device.
 
 ## todos
 
 - lfos: make more chaotic
-- midi: give tracks midi out
+- ~~midi: give tracks midi out~~
 - ~~midi: allow midi in (for plaits, 303)~~
 - rpi3: possible cpu spikes?
 - grid: light-up special parameters
