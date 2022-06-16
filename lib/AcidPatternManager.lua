@@ -179,7 +179,7 @@ function APM:process(beat)
   if self.ap[self.current].current==16 and params:get("sequencer_on")==1 then
     self.current=params:get("pattern"..self.current)
   end
-  self.ap[self.current]:process(beat)
+  return self.ap[self.current]:process(beat)
 end
 
 function APM:next_pattern()

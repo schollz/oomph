@@ -1,4 +1,4 @@
--- oomph v0.2.0
+-- oomph v0.1.1
 -- put a little into it.
 --
 -- llllllll.co/t/oomph
@@ -148,7 +148,8 @@ function init()
       local note,accent,slide=apm:process(beat_num)
       -- send midi out with this note
       if params:get("bass_to_midi")>1 then
-        local m=midi_device[midi_device_list[params:get("bass_to_midi")]]
+        print(note,accent,slide)
+        local m=midi_device[midi_device_list[params:get("bass_to_midi")]].midi
         if last_note~=nil then
           m:note_off(last_note)
           last_note=nil
