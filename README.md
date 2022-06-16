@@ -64,9 +64,17 @@ if you need a script to create quantized loops - checkout [amen](https://lllllll
 
 _note:_ depending on how your loop is created, its possible that it doesn't sound exactly in step with the rest of the sequences. to combat this there is a parameter at the bottom of the "LOOP" parameters called "latency" that lets you modulate how much the loop plays in front of or behind the beat.
 
+### chaining patterns
+
+chaining patterns can be accomplished in the menu through the "BASS SEQUENCER". every pattern will transition to another pattern after it is finished playing. by default, each pattern will automatically transition to itself (i.e. loop the current pattern). but can also be set to transition to any other pattern. to have a loop of multiple patterns, you need to ensure that the last pattern in the loop transitions to the first pattern. patterns are "unchained" by simply setting the transition back to itself.
+
+### copying patterns
+
+copying patterns can be accomplished in the "BASS SEQUENCER" menu. simply select the pattern to copy to and from, and then trigger a copy. 
+
 ### grid
 
-grid is simply an alternative interface for the main norns screen - it is totally optional.
+grid is an alternative interface for the main norns screen - it is totally optional.
 
 the first five rows edit the parameters of the monophonic synth. the sixth row can be used to change patterns. the sixth row also allows chaining patterns by holding down one pattern key and pressing another *while playing*. the sixth row also allows copying patterns by holding down one pattern key and pressing another *while not playing*.
 

@@ -158,9 +158,13 @@ function GGrid:get_visual()
       elseif self.apm:next_pattern()==i then
         self.visual[6][i]=5
       end
-
     end
     self.visual[6][self.apm:current_step()]=self.visual[6][self.apm:current_step()]+5
+    for i, r in ipairs(self.params) do 
+	for j,_ in ipairs(r) do
+	  self.visual[6+i][j] = 5	
+	end
+    end
   end
   -- -- illuminate currently pressed button
   -- for k,_ in pairs(self.pressed_buttons) do
