@@ -1,4 +1,4 @@
--- oomph v0.1.1
+-- oomph v0.2.0
 -- put a little into it.
 --
 -- llllllll.co/t/oomph
@@ -220,7 +220,7 @@ function init()
     end
   end
   ignore_transport=false
-  params:add_group("MIDI",5)
+  params:add_group("MIDI",6)
   params:add_option("midi_to_bass","midi -> bass",midi_device_list)
   params:add_option("bass_to_midi","bass -> midi",midi_device_list)
   params:add_option("midi_to_plaits","midi -> plaits",midi_device_list)
