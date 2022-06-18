@@ -62,18 +62,32 @@ there are some hard coded triggerable effects in the parameters menu and its pos
 
 if you need a script to create quantized loops - checkout [amen](https://llllllll.co/t/amen).
 
+_note:_ depending on how your loop is created, its possible that it doesn't sound exactly in step with the rest of the sequences. to combat this there is a parameter at the bottom of the "LOOP" parameters called "latency" that lets you modulate how much the loop plays in front of or behind the beat.
+
+### chaining patterns
+
+chaining patterns can be accomplished in the menu through the "BASS SEQUENCER". every pattern will transition to another pattern after it is finished playing. by default, each pattern will automatically transition to itself (i.e. loop the current pattern). but can also be set to transition to any other pattern. to have a loop of multiple patterns, you need to ensure that the last pattern in the loop transitions to the first pattern. patterns are "unchained" by simply setting the transition back to itself.
+
+### copying patterns
+
+copying patterns can be accomplished in the "BASS SEQUENCER" menu. simply select the pattern to copy to and from, and then trigger a copy. 
+
 ### grid
 
-grid is simply an alternative interface for the main norns screen - it is totally optional.
+grid is an alternative interface for the main norns screen - it is totally optional.
 
 the first five rows edit the parameters of the monophonic synth. the sixth row can be used to change patterns. the sixth row also allows chaining patterns by holding down one pattern key and pressing another *while playing*. the sixth row also allows copying patterns by holding down one pattern key and pressing another *while not playing*.
 
 
+### midi
+
+In the PARAM menu there is a MIDI menu that lets you select a midi device that can be used to input into the "BASS" engine or into the "PLAITS" engine. You can also route output from the "BASS" into an external MIDI device - there is an option to set the portamento CC of your device which will also be sent according to the sequencing. this menu also has options to input sequences using a MIDI device.
+
 ## todos
 
 - lfos: make more chaotic
-- midi: give tracks midi out
-- midi: allow midi in (for plaits)
+- ~~midi: give tracks midi out~~
+- ~~midi: allow midi in (for plaits, 303)~~
 - rpi3: possible cpu spikes?
 - grid: light-up special parameters
 - grid: recall patterns on double tap

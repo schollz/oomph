@@ -1,4 +1,4 @@
--- oomph v0.1.1
+-- oomph v0.2.0
 -- put a little into it.
 --
 -- llllllll.co/t/oomph
@@ -140,11 +140,29 @@ function init()
   -- setup the lattice clock
   lattice=lattice_:new()
   beat_num=-1
+  local last_note=nil
   lattice:new_pattern{
     action=function(t)
       beat_num=beat_num+1 -- beat % 16 + 1 => [1,16]
       amen:process(beat_num)
-      apm:process(beat_num)
+      local note,accent,slide=apm:process(beat_num)
+      -- send midi out with this note
+      if params:get("bass_to_midi")>1 then
+        print(note,accent,slide)
+        local m=midi_device[midi_device_list[params:get("bass_to_midi")]].midi
+        if last_note~=nil then
+          m:note_off(last_note)
+          last_note=nil
+        end
+        if note~=nil then
+          -- if CC is defined, apply portamento
+          if params:get("midi_portamento_cc")>0 then
+            m:cc(params:get("midi_portamento_cc"),slide*64)
+          end
+          m:note_on(note,64+accent*32)
+          last_note=note
+        end
+      end
       pad:process(beat_num)
       plaits:process(beat_num)
     end,
@@ -165,19 +183,19 @@ function init()
   end
 
   -- setup midi transports
-  local device={}
-  local device_list={}
+  midi_device={}
+  midi_device_list={"disabled"}
   for i,dev in pairs(midi.devices) do
     if dev.port~=nil then
       local name=string.lower(dev.name).." "..i
-      table.insert(device_list,name)
+      table.insert(midi_device_list,name)
       print("adding "..name.." to port "..dev.port)
-      device[name]={
+      midi_device[name]={
         name=name,
         port=dev.port,
         midi=midi.connect(dev.port),
       }
-      device[name].midi.event=function(data)
+      midi_device[name].midi.event=function(data)
         local msg=midi.to_msg(data)
         if msg.type=="clock" then do return end end
 -- OP-1 fix for transport
@@ -185,11 +203,31 @@ function init()
           toggle_start(true)
         elseif msg.type=="stop" then
           toggle_start(false)
+        elseif msg.type=="note_on" then
+          if params:get("midi_to_set")>1 and midi_device_list[params:get("midi_to_set")]==name then
+            apm:set_note(pos[2],msg.note)
+            if params:get("midi_to_set_in_place")==2 then
+              enc(2,1)
+            end
+          end
+          if params:get("midi_to_plaits")>1 and midi_device_list[params:get("midi_to_plaits")]==name then
+            engine.plaits_oneshot(msg.note,msg.vel/127)
+          end
+          if params:get("midi_to_bass")>1 and midi_device_list[params:get("midi_to_bass")]==name then
+            engine.threeohthree_oneshot(msg.note,msg.vel/127)
+          end
         end
       end
     end
   end
   ignore_transport=false
+  params:add_group("MIDI",6)
+  params:add_option("midi_to_bass","midi -> bass",midi_device_list)
+  params:add_option("bass_to_midi","bass -> midi",midi_device_list)
+  params:add_option("midi_to_plaits","midi -> plaits",midi_device_list)
+  params:add_option("midi_to_set","midi -> sequencer",midi_device_list)
+  params:add_option("midi_to_set_in_place","midi sequencing",{"in-place","moving"},2)
+  params:add_number("midi_portamento_cc","portamento cc",0,127,0)
 
   -- load in the default parameters
   params:default()

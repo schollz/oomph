@@ -153,6 +153,9 @@ function Amen:load(fname)
   end
 
   self.beats_total=util.round(duration/(60/bpm))
+  if self.beats_total==0 then 
+    self.beats_total=4
+  end
   -- recalculate the exact bpm based on the rounded beats
   self.bpm=self.beats_total/(duration/60)
   self.duration=duration
@@ -161,6 +164,7 @@ function Amen:load(fname)
   self.beat=self.beats_eigth_notes
   self.playing=false
 
+  print(fname,self.bpm,self.beats_total)
   params:set("amen_bpm_sample",self.bpm)
   engine.amen_load(fname,self.bpm)
   engine.amen_bpm_target(clock.get_tempo())

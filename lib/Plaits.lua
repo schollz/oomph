@@ -19,7 +19,7 @@ function Plaits:init()
     {name="pan",eng="pan",min=-1,max=1,default=-0.5,div=0.01,mod={-1,1}},
     {name="attack env",eng="attack",min=0,max=10,default=0.01,div=0.01,unit="s",mod={0.01,0.2}},
     {name="decay env",eng="decayEnv",min=0,max=10,default=clock.get_beat_sec(),div=0.01,unit="s",mod={1,4}},
-    {name="engine",eng="engine",min=1,max=15,default=13,div=0.01,mod={13,15}},
+    {name="engine",eng="engine",min=1,max=15,default=13,div=0.1,mod={13,15}},
     {name="harm",eng="harm",min=0,max=1,default=0.15,div=0.01,mod={0.1,0.5}},
     {name="timbre",eng="timbre",min=0,max=1,default=0.87,div=0.01,mod={0.5,1}},
     {name="morph",eng="morph",min=0,max=1,default=0.38,div=0.01,mod={0.1,0.5}},
