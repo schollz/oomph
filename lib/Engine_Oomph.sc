@@ -1,18 +1,16 @@
 Engine_Oomph : CroneEngine {
-// All norns engines follow the 'Engine_MySynthName' convention above
     // all
     var fxbus;
     var fxsyn;
     var fxlfo;
 
     // <Oomph>
-	var synThreeOhThree;
+    var synThreeOhThree;
     var busAccent;
     var busTape;
     var valDecayFactor;
     var latencyThreeOhThree;
     var lastSlide=0;
-    var lastAccent=0;
     // </Oomph>
 
     // <Tape>
@@ -36,7 +34,7 @@ Engine_Oomph : CroneEngine {
     var mxsamples;
     // </pad>
 
-	alloc { 
+    alloc { 
         
         // <Amen>
         latencyThreeOhThree=0.0;
@@ -44,7 +42,7 @@ Engine_Oomph : CroneEngine {
         fxsyn=Dictionary.new();
         fxlfo=Dictionary.new();
         sampleBuffAmen = Buffer.new(context.server);
-        sampleVinyl = Buffer.read(context.server, "/home/we/dust/code/oomph/lib/vinyl2.wav"); 
+        //sampleVinyl = Buffer.read(context.server, "/home/we/dust/code/oomph/lib/vinyl2.wav"); 
         playerSwap = 0;
         valDecayFactor=1.0;
 
@@ -682,13 +680,12 @@ Engine_Oomph : CroneEngine {
 
     free {
         // <Amen>
-        synAmen[0].free;
-        synAmen[1].free;
+	synAmen.do({ arg item,i; synAmen[i].free; });
         fxbus.keysValuesDo{ |key,value| value.free };
         fxsyn.keysValuesDo{ |key,value| value.free };
         sampleBuffAmen.free;
-        playerVinyl.free;
-        sampleVinyl.free;
+        //playerVinyl.free;
+        //sampleVinyl.free;
         // </Amen>
         synThreeOhThree.free;
         busAccent.free;
