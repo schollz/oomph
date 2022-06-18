@@ -101,3 +101,4 @@ end
 
 update()
 check()
+os.execute("sudo systemctl restart norns-sclang.service")
